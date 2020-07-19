@@ -71,7 +71,7 @@
       <DefaultRelation>Enemies</DefaultRelation>
       <EnableFriendlyFire>false</EnableFriendlyFire>
       <StartingBalance>100000000</StartingBalance>
-      <Type>Trader</Type>
+      <Type>None</Type>
       <DiscoveredByDefault>true</DiscoveredByDefault>
       <FactionIcon>Textures\FactionLogo\PirateIcon.dds</FactionIcon>
       <Description>Peaceful. Lone independent traders united into one faction for better coordination, their ships and rare stations are ready to trade with everyone.</Description>
@@ -166,7 +166,7 @@
       <DefaultRelation>Enemies</DefaultRelation>
       <EnableFriendlyFire>false</EnableFriendlyFire>
       <StartingBalance>100000000</StartingBalance>
-      <Type>Trader</Type>
+      <Type>None</Type>
       <DiscoveredByDefault>true</DiscoveredByDefault>
       <FactionIcon>Textures\FactionLogo\PirateIcon.dds</FactionIcon>
       <Description>Peaceful. Primarily specializing on trading, they established wide network of trading stations across the system. Funded enough to hire huge battleships, to protect their interests.</Description>
@@ -185,7 +185,7 @@
       <DefaultRelation>Enemies</DefaultRelation>
       <EnableFriendlyFire>false</EnableFriendlyFire>
       <StartingBalance>100000000</StartingBalance>
-      <Type>Trader</Type>
+      <Type>None</Type>
       <DiscoveredByDefault>true</DiscoveredByDefault>
       <FactionIcon>Textures\FactionLogo\PirateIcon.dds</FactionIcon>
       <Description>Peaceful. Specialized on resource gathering, the EXMC stations are found throughout the system, trading mostly resources and components.</Description>
@@ -204,7 +204,7 @@
       <DefaultRelation>Enemies</DefaultRelation>
       <EnableFriendlyFire>false</EnableFriendlyFire>
       <StartingBalance>100000000</StartingBalance>
-      <Type>Trader</Type>
+      <Type>None</Type>
       <DiscoveredByDefault>true</DiscoveredByDefault>
       <FactionIcon>Textures\FactionLogo\PirateIcon.dds</FactionIcon>
       <Description>Peaceful. The Interstellar Mining and Defense Corporation is a multinational militarized enterprise, constructing ships and vehicles. They also have few trading outposts, yet other stations are not public.</Description>

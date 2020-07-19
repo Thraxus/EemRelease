@@ -80,8 +80,18 @@ namespace Eem.Thraxus.Factions.Models
 		private void FactionStateChanged(MyFactionStateChange action, long fromFactionId, long toFactionId, long playerId, long senderId)
 		{
 			FactionCore.WriteToLog("FactionStateChanged",
-				$"Action:\t{action.ToString()}\tfromFaction:\t{fromFactionId}\ttag:\t{fromFactionId.GetFactionById()?.Tag}\ttoFaction:\t{toFactionId}\ttag:\t{toFactionId.GetFactionById()?.Tag}\tplayerId:\t{playerId}\tsenderId:\t{senderId}",
+				$"Action:\t{action.ToString()}\tfromFaction:\t{fromFactionId}\ttag:\t{fromFactionId.GetFactionById()?.Tag}\ttoFaction:\t{toFactionId}\ttag:\t{toFactionId.GetFactionById()?.Tag}\tplayerId:\t{playerId}\tsenderId:\t{senderId}\t",
 				true);
+
+			//foreach (var newPlayerFaction in _newPlayerFactionDictionary)
+			//{
+			//	FactionCore.WriteToLog("FSC",$"Faction: {newPlayerFaction.Key}", true);
+			//	foreach (var goodGuys in newPlayerFaction.Value)
+			//	{
+			//		FactionCore.WriteToLog("FSC", $"Remaining: {goodGuys}", true);
+			//	}	
+			//}
+
 			if (action != MyFactionStateChange.RemoveFaction)
 				if (fromFactionId == 0L || toFactionId == 0L) return;
 
@@ -91,7 +101,7 @@ namespace Eem.Thraxus.Factions.Models
 					FactionRemoved(fromFactionId);
 					break;
 				case MyFactionStateChange.SendPeaceRequest:
-					PeaceRequestSent(fromFactionId, toFactionId);
+					RequestPeace(fromFactionId, toFactionId);
 					break;
 				case MyFactionStateChange.CancelPeaceRequest:
 					PeaceCancelled(fromFactionId, toFactionId);
@@ -134,24 +144,25 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void FactionCreated(long factionId)
 		{
-			FactionCore.WriteToLog("FactionCreated", $"factionId:\t{factionId}");
+			FactionCore.WriteToLog("FactionCreated", $"factionId:\t{factionId}", true);
 			FactionEditedOrCreated(factionId, true);
 		}
 
 		private void FactionEdited(long factionId)
 		{
-			FactionCore.WriteToLog("FactionEdited", $"factionId:\t{factionId}");
+			//FactionCore.WriteToLog("FactionEdited", $"factionId:\t{factionId}");
 			FactionEditedOrCreated(factionId);
 		}
 
 		private void FactionRemoved(long factionId)
 		{
-			FactionCore.WriteToLog("FactionRemoved", $"factionId:\t{factionId}");
+			//FactionCore.WriteToLog("FactionRemoved", $"factionId:\t{factionId}");
 			ScrubDictionaries(factionId);
 		}
 
 		private void FactionEditedOrCreated(long factionId, bool newFaction = false)
 		{
+			FactionCore.WriteToLog("FactionEditedOrCreated", $"{factionId} | {newFaction}", true);
 			IMyFaction playerFaction = factionId.GetFactionById();
 			if (playerFaction == null || !ValidPlayer(playerFaction.FounderId)) return; // I'm not a player faction, or I don't exist.  Peace out, suckas!
 			if (CheckPiratePlayerOptIn(playerFaction) && _playerPirateFactionDictionary.ContainsKey(factionId)) return; // I'm a player pirate, and you know it.  Laterz!
@@ -168,49 +179,50 @@ namespace Eem.Thraxus.Factions.Models
 				return;
 			}
 			if (!newFaction) return;
-			_newFactionDictionary.Add(factionId, 0);  // I'm new man, just throw me a bone.
+			PopulateNewPlayerFactionDictionary(factionId);
+			//_newFactionDictionary.Add(factionId, 0);  // I'm new man, just throw me a bone.
 		}
 
-		private void PeaceRequestSent(long fromFactionId, long toFactionId)
+		private void RequestPeace(long fromFactionId, long toFactionId)
 		{   // So many reasons to clear peace...
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 0", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 0", true);
 			if ((_playerPirateFactionDictionary.ContainsKey(fromFactionId) || _playerPirateFactionDictionary.ContainsKey(toFactionId)) && CheckEitherFactionForNpc(fromFactionId, toFactionId))
 			{   // Is this a player pirate somehow involved in peace accords with a NPC faction?
 				ClearPeace(fromFactionId, toFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 1", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 1", true);
 			if (_lawfulFactionDictionary.ContainsKey(fromFactionId) && _pirateFactionDictionary.ContainsKey(toFactionId))
 			{   // Is a NPC proposing peace to a player pirate?
 				ClearPeace(fromFactionId, toFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 2", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 2", true);
 			if ((_pirateFactionDictionary.ContainsKey(toFactionId) || _pirateFactionDictionary.ContainsKey(fromFactionId)) && CheckEitherFactionForNpc(fromFactionId, toFactionId))
 			{   // Pirates can't be friends (unless they are both players)!
 				ClearPeace(fromFactionId, toFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 3", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 3", true);
 			if (fromFactionId.GetFactionById().IsNeutral(toFactionId.GetFactionById().FounderId))
 			{   // Are these factions already neutral?
 				ClearPeace(fromFactionId, toFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 4", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 4", true);
 			if (CheckTimedNegativeRelationshipState(fromFactionId, toFactionId))
 			{   // Is either faction currently experiencing EEM controlled hostile relations?
 				ClearPeace(fromFactionId, toFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 5", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 5", true);
 			if (ValidPlayer(fromFactionId.GetFactionById().FounderId) || IsFirstColonists(fromFactionId) && MyAPIGateway.Session.Factions.AreFactionsEnemies(fromFactionId, toFactionId))
 			{   // This player was at war with an NPC by choice, so add them to the mending relationship category
 				ClearPeace(fromFactionId, toFactionId);
 				NewTimedNegativeRelationship(toFactionId, fromFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 6", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 6", true);
 			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && !ValidPlayer(toFactionId.GetFactionById().FounderId) && !IsFirstColonists(fromFactionId) && !IsFirstColonists(toFactionId))
 			{   // Aww, look, the NPCs want to be friends!
 				if (_pirateFactionDictionary.ContainsKey(fromFactionId) || _pirateFactionDictionary.ContainsKey(toFactionId))
@@ -221,7 +233,7 @@ namespace Eem.Thraxus.Factions.Models
 				AcceptPeace(toFactionId, fromFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 7", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 7", true);
 			//ValidPlayer(fromFactionId.GetFactionById().FounderId)
 			//ValidPlayer(toFactionId.GetFactionById().FounderId)
 			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && !ValidPlayer(toFactionId.GetFactionById().FounderId))
@@ -229,7 +241,7 @@ namespace Eem.Thraxus.Factions.Models
 				AcceptPeace(toFactionId, fromFactionId);
 				return;
 			}
-			FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 8", true);
+			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 8", true);
 			// Condition not accounted for, just accept the request for now (get logs!)
 			FactionCore.WriteToLog("PeaceRequestSent", $"Unknown peace condition detected, please review...\tfromFaction:\t{fromFactionId.GetFactionById().Tag}\ttoFaction:\t{toFactionId.GetFactionById().Tag}", true);
 			DumpEverythingToTheLog(true);
@@ -248,6 +260,7 @@ namespace Eem.Thraxus.Factions.Models
 		{
 			if (_newFactionDictionary.ContainsKey(fromFactionId))
 			{
+				FactionCore.WriteToLog("AcceptPeace", $"{fromFactionId} | {toFactionId} - {_newFactionDictionary[fromFactionId]}", true);
 				if (_newFactionDictionary[fromFactionId] > 1)
 					_newFactionDictionary[fromFactionId]--;
 				else
@@ -430,6 +443,13 @@ namespace Eem.Thraxus.Factions.Models
 			return MyAPIGateway.Players.TryGetSteamId(identityId) != 0;
 		}
 
+		public static bool ValidPlayerFaction(long factionId)
+		{
+			IMyFaction faction = factionId.GetFactionById();
+			if (faction == null) return false;
+			return MyAPIGateway.Players.TryGetSteamId(faction.FounderId) != 0;
+		}
+
 		//private void SetupFactionDeletionProtection()
 		//{
 		//	foreach (KeyValuePair<long, IMyFaction> npcFaction in _npcFactionDictionary)
@@ -553,7 +573,7 @@ namespace Eem.Thraxus.Factions.Models
 		private static bool CheckEitherFactionForNpc(long leftFactionId, long rightFactionId)
 		{
 			if (!IsFirstColonists(leftFactionId) && !IsFirstColonists(rightFactionId)) return !ValidPlayer(leftFactionId.GetFactionById().FounderId) || !ValidPlayer(rightFactionId.GetFactionById().FounderId);
-			FactionCore.WriteToLog("CheckEitherFactionForNpc", "FSTC Call", true);
+			//FactionCore.WriteToLog("CheckEitherFactionForNpc", "FSTC Call", true);
 			return false;
 		}
 
@@ -611,8 +631,8 @@ namespace Eem.Thraxus.Factions.Models
 		private void WarDeclared(long fromFactionId, long toFactionId)
 		{   // Going to take the stance that if a war is declared by an NPC, it's a valid war
 			// TODO Add dialogue for when a player declares war on an NPC directly
-			FactionCore.WriteToLog("WarDeclared", $"fromFaction:\t{fromFactionId}\ttoFaction:\t{toFactionId}", true);
-			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && !IsFirstColonists(fromFactionId))
+			//FactionCore.WriteToLog("WarDeclared", $"fromFaction:\t{fromFactionId}\ttoFaction:\t{toFactionId}", true);
+			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId))
 				VetNewWar(fromFactionId, toFactionId);
 			//// This is for when a player declares war on an NPC 
 			//if (!fromFactionId.GetFactionById().IsEveryoneNpc() && toFactionId.GetFactionById().IsEveryoneNpc())
@@ -622,7 +642,7 @@ namespace Eem.Thraxus.Factions.Models
 		private void War(long npcFactionId, long playerFactionId)
 		{
 			// TODO just a bookmark!
-			FactionCore.WriteToLog("War", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
+			//FactionCore.WriteToLog("War", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
 			NewTimedNegativeRelationship(npcFactionId, playerFactionId);
 			RequestDialog(npcFactionId.GetFactionById(), playerFactionId.GetFactionById(), Dialogue.DialogType.WarDeclared);
 			DeclareWar(npcFactionId, playerFactionId);
@@ -678,12 +698,36 @@ namespace Eem.Thraxus.Factions.Models
 		private void ProcessWarQueue()
 		{
 			FactionCore.WriteToLog("ProcessWarQueue", $"Start", true);
+			
 			try
 			{
 				while (WarQueue.Count > 0)
 				{
 					bool found = false;
 					PendingRelation tmpRelation = WarQueue.Dequeue();
+					if (IsFirstColonists(tmpRelation.NpcFaction) && ValidPlayer(tmpRelation.PlayerFaction.GetFactionById().FounderId) && _newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
+					{
+						//FactionCore.WriteToLog("ProcessWarQueue", $"FSTC found trying to war the player... {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
+						SetRep(tmpRelation.NpcFaction, tmpRelation.PlayerFaction, false);
+						return;
+					}
+					if (_newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
+					{
+						//FactionCore.WriteToLog("ProcessWarQueue", $"New player faction found, ignoring. {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
+						
+						IMyFaction npcFaction = tmpRelation.NpcFaction.GetFactionById();
+						if (npcFaction == null) return;
+						if (_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Contains(npcFaction.Tag))
+						{
+							SetRep(tmpRelation.NpcFaction, tmpRelation.PlayerFaction, false);
+							_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Remove(npcFaction.Tag);
+						}
+
+						if (_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count != 0) return;
+						//FactionCore.WriteToLog("ProcessWarQueue", $"New player faction dictionary empty - deleting.", true);
+						_newPlayerFactionDictionary.Remove(tmpRelation.PlayerFaction);
+						return;
+					}
 					if (tmpRelation.NpcFaction == 0L || tmpRelation.PlayerFaction == 0L) continue;
 					if (_playerPirateFactionDictionary.ContainsKey(tmpRelation.PlayerFaction) || _pirateFactionDictionary.ContainsKey(tmpRelation.NpcFaction)) continue;
 					TimedRelationship newTimedRelationship = new TimedRelationship(tmpRelation.NpcFaction.GetFactionById(), tmpRelation.PlayerFaction.GetFactionById(), Helpers.Constants.FactionNegativeRelationshipCooldown);
@@ -693,6 +737,7 @@ namespace Eem.Thraxus.Factions.Models
 						TimedNegativeRelationships[i].CooldownTime = Helpers.Constants.FactionNegativeRelationshipCooldown;
 						found = true;
 					}
+					//FactionCore.WriteToLog("ProcessWarQueue", $"Nothing found, declaring new war: {tmpRelation.PlayerFaction}", true);
 					if (!found) War(tmpRelation.NpcFaction, tmpRelation.PlayerFaction);
 
 					foreach (KeyValuePair<long, IMyFaction> enforcementFaction in _enforcementFactionDictionary)
@@ -705,7 +750,7 @@ namespace Eem.Thraxus.Factions.Models
 							TimedNegativeRelationships[i].CooldownTime = Helpers.Constants.FactionNegativeRelationshipCooldown;
 							found = true;
 						}
-						FactionCore.WriteToLog("ProcessWarQueue", $"Nothing found, declaring lawful war against: {tmpRelation.PlayerFaction}", true);
+						//FactionCore.WriteToLog("ProcessWarQueue", $"Nothing found, declaring lawful war against: {tmpRelation.PlayerFaction}", true);
 						if (!found) War(enforcementFaction.Key, tmpRelation.PlayerFaction);
 					}
 				}
@@ -721,23 +766,49 @@ namespace Eem.Thraxus.Factions.Models
 			// May revisit parallel threading for this in the future, for now, it's fine as is
 			//MyAPIGateway.Parallel.Start(delegate
 			//{ 
-			FactionCore.WriteToLog("WarDeclaration", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
+			//FactionCore.WriteToLog("WarDeclaration", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
 			WarQueue.Enqueue(new PendingRelation(npcFactionId, playerFactionId));
 			ProcessWarQueue();
 			//});
+		}
+
+		private readonly Dictionary<long, List<string>> _newPlayerFactionDictionary = new Dictionary<long, List<string>>();
+
+		private void PopulateNewPlayerFactionDictionary(long playerFactionId)
+		{
+			List<string> lawfulFactions = new List<string>()
+			{
+				"UCMF", "SEPD", "CIVL", "ISTG", "MA-I", "EXMC", "KUSS", "HS", "AMPH", "IMDC"
+			};
+
+			_newPlayerFactionDictionary.Add(playerFactionId, lawfulFactions);
 		}
 
 		private void VetNewWar(long npcFactionId, long playerFactionId)
 		{
 			try
 			{
-				if (_newFactionDictionary.ContainsKey(playerFactionId))
-				{
-					if (_lawfulFactionDictionary.ContainsKey(npcFactionId)) _newFactionDictionary[playerFactionId]++;
-					if (_newFactionDictionary[playerFactionId] != _lawfulFactionDictionary.Count) return;
-					DeclareFullNpcPeace(playerFactionId);
-					return;
-				}
+				//FactionCore.WriteToLog("VetNewWar", $"{npcFactionId} | {playerFactionId}", true);
+				//if (_newPlayerFactionDictionary.ContainsKey(playerFactionId))
+				//{
+				//	IMyFaction npcFaction = npcFactionId.GetFactionById();
+				//	if (npcFaction == null) return;
+				//	if (_newPlayerFactionDictionary[playerFactionId].Contains(npcFaction.Tag))
+				//	{
+				//		SetRep(npcFactionId, playerFactionId, false);
+				//		_newPlayerFactionDictionary[playerFactionId].Remove(npcFaction.Tag);
+				//	}
+				//}
+				//if (_newFactionDictionary.ContainsKey(playerFactionId))
+				//{
+					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 0", true);
+					//if (_lawfulFactionDictionary.ContainsKey(npcFactionId)) _newFactionDictionary[playerFactionId]++;
+					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 1", true);
+					//if (_newFactionDictionary[playerFactionId] != _lawfulFactionDictionary.Count) return;
+					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 2", true);
+					//DeclareFullNpcPeace(playerFactionId);
+					//return;
+				//}
 
 				if (_playerPirateFactionDictionary.ContainsKey(playerFactionId)) return;
 				WarDeclaration(npcFactionId, playerFactionId);
@@ -797,7 +868,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void AddToTimedNegativeRelationships(TimedRelationship newTimedRelationship)
 		{
-			FactionCore.WriteToLog("AddToTimedNegativeRelationships", $"newTimedRelationship:\t{newTimedRelationship}", true);
+			//FactionCore.WriteToLog("AddToTimedNegativeRelationships", $"newTimedRelationship:\t{newTimedRelationship}", true);
 			TimedNegativeRelationships.Add(newTimedRelationship);
 			RemoveMendingRelationship(newTimedRelationship.NpcFaction.FactionId, newTimedRelationship.PlayerFaction.FactionId);
 			DumpEverythingToTheLog();
@@ -806,7 +877,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void AddToMendingRelationships(PendingRelation newMendingRelation)
 		{
-			FactionCore.WriteToLog("AddToMendingRelationships", $"newTimedRelationship:\t{newMendingRelation}");
+			//FactionCore.WriteToLog("AddToMendingRelationships", $"newTimedRelationship:\t{newMendingRelation}", true);
 			MendingRelationships.Add(newMendingRelation);
 		}
 
@@ -814,7 +885,7 @@ namespace Eem.Thraxus.Factions.Models
 		{
 			try
 			{
-				FactionCore.WriteToLog("AssessNegativeRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}");
+				//FactionCore.WriteToLog("AssessNegativeRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}", true);
 				DumpTimedNegativeFactionRelationships();
 				for (int i = TimedNegativeRelationships.Count - 1; i >= 0; i--)
 				{
@@ -833,7 +904,7 @@ namespace Eem.Thraxus.Factions.Models
 		{
 			try
 			{
-				FactionCore.WriteToLog("AssessMendingRelationships", $"MendingRelationships.Count:\t{TimedNegativeRelationships.Count}");
+				//FactionCore.WriteToLog("AssessMendingRelationships", $"MendingRelationships.Count:\t{TimedNegativeRelationships.Count}", true);
 				DumpMendingRelationshipsRelationships();
 				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
 				{
@@ -875,14 +946,14 @@ namespace Eem.Thraxus.Factions.Models
 		private void CheckCounts()
 		{
 			if (MendingRelationships.Count == 0 && TimedNegativeRelationships.Count == 0) FactionTimer(MyUpdateOrder.NoUpdate);
-			FactionCore.WriteToLog("CheckCounts", $"MendingRelationships:\t{MendingRelationships.Count}\tTimedNegativeRelationship:\t{TimedNegativeRelationships.Count}");
+			//FactionCore.WriteToLog("CheckCounts", $"MendingRelationships:\t{MendingRelationships.Count}\tTimedNegativeRelationship:\t{TimedNegativeRelationships.Count}", true);
 		}
 
 		private static void FactionTimer(MyUpdateOrder updateOrder)
 		{
 			if (FactionCore.FactionCoreStaticInstance.UpdateOrder != updateOrder)
 				MyAPIGateway.Utilities.InvokeOnGameThread(() => FactionCore.FactionCoreStaticInstance.SetUpdateOrder(updateOrder));
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => FactionCore.WriteToLog("FactionTimer", $"SetUpdateOrder:\t{updateOrder}\tActual:\t{FactionCore.FactionCoreStaticInstance.UpdateOrder}"));
+			//MyAPIGateway.Utilities.InvokeOnGameThread(() => FactionCore.WriteToLog("FactionTimer", $"SetUpdateOrder:\t{updateOrder}\tActual:\t{FactionCore.FactionCoreStaticInstance.UpdateOrder}"));
 		}
 
 		// External calls to manage internal relationships
@@ -1039,6 +1110,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private static void SetRep(long npcFactionId, long playerFactionId, bool hostile)
 		{
+			//FactionCore.WriteToLog("SetRep", $"{npcFactionId} | {playerFactionId} | {hostile}", true);
 			int value;
 
 			if (hostile)

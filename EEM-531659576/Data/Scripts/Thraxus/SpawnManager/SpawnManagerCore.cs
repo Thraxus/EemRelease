@@ -1,117 +1,104 @@
-﻿using Sandbox.ModAPI;
-using Eem.Thraxus.Helpers;
-using Eem.Thraxus.SpawnManager.Models;
-using Eem.Thraxus.Utilities;
+﻿using System.Collections.Generic;
+using Eem.Thraxus.Common.BaseClasses;
+using Eem.Thraxus.Common.Enums;
+using Sandbox.ModAPI;
+using Sandbox.Game.Entities;
 using VRage.Game.Components;
+using VRage.ModAPI;
+using VRageMath;
 
 namespace Eem.Thraxus.SpawnManager
 {
-	[MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
-	public class SpawnManagerCore : MySessionComponentBase
+	[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation, priority: int.MinValue + 1)]
+	public class SpawnManagerCore : BaseSessionComp
 	{
 		// Constants
 
-		private const string DebugLogName = "SpawnManagerDebug";
-		private const string GeneralLogName = "SpawnManagerGeneral";
+		protected override string CompName { get; } = "SpawnManagerCore";
+		protected override CompType Type { get; } = CompType.Server;
+		protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.NoUpdate;
 
 		// Fields
-
-		private bool _registerEarly;
-		private bool _initialized;
-
-		private static Log _debugLog;
-		private static Log _generalLog;
-
-		private EntityTracker _entityTracker;
-
-		/// <inheritdoc />
-		public override void LoadData()
+		
+		protected override void SuperEarlySetup()
 		{
-			base.LoadData();
+			base.SuperEarlySetup();
+			MyAPIGateway.Entities.OnEntityAdd += OnEntityAdd;
+			MyAPIGateway.Entities.OnEntityRemove += OnEntityRemoved;
 		}
 
-		// Init Methods
-
-		/// <summary>
-		/// Runs before the game is ready, safe for some initializations, not safe for others
-		/// </summary>
-		public override void BeforeStart()
+		protected override void Unload()
 		{
-			base.BeforeStart();
-			if (!Constants.IsServer) return;
-			if (!_registerEarly) RegisterEarly();
+			base.Unload();
+			MyAPIGateway.Entities.OnEntityAdd -= OnEntityAdd;
+			MyAPIGateway.Entities.OnEntityRemove -= OnEntityRemoved;
 		}
 
-		/// <summary>
-		/// Runs every tick before the simulation is updated
-		/// </summary>
-		public override void UpdateBeforeSimulation()
+		private void OnEntityAdd(IMyEntity myEntity)
 		{
-			base.UpdateBeforeSimulation();
-			if (!Constants.IsServer) return;
-			if (!_initialized) Initialize();
-			_entityTracker = new EntityTracker();
-			TickTimer();
+			if (myEntity.GetType() != typeof(MyCubeGrid)) return;
+			MyCubeGrid grid = (MyCubeGrid)myEntity;
+			WriteToLog("OnEntityAdd", $"Id: {grid.EntityId} | Name: {grid.DisplayName} | Size: {grid.GridSizeEnum} | Blocks: {grid.BlocksCount} | PCU: {grid.BlocksPCU}", LogType.General);
+			AttemptStationFix(myEntity);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		private void RegisterEarly()
+		private void OnEntityRemoved(IMyEntity myEntity)
 		{
-			if (Constants.DebugMode) _debugLog = new Log(DebugLogName);
-			_generalLog = new Log(GeneralLogName);
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => SetUpdateOrder(MyUpdateOrder.BeforeSimulation));
-			WriteToLog("SpawnManagerCore", $"RegisterEarly Complete... {UpdateOrder}", true);
-			_registerEarly = true;
+			if (myEntity.GetType() != typeof(MyCubeGrid)) return;
+			WriteToLog("OnEntityRemoved", $"Id: {myEntity.EntityId} | Name: {myEntity.DisplayName}", LogType.General);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		private void Initialize()
+		private static void AttemptStationFix(IMyEntity entity)
 		{
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => SetUpdateOrder(MyUpdateOrder.NoUpdate));
-			WriteToLog("SpawnManagerCore", $"Initialized... {UpdateOrder}", true);
-			_initialized = true;
+			MyCubeGrid thisCubeGrid = (MyCubeGrid)entity;
+			if (!EemStations.Contains(thisCubeGrid.DisplayName)) return;
+			if (thisCubeGrid.Physics == null || thisCubeGrid.IsStatic) return;
+			thisCubeGrid.Physics.LinearVelocity = Vector3.Zero;
+			thisCubeGrid.Physics.AngularVelocity = Vector3.Zero;
+			thisCubeGrid.ConvertToStatic();
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		protected override void UnloadData()
+		private static readonly List<string> EemStations = new List<string>
 		{
-			base.UnloadData();
-			if (!Constants.IsServer) return;
-			_entityTracker?.Close();
-			WriteToLog("SpawnManagerCore", $"I'm out!... {UpdateOrder}", true);
-			_debugLog?.Close();
-			_generalLog?.Close();
-		}
-
-
-		// Core Logic Methods
-
-		/// <summary>
-		/// Processes certain things at set intervals
-		/// </summary>
-		private void TickTimer()
-		{
-
-		}
-
-		// Non-Core logic below this point
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="caller"></param>
-		/// <param name="message"></param>
-		/// <param name="general"></param>
-		public static void WriteToLog(string caller, string message, bool general = false)
-		{
-			_debugLog?.WriteToLog(caller, message);
-			if (general) _generalLog?.WriteToLog(caller, message);
-		}
+			"Amphion Diatom Waystation",
+			"Hydrozoa Waystation",
+			"Amphion Polyp Small Outpost",
+			"Amphion Reef Barrier Station",
+			"Amphion Rotifer Waystation",
+			"Station Debris",
+			"Dead_Station_2_signal",
+			"Encounter Droneyard",
+			"Encounter Haunted Section",
+			"HEC Debris",
+			"Station Defence",
+			"Large Grid 4740",
+			"Encounter MushStation",
+			"Encounter RoidStation",
+			"Encounter Stealth pirate station",
+			"Hi-Tech Factory",
+			"IMDC Defense Platform",
+			"KUS Waystation",
+			"Small Solar Recharge Station",
+			"Object Defense Platform Echo",
+			"IMDC 1781 Service Platform",
+			"Mahriane 34 Trading Outpost",
+			"Mahriane 56 Trading Outpost",
+			"Mahriane 8724 Service Platform",
+			"XMC 603 Factory",
+			"XMC 718 Trading Outpost",
+			"XMC 99 Refinery",
+			"Trade Route Beacon",
+			"Phaeton Trading Outpost",
+			"Police Outpost",
+			"Raiding Outpost mk.1",
+			"Raiding Station - Scourge",
+			"Ð‘Ð¾Ð»ÑŒÑˆÐ¾Ð¹ ÐºÐ¾Ñ€Ð°Ð±Ð»ÑŒ 3106",
+			"Refueling Station XL Beta",
+			"Salvaging Outpost",
+			"Navigational Beacon",
+			"XMC 4402 Captured",
+			"XMC 521 Trade Center_Destroyed",
+			"Mining Station Cirva"
+		};
 	}
 }

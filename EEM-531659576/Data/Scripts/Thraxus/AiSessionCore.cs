@@ -113,7 +113,7 @@ namespace Eem.Thraxus
 			List<IMyIdentity> identityList = new List<IMyIdentity>();
 			MyAPIGateway.Players.GetAllIdentites(identityList);
 			foreach (IMyIdentity identity in identityList)
-				GeneralLog.WriteToLog("LateSetup", $"Identity: {identity.IdentityId} | {identity.DisplayName} | {identity.IsDead}");
+				GeneralLog.WriteToLog("LateSetup", $"Identity: {identity.IdentityId} | {identity.DisplayName} | {identity.IsDead} | {MyAPIGateway.Players.TryGetSteamId(identity.IdentityId)}");
 		}
 
 		private static void CloseLogs()
@@ -123,7 +123,20 @@ namespace Eem.Thraxus
 			if (Constants.EnableGeneralLog) GeneralLog?.Close();
 		}
 
-		
+		public override void LoadData()
+		{
+			base.LoadData();
+			MyAPIGateway.Session.SessionSettings.EnableIngameScripts = true;
+			MyAPIGateway.Session.SessionSettings.EnableDrones = true;
+			if (MyAPIGateway.Session.SessionSettings.PiratePCU > 50000) return;
+			if (MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled == MyBlockLimitsEnabledEnum.NONE)
+				MyAPIGateway.Session.SessionSettings.PiratePCU = 1000000;
+			else
+			{
+				MyAPIGateway.Session.SessionSettings.PiratePCU = MyAPIGateway.Session.SessionSettings.TotalPCU * 3;
+			}
+		}
+
 
 		///// <summary>
 		///// Initial setup
