@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <RespawnShips>
+
+    <Ship>
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>Range_Runner_Respawncar</SubtypeId>
+      </Id>
+      <DisplayName>Range Runner</DisplayName>
+      <Icon>Textures\GUI\Respawnships\RangeRunner.png</Icon>
+      <CooldownSeconds>0</CooldownSeconds>
+      <Prefab>Range_Runner_Respawncar</Prefab>
+      <MinimalAirDensity>0.8</MinimalAirDensity>
+      <PlanetDeployAltitude>2000</PlanetDeployAltitude>
+      <UseForPlanetsWithAtmosphere>true</UseForPlanetsWithAtmosphere>
+      <HelpTextLocalizationId>Basic rover to explore planets.</HelpTextLocalizationId>
+    </Ship>
+
+    <Ship>
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>Little_Bird_Respawnship</SubtypeId>
+      </Id>
+      <DisplayName>Little Bird</DisplayName>
+      <Icon>Textures\GUI\Respawnships\LittleBird.png</Icon>
+      <CooldownSeconds>0</CooldownSeconds>
+      <Prefab>Little_Bird_Respawnship</Prefab>
+      <UseForSpace>true</UseForSpace>
+      <HelpTextLocalizationId>Fast, agile and small space ship.</HelpTextLocalizationId>
+    </Ship>
+
+    <Ship>
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>Ibis_Respawnship</SubtypeId>
+      </Id>
+      <DisplayName>Ibis</DisplayName>
+      <Icon>Textures\GUI\Respawnships\TraderIbis.png</Icon>
+      <CooldownSeconds>900</CooldownSeconds>
+      <Prefab>Ibis_Respawnship</Prefab>
+      <UseForSpace>true</UseForSpace>
+      <HelpTextLocalizationId>Compact space ship for trading.</HelpTextLocalizationId>
+    </Ship>
+
+    <Ship>
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>M3_Miner_Respawnship</SubtypeId>
+      </Id>
+      <DisplayName>M3 Miner</DisplayName>
+      <Icon>Textures\GUI\Respawnships\MinerM3.png</Icon>
+      <CooldownSeconds>900</CooldownSeconds>
+      <Prefab>M3_Miner_Respawnship</Prefab>
+      <UseForSpace>true</UseForSpace>
+      <HelpTextLocalizationId>Basic mining space ship.</HelpTextLocalizationId>
+    </Ship>
+    
+    <!-- Vanilla Ships - Disabled -->
+
+    <Ship Enabled="false">
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>RespawnPlanetPod</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_PlanetaryLander</DisplayName>
+      <Icon>Textures\GUI\Icons\RespawnShips\RespawnPlanetPod.png</Icon>
+      <CooldownSeconds>0</CooldownSeconds>
+      <Prefab>RespawnPlanetPod</Prefab>
+      <MinimalAirDensity>0.8</MinimalAirDensity>
+      <PlanetDeployAltitude>2000</PlanetDeployAltitude>
+      <UseForPlanetsWithAtmosphere>true</UseForPlanetsWithAtmosphere>
+      <InitialLinearVelocity x="0" y="-95" z="0" />
+      <InitialAngularVelocity x="0" y="0.5" z="0" />
+      <HelpTextLocalizationId>RespawnScreeenHelpTextSpawn</HelpTextLocalizationId>
+    </Ship>
+
+    <Ship Enabled="false">
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>RespawnMoonPod</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_PlanetaryLander</DisplayName>
+      <Icon>Textures\GUI\Icons\RespawnShips\RespawnMoonPod.png</Icon>
+      <CooldownSeconds>0</CooldownSeconds>
+      <Prefab>RespawnMoonPod</Prefab>
+      <PlanetDeployAltitude>8</PlanetDeployAltitude>
+      <UseForPlanetsWithoutAtmosphere>true</UseForPlanetsWithoutAtmosphere>
+      <HelpTextLocalizationId>RespawnScreeenHelpTextSpawn</HelpTextLocalizationId>
+    </Ship>
+
+    <Ship Enabled="false">
+      <Id>
+        <TypeId>RespawnShipDefinition</TypeId>
+        <SubtypeId>RespawnSpacePod</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_RespawnPodSpace</DisplayName>
+      <Icon>Textures\GUI\Icons\RespawnShips\RespawnSpacePod.png</Icon>
+      <CooldownSeconds>900</CooldownSeconds>
+      <Prefab>RespawnSpacePod</Prefab>
+      <UseForSpace>true</UseForSpace>
+      <HelpTextLocalizationId>RespawnScreeenHelpTextSpaceSpawn</HelpTextLocalizationId>
+    </Ship>
+
+  </RespawnShips>                
+</Definitions>
