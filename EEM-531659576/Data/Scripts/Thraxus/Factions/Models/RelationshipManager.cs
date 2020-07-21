@@ -185,6 +185,8 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void RequestPeace(long fromFactionId, long toFactionId)
 		{   // So many reasons to clear peace...
+			if (_nonEemNpcFactionDictionary.ContainsKey(fromFactionId) || _nonEemNpcFactionDictionary.ContainsKey(toFactionId)) return; // gtfo non-EEM NPC faction relationship.  NOT MY JOB!!!!!!@#!@#
+
 			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 0", true);
 			if ((_playerPirateFactionDictionary.ContainsKey(fromFactionId) || _playerPirateFactionDictionary.ContainsKey(toFactionId)) && CheckEitherFactionForNpc(fromFactionId, toFactionId))
 			{   // Is this a player pirate somehow involved in peace accords with a NPC faction?
@@ -258,6 +260,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void AcceptPeace(long fromFactionId, long toFactionId)
 		{
+			if (_nonEemNpcFactionDictionary.ContainsKey(fromFactionId) || _nonEemNpcFactionDictionary.ContainsKey(toFactionId)) return; // gtfo non-EEM NPC faction
 			if (_newFactionDictionary.ContainsKey(fromFactionId))
 			{
 				FactionCore.WriteToLog("AcceptPeace", $"{fromFactionId} | {toFactionId} - {_newFactionDictionary[fromFactionId]}", true);
@@ -277,6 +280,7 @@ namespace Eem.Thraxus.Factions.Models
 		private void RequestDialog(IMyFaction npcFaction, IMyFaction playerFaction, Dialogue.DialogType type)
 		{
 			FactionCore.WriteToLog("RequestDialog", $"{npcFaction.Tag} | {playerFaction.Tag} - {type}", true);
+			if (_nonEemNpcFactionDictionary.ContainsKey(npcFaction.FactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFaction.FactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
 			try
 			{
 				Func<string> message = _dialogue.RequestDialog(npcFaction, type);
@@ -708,7 +712,7 @@ namespace Eem.Thraxus.Factions.Models
 				{
 					bool found = false;
 					PendingRelation tmpRelation = WarQueue.Dequeue();
-					if (!_npcFactionDictionary.ContainsKey(tmpRelation.NpcFaction) && !_npcFactionDictionary.ContainsKey(tmpRelation.PlayerFaction)) continue; // neither side is EEM, screw em - not this mods war
+					if (_nonEemNpcFactionDictionary.ContainsKey(tmpRelation.NpcFaction) || _nonEemNpcFactionDictionary.ContainsKey(tmpRelation.PlayerFaction)) continue; // Some side isn't an EEM faction; fuck em
 					if (IsFirstColonists(tmpRelation.NpcFaction) && ValidPlayer(tmpRelation.PlayerFaction.GetFactionById().FounderId) && _newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
 					{
 						//FactionCore.WriteToLog("ProcessWarQueue", $"FSTC found trying to war the player... {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
