@@ -38185,7 +38185,7 @@ Port 02</PublicDescription>
               <Enabled>true</Enabled>
               <Range>35</Range>
               <Volume>0.6</Volume>
-              <CueName>EEM_TradeStationMusic_Jeezlh</CueName>
+              <CueName>EEM_TradeStationMusic_Mahriane</CueName>
               <LoopPeriod>1</LoopPeriod>
               <IsPlaying>false</IsPlaying>
               <ElapsedSoundSeconds>0</ElapsedSoundSeconds>

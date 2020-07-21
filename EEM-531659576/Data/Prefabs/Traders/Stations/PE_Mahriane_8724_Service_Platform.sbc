@@ -40362,7 +40362,7 @@ Level -1   Service Area, CPU</PublicDescription>
               <Enabled>true</Enabled>
               <Range>50</Range>
               <Volume>0.7008104</Volume>
-              <CueName>EEM_TradeStationMusic_TheMissing</CueName>
+              <CueName>EEM_TradeStationMusic_Mahriane</CueName>
               <LoopPeriod>1</LoopPeriod>
               <IsPlaying>true</IsPlaying>
               <ElapsedSoundSeconds>4.326835</ElapsedSoundSeconds>

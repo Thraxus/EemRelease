@@ -48965,7 +48965,7 @@ $IOS_ATI_Tutorial</Value>
               <Enabled>true</Enabled>
               <Range>60</Range>
               <Volume>1</Volume>
-              <CueName>EEM_TradeStationMusic_Lifebook</CueName>
+              <CueName>EEM_TradeStationMusic_XMC</CueName>
               <LoopPeriod>1</LoopPeriod>
               <IsPlaying>true</IsPlaying>
               <ElapsedSoundSeconds>2.67155719</ElapsedSoundSeconds>
