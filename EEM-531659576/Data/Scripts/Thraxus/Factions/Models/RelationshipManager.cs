@@ -276,6 +276,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void RequestDialog(IMyFaction npcFaction, IMyFaction playerFaction, Dialogue.DialogType type)
 		{
+			FactionCore.WriteToLog("RequestDialog", $"{npcFaction.Tag} | {playerFaction.Tag} - {type}", true);
 			try
 			{
 				Func<string> message = _dialogue.RequestDialog(npcFaction, type);
@@ -291,6 +292,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void RequestNewFactionDialog(long playerFactionId)
 		{
+			FactionCore.WriteToLog("RequestNewFactionDialog", $"{playerFactionId.GetFactionById().Tag}", true);
 			const string npcFactionTag = "The Lawful";
 			try
 			{
@@ -307,6 +309,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void RequestNewPirateDialog(long playerFactionId)
 		{
+			FactionCore.WriteToLog("RequestNewPirateDialog", $"{playerFactionId.GetFactionById().Tag}", true);
 			const string npcFactionTag = "The Lawful";
 			try
 			{
@@ -629,10 +632,10 @@ namespace Eem.Thraxus.Factions.Models
 		// War
 
 		private void WarDeclared(long fromFactionId, long toFactionId)
-		{   // Going to take the stance that if a war is declared by an NPC, it's a valid war
+		{   // Going to take the stance that if a war is declared by an NPC that is from EEM, it's a valid war
 			// TODO Add dialogue for when a player declares war on an NPC directly
 			//FactionCore.WriteToLog("WarDeclared", $"fromFaction:\t{fromFactionId}\ttoFaction:\t{toFactionId}", true);
-			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId))
+			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && _npcFactionDictionary.ContainsKey(fromFactionId))
 				VetNewWar(fromFactionId, toFactionId);
 			//// This is for when a player declares war on an NPC 
 			//if (!fromFactionId.GetFactionById().IsEveryoneNpc() && toFactionId.GetFactionById().IsEveryoneNpc())
@@ -705,6 +708,7 @@ namespace Eem.Thraxus.Factions.Models
 				{
 					bool found = false;
 					PendingRelation tmpRelation = WarQueue.Dequeue();
+					if (!_npcFactionDictionary.ContainsKey(tmpRelation.NpcFaction) && !_npcFactionDictionary.ContainsKey(tmpRelation.PlayerFaction)) continue; // neither side is EEM, screw em - not this mods war
 					if (IsFirstColonists(tmpRelation.NpcFaction) && ValidPlayer(tmpRelation.PlayerFaction.GetFactionById().FounderId) && _newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
 					{
 						//FactionCore.WriteToLog("ProcessWarQueue", $"FSTC found trying to war the player... {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
