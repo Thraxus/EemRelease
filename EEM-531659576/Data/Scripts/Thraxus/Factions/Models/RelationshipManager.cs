@@ -833,6 +833,7 @@ namespace Eem.Thraxus.Factions.Models
 		{
 			try
 			{
+				if (_nonEemNpcFactionDictionary.ContainsKey(npcFactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
 				PendingRelation newMendingRelation = new PendingRelation(npcFactionId, playerFactionId);
 				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
 				{
@@ -870,6 +871,7 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void NewTimedNegativeRelationship(long npcFactionId, long playerFactionId)
 		{
+			if (_nonEemNpcFactionDictionary.ContainsKey(npcFactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
 			int cooldown = Helpers.Constants.FactionNegativeRelationshipCooldown + Helpers.Constants.Random.Next(Helpers.Constants.TicksPerSecond * 30, Helpers.Constants.TicksPerMinute * 2);
 			AddToTimedNegativeRelationships(new TimedRelationship(npcFactionId.GetFactionById(), playerFactionId.GetFactionById(), cooldown));
 		}
