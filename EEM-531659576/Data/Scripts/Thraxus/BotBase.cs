@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eem.Thraxus.Extensions;
+using Eem.Thraxus.Factions.DataTypes;
+using Eem.Thraxus.Factions.Models;
 using Eem.Thraxus.Helpers;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
@@ -318,7 +320,7 @@ namespace Eem.Thraxus
 				if (_ownerFaction == null)
 					_ownerFaction = Grid.GetOwnerFaction();
 				//MyAPIGateway.Session.Factions.DeclareWar(_ownerFaction.FactionId, playerFaction.FactionId);
-				Factions.FactionCore.FactionCoreStaticInstance.RelationshipManager.WarDeclaration(_ownerFaction.FactionId, playerFaction.FactionId);
+				Factions.FactionCore.FactionCoreStaticInstance.RegisterWar(new PendingWar(_ownerFaction.FactionId, playerFaction.FactionId));
 				//Factions.Factions.DeclareFactionWar(_ownerFaction, playerFaction);
 			}
 			catch (Exception)

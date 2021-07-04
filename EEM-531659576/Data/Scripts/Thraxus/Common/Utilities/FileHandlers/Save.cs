@@ -51,7 +51,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 
 		public static void WriteToSandbox(Type T)
 		{
-			
+
 		}
 	}
 }

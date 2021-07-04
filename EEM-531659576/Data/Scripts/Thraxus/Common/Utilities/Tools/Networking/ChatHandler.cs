@@ -7,7 +7,7 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Networking
 {
 	internal static class ChatHandler
 	{
-		internal const string ChatCommandPrefix = Settings.ChatCommandPrefix;
+		internal const string ChatCommandPrefix = CommonSettings.ChatCommandPrefix;
 		private const string HelpPrefix = "help";
 
 		private static readonly Dictionary<string, Action<string>> ChatAction = new Dictionary<string, Action<string>>

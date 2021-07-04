@@ -18,7 +18,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 		}
 
 		public static T ReadFromXmlFile<T>(string fileName, Type type)
-		{	
+		{
 			if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				return default(T);
 

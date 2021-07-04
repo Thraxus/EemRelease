@@ -1,9 +1,9 @@
 ﻿using System;
 using Sandbox.ModAPI;
 
-namespace Eem.Thraxus.Common
+namespace Eem.Thraxus.Common.Utilities
 {
-	public static class Settings
+	public static class CommonSettings
 	{   // These settings should be used by the mod directly, and not changeable by a user.  They are considered "reference only"
 
 		public const string MyIniFileName = "MyCustomIniName.ini";
@@ -14,6 +14,13 @@ namespace Eem.Thraxus.Common
 		public const string ExceptionLogName = "Exception";
 		public const string StaticGeneralLogName = "StaticLog";
 		public const ushort NetworkId = 16759;
+
+		#region User Configuration
+
+		public static bool DebugMode = false;
+		public static bool ProfilingEnabled = false;
+		
+		#endregion
 
 		#region Reference Values
 

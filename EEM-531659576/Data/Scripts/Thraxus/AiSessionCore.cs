@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Eem.Thraxus.Common.Utilities.Tools.Logging;
 using Eem.Thraxus.Debug;
 using Eem.Thraxus.Helpers;
-using Eem.Thraxus.Networking;
-using Eem.Thraxus.Utilities;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
-using VRage.Game.ObjectBuilders.ComponentSystem;
 using VRage.ModAPI;
 using VRage.Utils;
 
@@ -86,7 +82,7 @@ namespace Eem.Thraxus
 		private void Initialize()
 		{
 			//if (Constants.DebugMode) DebugLog.WriteToLog("Initialize", $"Debug Active - IsServer: {Constants.IsServer}", true, 20000);
-			Messaging.Register();
+			//Messaging.Register();
 			MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageRefHandler);
 			MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler(0, GenericDamageHandler);
 			MyAPIGateway.Session.DamageSystem.RegisterDestroyHandler(0, GenericDamageHandler);
@@ -128,15 +124,14 @@ namespace Eem.Thraxus
 			base.LoadData();
 			MyAPIGateway.Session.SessionSettings.EnableIngameScripts = true;
 			MyAPIGateway.Session.SessionSettings.EnableDrones = true;
-			if (MyAPIGateway.Session.SessionSettings.PiratePCU > 50000) return;
-			if (MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled == MyBlockLimitsEnabledEnum.NONE)
+			if (MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled == MyBlockLimitsEnabledEnum.NONE || 
+			    MyAPIGateway.Session.SessionSettings.TotalPCU == 0)
 				MyAPIGateway.Session.SessionSettings.PiratePCU = 1000000;
 			else
-			{
 				MyAPIGateway.Session.SessionSettings.PiratePCU = MyAPIGateway.Session.SessionSettings.TotalPCU * 3;
-			}
+			if (MyAPIGateway.Session.SessionSettings.PiratePCU > 500000)
+				MyAPIGateway.Session.SessionSettings.PiratePCU = 500000;
 		}
-
 
 		///// <summary>
 		///// Initial setup
@@ -158,7 +153,7 @@ namespace Eem.Thraxus
 		protected override void UnloadData()
 		{
 			base.UnloadData();
-			Messaging.Unregister();
+			//Messaging.Unregister();
 			CloseLogs();
 		}
 

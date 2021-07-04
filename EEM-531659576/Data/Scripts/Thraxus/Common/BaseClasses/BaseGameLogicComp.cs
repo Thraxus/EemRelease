@@ -1,6 +1,7 @@
 ﻿using Eem.Thraxus.Common.Enums;
 using Eem.Thraxus.Common.Utilities.Tools.Logging;
 using VRage.Game.Components;
+using VRage.ObjectBuilders;
 
 namespace Eem.Thraxus.Common.BaseClasses
 {
@@ -23,6 +24,13 @@ namespace Eem.Thraxus.Common.BaseClasses
 				default:
 					return;
 			}
+		}
+
+		public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
+		{
+			// Always return base.GetObjectBuilder(); after your code! 
+			// Do all saving here, make sure to return the OB when done;
+			return base.GetObjectBuilder(copy);
 		}
 
 		public override void UpdateBeforeSimulation()

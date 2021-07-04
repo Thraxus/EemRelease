@@ -34,7 +34,7 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 
 		public static float CalculatedMaxThrust(MyThrust thruster, bool inAtmosphere)
 		{
-			return thruster.BlockDefinition.ForceMagnitude * ((IMyThrust) thruster).ThrustMultiplier * CalculatedThrustScalar(thruster, inAtmosphere);
+			return thruster.BlockDefinition.ForceMagnitude * ((IMyThrust)thruster).ThrustMultiplier * CalculatedThrustScalar(thruster, inAtmosphere);
 		}
 
 		public static float AdjustedMaxPower(MyThrust thruster, bool inAtmosphere)
@@ -44,7 +44,7 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 
 		public static float CalculatedCurrentPower(MyThrust thruster)
 		{
-			return (((IMyThrust) thruster).CurrentThrust / ((IMyThrust) thruster).MaxThrust) * thruster.MaxPowerConsumption;
+			return (((IMyThrust)thruster).CurrentThrust / ((IMyThrust)thruster).MaxThrust) * thruster.MaxPowerConsumption;
 		}
 
 		public static float CalculatedThrustScalar(MyThrust thruster, bool inAtmosphere)

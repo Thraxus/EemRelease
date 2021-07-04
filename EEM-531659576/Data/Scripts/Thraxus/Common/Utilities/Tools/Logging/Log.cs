@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using Eem.Thraxus.Common.Models;
-using Eem.Thraxus.Common.Utilities.Tools.Networking;
 using Sandbox.ModAPI;
 using VRage.Game;
 
@@ -14,8 +12,6 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 		private TextWriter TextWriter { get; set; }
 
 		private static string TimeStamp => DateTime.Now.ToString("MMddyy-HH:mm:ss:ffff");
-
-		private readonly FastQueue<string> _messageQueue = new FastQueue<string>(20);
 
 		private const int DefaultIndent = 4;
 
@@ -40,24 +36,9 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 			TextWriter = null;
 		}
 
-		public void WriteToLog(string caller, string message, bool showOnHud = false, int duration = Settings.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
+		public void WriteToLog(string caller, string message, int duration = CommonSettings.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
 		{
 			BuildLogLine(caller, message);
-			if (!showOnHud) return;
-			BuildHudNotification(caller, message, duration, color);
-		}
-
-		public void GetTailMessages()
-		{
-			lock (_lockObject)
-			{
-				MyAPIGateway.Utilities.ShowMissionScreen(LogName, "", "", string.Join($"{Environment.NewLine}{Environment.NewLine}", _messageQueue.GetQueue()));
-			}
-		}
-
-		private static void BuildHudNotification(string caller, string message, int duration, string color)
-		{
-			Messaging.ShowLocalNotification($"{caller}{Indent}{message}", duration, color);
 		}
 
 		private readonly object _lockObject = new object();
@@ -72,7 +53,6 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 
 		private void WriteLine(string line)
 		{
-			_messageQueue?.Enqueue(line);
 			TextWriter?.WriteLine(line);
 			TextWriter?.Flush();
 		}

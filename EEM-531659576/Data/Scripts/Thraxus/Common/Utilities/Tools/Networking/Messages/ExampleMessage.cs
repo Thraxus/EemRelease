@@ -1,4 +1,5 @@
-﻿namespace Eem.Thraxus.Common.Utilities.Tools.Networking.Messages
+﻿
+namespace Eem.Thraxus.Common.Utilities.Tools.Networking.Messages
 {
 	class ExampleMessage
 	{

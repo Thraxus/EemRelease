@@ -1,428 +1,887 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Eem.Thraxus.Extensions;
-using Eem.Thraxus.Factions.Settings;
+using Eem.Thraxus.Common.BaseClasses;
+using Eem.Thraxus.Common.Enums;
+using Eem.Thraxus.Common.Utilities;
+using Eem.Thraxus.Common.Utilities.Statics;
+using Eem.Thraxus.Factions.DataTypes;
 using Eem.Thraxus.Factions.Utilities;
-using Eem.Thraxus.Networking;
+using Sandbox.Game.Multiplayer;
 using Sandbox.ModAPI;
-using VRage.Collections;
 using VRage.Game;
-using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using VRage.ModAPI;
 
 namespace Eem.Thraxus.Factions.Models
 {
-	public class RelationshipManager
+	public class RelationshipManager : BaseLoggingClass
 	{
-		private readonly Dictionary<long, IMyFaction> _playerFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _playerPirateFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _pirateFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _enforcementFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _lawfulFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _npcFactionDictionary;
-		private readonly Dictionary<long, IMyFaction> _nonEemNpcFactionDictionary;
-		private readonly Dictionary<long, int> _newFactionDictionary;
+		protected override string Id { get; } = "RelationshipManager";
 
-		private static readonly Queue<PendingRelation> WarQueue = new Queue<PendingRelation>();
+		// TODO: https://steamcommunity.com/sharedfiles/filedetails/?id=1903401450 
+		// Friendly faction for MES for once... probably should account for it...
 
-		private List<TimedRelationship> TimedNegativeRelationships { get; }
-		private List<PendingRelation> MendingRelationships { get; }
+		// TODO: Add system for players to be able to pay off negative rep (credit to Lucas for the idea)
+		//			Added to this is the potential to pay up to +1500
+		//			Should carry the penalty of potential negative police / military if caught "bribing" officials
+		//				need to make it cost more per purchase too
+		//				based on current standings
+		//				so like, -550 to -500, not so expensive, but -1500 to -500, pretty damn expensive
+		//				even -1500 - -1400 also pretty damn expensive
+		//				or -500 to 0, also pretty expensive if they want to go up
 
-		private bool _setupComplete;
+		/// <summary>
+		/// Normal rep controlled player factions
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _playerFactionDictionary = new Dictionary<long, IMyFaction>();
 
-		private readonly Dialogue _dialogue;
+		/// <summary>
+		/// Players who have decided to opt out of the rep system (always hostile to NPCs)
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _playerPirateFactionDictionary = new Dictionary<long, IMyFaction>();
 
-		public RelationshipManager()
+		/// <summary>
+		/// NPC factions who hate everyone
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _pirateFactionDictionary = new Dictionary<long, IMyFaction>();
+
+		/// <summary>
+		/// NPC factions who hate people who hate other people
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _enforcementFactionDictionary = new Dictionary<long, IMyFaction>();
+
+		/// <summary>
+		/// NPC factions who like to be nice to everyone
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _lawfulFactionDictionary = new Dictionary<long, IMyFaction>();
+
+		/// <summary>
+		/// All EEM NPC factions; doesn't discriminate if they are an asshole or angel
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _npcFactionDictionary = new Dictionary<long, IMyFaction>();
+
+		/// <summary>
+		/// All NPC factions that aren't controlled by EEM
+		/// </summary>
+		private readonly Dictionary<long, IMyFaction> _nonEemNpcFactionDictionary = new Dictionary<long, IMyFaction>();
+
+		#region Save Data
+
+		/// <summary>
+		/// Keeper of the keys to the castle, gatekeeper of old, holds all relationship information
+		/// </summary>
+		public readonly Dictionary<long, FactionRelation> FactionRelationships = new Dictionary<long, FactionRelation>();
+
+		/// <summary>
+		/// Holds all identity based relationships
+		/// </summary>
+		public readonly Dictionary<long, IdentityRelation> IdentityRelationships = new Dictionary<long, IdentityRelation>();
+
+		#endregion
+
+		/// <summary>
+		/// Responsible for managing external requests for reputation hits 
+		/// </summary>
+		private static readonly ConcurrentQueue<PendingWar> WarQueue = new ConcurrentQueue<PendingWar>();
+
+		/// <summary>
+		/// Used to keep the Identity List; avoids having to allocate a new list every time it's required
+		/// </summary>
+		protected readonly List<IMyIdentity> Identities = new List<IMyIdentity>();
+
+		/// <summary>
+		/// Populates the Identity list with a fresh set of identities
+		/// </summary>
+		/// <returns>All current known identities</returns>
+		protected List<IMyIdentity> GetIdentities()
 		{
-			FactionCore.WriteToLog("RelationshipManager", $"Constructing!", true);
-			_dialogue = new Dialogue();
-			_playerFactionDictionary = new Dictionary<long, IMyFaction>();
-			_pirateFactionDictionary = new Dictionary<long, IMyFaction>();
-			_playerPirateFactionDictionary = new Dictionary<long, IMyFaction>();
-			_enforcementFactionDictionary = new Dictionary<long, IMyFaction>();
-			_lawfulFactionDictionary = new Dictionary<long, IMyFaction>();
-			_npcFactionDictionary = new Dictionary<long, IMyFaction>();
-			_newFactionDictionary = new Dictionary<long, int>();
-			_nonEemNpcFactionDictionary = new Dictionary<long, IMyFaction>();
-			TimedNegativeRelationships = new List<TimedRelationship>();
-			MendingRelationships = new List<PendingRelation>();
+			Identities.Clear();
+			MyAPIGateway.Players.GetAllIdentites(Identities);
+			return Identities;
+		}
+
+		/// <summary>
+		/// Used to keep the Player List; avoids having to allocate a new list every time it's required
+		/// </summary>
+		protected readonly List<IMyPlayer> Players = new List<IMyPlayer>();
+
+		/// <summary>
+		/// Populates the player list with a fresh set of players
+		/// </summary>
+		/// <returns>All currently active players</returns>
+		protected List<IMyPlayer> GetPlayers()
+		{
+			Players.Clear();
+			MyAPIGateway.Players.GetPlayers(Players);
+			return Players;
+		}
+
+		/// <summary>
+		/// Holds the last known save game; only used to initialize factions when the game is loaded
+		/// </summary>
+		private readonly SaveData _saveData;
+
+		/// <summary>
+		/// Ensures setup isn't run more than once for whatever reason
+		/// </summary>
+		private bool _setupComplete;
+		
+		/// <summary>
+		/// Ctor; sets up the class so it can do it's job
+		/// </summary>
+		/// <param name="save">The last save</param>
+		public RelationshipManager(SaveData save)
+		{
+			WriteToLog("RelationshipManager", $"Constructing!", LogType.General);
+			_saveData = save;
+			
 			MyAPIGateway.Session.Factions.FactionStateChanged += FactionStateChanged;
 			MyAPIGateway.Session.Factions.FactionCreated += FactionCreated;
 			MyAPIGateway.Session.Factions.FactionEdited += FactionEdited;
 			MyAPIGateway.Session.Factions.FactionAutoAcceptChanged += MonitorAutoAccept;
-			SetupFactionRelations();
-			FactionCore.WriteToLog("RelationshipManager", $"Constructed!", true);
 		}
 
-		public void Close()
+		/// <summary>
+		/// After the class is created, this is run to setup all dictionaries and relationships
+		/// </summary>
+		public void Run()
 		{
-			FactionCore.WriteToLog("RelationshipManager-Unload", $"Packing up shop...", true);
+			WriteToLog("RelationshipManager.Run", $"Warming up! Existing save: {!_saveData.IsEmpty}", LogType.General);
+
+			SetupFactionDictionaries();
+
+			LoadSaveData();
+
+			SetupFactionDeletionProtection();
+			SetupAutoRelations();
+
+			MyAPIGateway.Entities.OnEntityAdd += PlayerNet;
+
+			_setupComplete = true;
+			WriteToLog("RelationshipManager.Run", $"At a full Sprint!", LogType.General);
+		}
+
+		/// <summary>
+		/// Called when the game is unloading to ensure that all events are unregistered and collections cleared
+		/// </summary>
+		public override void Close()
+		{
+			WriteToLog("RelationshipManager.Close", $"Cooling down...", LogType.General);
 			MyAPIGateway.Session.Factions.FactionStateChanged -= FactionStateChanged;
 			MyAPIGateway.Session.Factions.FactionCreated -= FactionCreated;
 			MyAPIGateway.Session.Factions.FactionEdited -= FactionEdited;
 			MyAPIGateway.Session.Factions.FactionAutoAcceptChanged -= MonitorAutoAccept;
-			WarQueue.Clear();
+			Players.Clear();
+			_currentPlayers.Clear();
+			Identities.Clear();
 			_playerFactionDictionary.Clear();
 			_playerPirateFactionDictionary.Clear();
 			_pirateFactionDictionary.Clear();
 			_enforcementFactionDictionary.Clear();
 			_lawfulFactionDictionary.Clear();
 			_npcFactionDictionary.Clear();
-			_newFactionDictionary.Clear();
 			_nonEemNpcFactionDictionary.Clear();
-			TimedNegativeRelationships.Clear();
-			MendingRelationships.Clear();
-			_dialogue.Unload();
-			FactionCore.WriteToLog("RelationshipManager-Unload", $"Shop all packed up", true);
+			IdentityRelationships.Clear();
+			FactionRelationships.Clear();
+			MyAPIGateway.Entities.OnEntityAdd -= PlayerNet;
+			WriteToLog("RelationshipManager.Close", $"Ready for a vacation!", LogType.General);
+			base.Close();
 		}
 
-		private void FactionStateChanged(MyFactionStateChange action, long fromFactionId, long toFactionId, long playerId, long senderId)
+		private readonly List<IMyPlayer> _currentPlayers = new List<IMyPlayer>();
+
+		private void RefreshCurrentPlayerCollection()
 		{
-			FactionCore.WriteToLog("FactionStateChanged",
-				$"Action:\t{action.ToString()}\tfromFaction:\t{fromFactionId}\ttag:\t{fromFactionId.GetFactionById()?.Tag}\ttoFaction:\t{toFactionId}\ttag:\t{toFactionId.GetFactionById()?.Tag}\tplayerId:\t{playerId}\tsenderId:\t{senderId}\t",
-				true);
+			_currentPlayers.Clear();
+			MyAPIGateway.Players.GetPlayers(_currentPlayers);
+		}
 
-			//foreach (var newPlayerFaction in _newPlayerFactionDictionary)
-			//{
-			//	FactionCore.WriteToLog("FSC",$"Faction: {newPlayerFaction.Key}", true);
-			//	foreach (var goodGuys in newPlayerFaction.Value)
-			//	{
-			//		FactionCore.WriteToLog("FSC", $"Remaining: {goodGuys}", true);
-			//	}	
-			//}
+		private IMyPlayer GetPlayerById(long id)
+		{
+			RefreshCurrentPlayerCollection();
+			return _currentPlayers.FirstOrDefault(player => player.IdentityId == id);
+		}
 
+		/// <summary>
+		/// Catches players as they join the game and/or are registered as identities (happens more than you think; such as leaving a cockpit)
+		/// </summary>
+		/// <param name="myEntity">The entity detected by the game</param>
+		private void PlayerNet(IMyEntity myEntity)
+		{   // Catches players joining the game / server.  GET IT?!
+			IMyPlayer player = GetPlayerById(myEntity.EntityId);
+			if (player == null) return;
+			PlayerJoined(player);
+			WriteToLog("Factions: OnEntityAdd", $"New Player: {player.DisplayName} - {player.IdentityId}", LogType.General);
+		}
+
+		/// <summary>
+		/// Checks to see whether the player is new or known.  If new, passes the player off to be added to the reputation system
+		/// </summary>
+		/// <param name="player">IMyPlayer of the new player</param>
+		private void PlayerJoined(IMyPlayer player)
+		{
+			IMyFaction playerFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.IdentityId);
+			if (playerFaction != null) return;  // If the player already has a faction then it can be assumed the players rep is being managed within that faction and they are not new to the game / server
+			if (IdentityRelationships.ContainsKey(player.IdentityId)) return;   // Identity is already being tracked, safe to ignore
+			AddNewIdentity(player.Identity);    // New blood! 
+		}
+
+		/// <summary>
+		/// This pulls save data from IdentityRelations and FactionRelations and passes it off to be processed
+		/// </summary>
+		/// <returns></returns>
+		public SaveData GetSaveData()
+		{
+			HashSet<RelationSave> factionRelations = new HashSet<RelationSave>();
+			foreach (KeyValuePair<long, FactionRelation> factionRelationship in FactionRelationships)
+			{
+				factionRelations.Add(factionRelationship.Value.GetSaveState());
+				WriteToLog("GetSaveState", $"Adding to FactionRelationships save: {factionRelationship.Value.GetSaveState().ToStringExtended()}", LogType.General);
+			}
+
+			HashSet<RelationSave> identityRelations = new HashSet<RelationSave>();
+			foreach (KeyValuePair<long, IdentityRelation> identityRelationship in IdentityRelationships)
+			{
+				identityRelations.Add(identityRelationship.Value.GetSaveState());
+				WriteToLog("GetSaveState", $"Adding to IdentityRelationships save: {identityRelationship.Value.GetSaveState().ToStringExtended()}", LogType.General);
+			}
+
+			return new SaveData(factionRelations, identityRelations);
+		}
+
+		/// <summary>
+		/// Parses out the save game and loads last known faction / identity reputations
+		/// </summary>
+		private void LoadSaveData()
+		{
+			if(_saveData.IsEmpty)
+			{
+				FirstRunSetup();
+				return;
+			}
+
+			WriteToLog("LoadSaveData-Factions", $"Loading save: {_saveData.IsEmpty} | {_saveData.ToString()}", LogType.General);
+			
+			if (_saveData.FactionSave != null)
+			{
+				foreach (RelationSave factionRelation in _saveData.FactionSave)
+				{
+					WriteToLog("LoadSaveData-factionRelation", $"Loading faction relation: {factionRelation.ToStringExtended()}", LogType.General);
+					IMyFaction fromFaction = MyAPIGateway.Session.Factions.TryGetFactionById(factionRelation.FromId);
+					if (fromFaction == null) continue;
+					FactionRelationships.Add(fromFaction.FactionId, new FactionRelation(fromFaction));
+					foreach (Relation relation in factionRelation.ToFactionRelations)
+					{
+						//	TODO: This inner loop is the same in both faction and identity - perhaps extract to a common method instead?
+						IMyFaction toFaction = MyAPIGateway.Session.Factions.TryGetFactionById(relation.FactionId);
+						if (toFaction == null) // if the toFaction is null, this faction doesn't exist any longer.  Abandon ship! 
+							continue;
+						FactionRelationships[fromFaction.FactionId].AddNewRelation(relation.FactionId, relation.Rep);
+					}
+				}
+			}
+
+			if (_saveData.IdentitySave != null)
+			{
+				foreach (RelationSave identityRelation in _saveData.IdentitySave)
+				{
+					WriteToLog("LoadSaveData-identityRelation", $"Loading identity relation: {identityRelation.ToStringExtended()}", LogType.General);
+
+					// Possible default condition catch
+					if (identityRelation.FromId == 0) continue;
+
+					// This stops bots from making it into the dictionary
+					if (!ValidIdentityRelationship(identityRelation.FromId)) continue;
+
+					foreach (Relation relation in identityRelation.ToFactionRelations.Where(relation => MyAPIGateway.Session.Factions.TryGetFactionById(relation.FactionId) != null))
+					{
+						WriteToLog("LoadSaveData-identityRelation", $"Loop for {relation.ToString()}", LogType.General);
+						if (!IdentityRelationships.ContainsKey(identityRelation.FromId))
+							IdentityRelationships.Add(identityRelation.FromId, new IdentityRelation(GetIdentityFromId(identityRelation.FromId)));
+						IdentityRelationships[identityRelation.FromId].AddNewRelation(relation.FactionId, relation.Rep);
+					}
+				}
+			}
+			
+			WriteToLog("LoadSaveData-gameIdentities", $"Adding new identities for the rest...", LogType.General);
+			foreach (IMyIdentity identity in GetIdentities().ToList())
+			{
+				AddNewIdentity(identity);
+			}
+		}
+
+		private IMyIdentity GetIdentityFromId(long id)
+		{
+			return GetIdentities().Find(x => x.IdentityId == id);
+		}
+
+		private bool ValidIdentityRelationship(long id)
+		{
+			// Remove stale identities
+			if (GetIdentityFromId(id) == null)
+			{
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was stale, invalidating.", LogType.General);
+				return false;
+			}
+
+			// Remove bots
+			if (!Statics.ValidPlayer(id))
+			{
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was invalid, invalidating.", LogType.General);
+				return false;
+			}
+
+			// Remove players managed by factions
+			if (MyAPIGateway.Session.Factions.TryGetPlayerFaction(id) != null)
+			{
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was in a faction, invalidating.", LogType.General);
+				return false;
+			}
+
+			// Remove already managed identities
+			if (!IdentityRelationships.ContainsKey(id)) return true;
+			WriteToLog("ValidIdentityRelationship", $"Identity {id} was already managed, invalidating.", LogType.General);
+			return false;
+
+		}
+
+		/// <summary>
+		/// When a player leaves a faction, this is called to make sure they are allocated to IdentityRelationships
+		/// </summary>
+		/// <param name="factionId">ID of the faction the player left</param>
+		/// <param name="playerId">ID of the player who just left or was kicked</param>
+		private void FactionTraitor(long factionId, long playerId)
+		{   // They abandoned their faction and are now loners.  Way to go, asshole.
+
+			// This stops bots from making it into the dictionary
+			if (!Statics.ValidPlayer(playerId)) return;  
+			
+			IMyIdentity myIdentity = GetIdentities().Find(x => x.IdentityId == playerId);
+
+			// This automatically parses out all stale identities
+			if (myIdentity == null) return;                   
+
+			// Make sure the identity in IdentityRelationships is not stale
+			if (IdentityRelationships.ContainsKey(playerId)) IdentityRelationships.Remove(playerId);
+			IdentityRelationships.Add(myIdentity.IdentityId, new IdentityRelation(myIdentity));
+
+			// Carry over their past sins
+			if (FactionRelationships.ContainsKey(factionId))
+			{
+				foreach (KeyValuePair<long, int> relationship in FactionRelationships[factionId].ToFactions)
+				{	// Haha fucker, thought you could escape the law!!  I'LL SHOW YOU!
+					IdentityRelationships[playerId].AddNewRelation(relationship.Key, relationship.Value);
+				}
+			}
+			else
+			{	// I have no idea how this is possible, but figured I may as well protect for it
+				foreach (KeyValuePair<long, IMyFaction> faction in _lawfulFactionDictionary)
+				{
+					// These reps can carry over; no need to change.
+					IdentityRelationships[playerId].AddNewRelation(faction.Key);
+				}
+
+				foreach (KeyValuePair<long, IMyFaction> faction in _pirateFactionDictionary)
+				{
+					// Just making sure evil is still evil
+					IdentityRelationships[playerId].AddNewRelation(faction.Key, FactionSettings.DefaultNegativeRep);
+				}
+			}
+			Identities.Clear();
+		}
+
+		/// <summary>
+		/// Called when a faction is dissolved - need to manually pull the ID from FactionRelationships and convert the members to IdentityRelationships
+		/// </summary>
+		/// <param name="factionId">ID of the now defunct faction</param>
+		/// <param name="playerId">ID of the player who dissolved it</param>
+		private void FactionDissolved(long factionId, long playerId)
+		{
+			WriteToLog("FactionDissolved", $"Faction {factionId} dissolved by {playerId}", LogType.General);
+			if (!FactionRelationships.ContainsKey(factionId)) return;
+			FactionTraitor(factionId, playerId);
+			FactionRelationships.Remove(factionId);
+			ScrubDictionaries(factionId);
+
+			// TODO: Evaluate the need to catch a case when the faction key didn't exist? Ensure the playerId exists?
+			// Kinda makes it so I acknowledge I wrote bad code somewhere though... 
+		}
+
+		/// <summary>
+		/// This is only used when a new player is detected who hasn't otherwise been managed by the RelationshipManager
+		/// Converts the long to an IMyIdentity and passes it to the proper method
+		/// </summary>
+		/// <param name="identity"></param>
+		private void AddNewIdentity(long identity)
+		{
+			if (!Statics.ValidPlayer(identity)) return;
+			List<IMyIdentity> gameIdentities = new List<IMyIdentity>();
+			MyAPIGateway.Players.GetAllIdentites(gameIdentities);
+			AddNewIdentity(gameIdentities.Find(x => x.IdentityId == identity));
+		}
+
+		/// <summary>
+		/// This is only used when a new player is detected who hasn't otherwise been managed by the RelationshipManager
+		/// Adds a new player to IdentityRelationships
+		/// </summary>
+		/// <param name="identity"></param>
+		private void AddNewIdentity(IMyIdentity identity)
+		{
+			if (!ValidIdentityRelationship(identity.IdentityId)) return;
+			
+			IdentityRelationships.Add(identity.IdentityId, new IdentityRelation(identity));
+
+			foreach (KeyValuePair<long, IMyFaction> faction in _lawfulFactionDictionary)
+			{
+				WriteToLog("AddNewIdentity", $"Adding Identity relationship: {identity.IdentityId} - ({faction.Value.Tag}) {faction.Key}", LogType.General);
+				IdentityRelationships[identity.IdentityId].AddNewRelation(faction.Key, FactionSettings.DefaultNeutralRep);
+			}
+
+			foreach (KeyValuePair<long, IMyFaction> faction in _pirateFactionDictionary)
+			{
+				WriteToLog("AddNewIdentity", $"Adding Identity relationship: {identity.IdentityId} - ({faction.Value.Tag}) {faction.Key}", LogType.General);
+				IdentityRelationships[identity.IdentityId].AddNewRelation(faction.Key, FactionSettings.DefaultNegativeRep);
+			}
+		}
+
+		/// <summary>
+		/// Pulls IMyFaction from the Faction ID and passes it to the actual AddNewFaction method
+		/// </summary>
+		/// <param name="factionId">ID of the new faction</param>
+		/// <param name="hostile">Is this new faction hostile?</param>
+		private void AddNewFaction(long factionId, bool? hostile = null)
+		{	
+			IMyFaction faction = MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
+			if (faction == null) return;
+			AddNewFaction(faction, hostile);
+		}
+
+		/// <summary>
+		/// Adds a new faction FactionRelationships
+		/// </summary>
+		/// <param name="newFaction">IMyFaction for the new faction</param>
+		/// <param name="hostile">Is this new faction hostile?</param>
+		private void AddNewFaction(IMyFaction newFaction, bool? hostile = null)
+		{
+			if (hostile == null)
+				hostile = newFaction.Description == null || FactionSettings.PlayerFactionExclusionList.Contains(newFaction.Description);
+			WriteToLog("AddNewFaction", $"Tag: {newFaction.Tag} | Hostile? {hostile.ToString()}", LogType.General);
+			FactionRelationships.Add(newFaction.FactionId, new FactionRelation(newFaction));
+
+			long factionFounder = newFaction.FounderId;
+			bool inIdentityRelationships = IdentityRelationships.ContainsKey(factionFounder);
+
+			foreach (KeyValuePair<long, IMyFaction> faction in _lawfulFactionDictionary)
+			{
+				WriteToLog("AddNewFaction", $"Adding Faction relationship: ({newFaction.Tag}) {newFaction.FactionId} - ({faction.Value.Tag}) {faction.Key}", LogType.General);
+				if (newFaction.FactionId == faction.Key) continue;
+				int? rep = null;
+				if (inIdentityRelationships)
+				{
+					rep = IdentityRelationships[factionFounder].GetReputation(faction.Key);
+					IdentityRelationships[factionFounder].RemoveRelation(faction.Key);
+				}
+				FactionRelationships[newFaction.FactionId].AddNewRelation(faction.Key, (bool)hostile ? FactionSettings.DefaultNegativeRep : rep);
+				if (newFaction.Members.Count == 1) continue;
+				foreach (KeyValuePair<long, MyFactionMember> factionMember in newFaction.Members)
+				{
+					if (factionMember.Key == factionFounder) continue;
+					// TODO: Evaluate this for failure modes related to SE's rep system overriding my set values (affects all new relations)
+					FactionRelationships[newFaction.FactionId].AddNewFactionMember(factionMember.Key);
+					if (IdentityRelationships.ContainsKey(factionMember.Key))
+						IdentityRelationships[factionMember.Key].RemoveRelation(faction.Key);
+				}
+			}
+
+			foreach (KeyValuePair<long, IMyFaction> faction in _pirateFactionDictionary)
+			{
+				WriteToLog("AddNewFaction", $"Adding Faction relationship: ({newFaction.Tag}) {newFaction.FactionId} - ({faction.Value.Tag}) {faction.Key}", LogType.General);
+				if (newFaction.FactionId == faction.Key) continue;
+				FactionRelationships[newFaction.FactionId].AddNewRelation(faction.Key, FactionSettings.DefaultNegativeRep);
+				if (inIdentityRelationships)
+					IdentityRelationships[factionFounder].RemoveRelation(faction.Key);
+				if (newFaction.Members.Count == 1) continue;
+				// TODO: Evaluate this for failure modes related to SE's rep system overriding my set values (affects all new relations)
+				foreach (KeyValuePair<long, MyFactionMember> factionMember in newFaction.Members)
+					FactionRelationships[newFaction.FactionId].AddNewFactionMember(factionMember.Key);
+				if (newFaction.Members.Count == 1) continue;
+				foreach (KeyValuePair<long, MyFactionMember> factionMember in newFaction.Members)
+				{
+					if (factionMember.Key == factionFounder) continue;
+					// TODO: Evaluate this for failure modes related to SE's rep system overriding my set values (affects all new relations)
+					FactionRelationships[newFaction.FactionId].AddNewFactionMember(factionMember.Key);
+					if (IdentityRelationships.ContainsKey(factionMember.Key))
+						IdentityRelationships[factionMember.Key].RemoveRelation(faction.Key);
+				}
+			}
+
+			foreach (KeyValuePair<long, MyFactionMember> factionMember in newFaction.Members.Where(factionMember => IdentityRelationships.ContainsKey(factionMember.Key)))
+			{
+				WriteToLog("AddNewFaction", $"Removing Identity Relation: {factionMember.Key} with {IdentityRelationships[factionMember.Key].RelationCount()} relations left.", LogType.General);
+				IdentityRelationships.Remove(factionMember.Key);
+			}
+		}
+
+		/// <summary>
+		/// Makes sure the reputation of a faction is balanced for the new member
+		/// </summary>
+		/// <param name="id">ID of the new member</param>
+		private void NewFactionMember(long id)
+		{   // Idea here is to make sure that when someone joins a faction, the rep is rebalanced 
+			// there should always be a rep hit, but minor for like reps, but more major the greater the divergence 
+			IMyFaction tmp = MyAPIGateway.Session.Factions.TryGetPlayerFaction(id);
+			if (tmp == null)
+				return; // Trying to account for errant calls to this method
+			try
+			{
+				if(!FactionRelationships.ContainsKey(tmp.FactionId))
+				{
+					AddNewFaction(tmp);
+					return;
+				}
+				// TODO: Evaluate this for failure modes related to SE's rep system overriding my set values (affects all new relations)
+				FactionRelationships[tmp.FactionId].AddNewFactionMember(id);
+			}
+			catch (Exception e)
+			{
+				WriteToLog("NewFactionMember", $"Exception! Identity {id} or some faction lookup likely didn't exist: \t{e}", LogType.Exception);
+			}
+		}
+
+		private void NewPlayerPirateFaction(long id)
+		{
+			try
+			{
+				if (!FactionRelationships.ContainsKey(id))
+				{
+					AddNewFaction(id, true);
+				}
+				_playerPirateFactionDictionary.Remove(id);
+				_playerFactionDictionary.Add(id, id.GetFactionById());
+				FactionRelationships[id].SetAsPirate();
+			}
+			catch (Exception e)
+			{
+				WriteToLog("HandleFormerPlayerPirate", $"Exception!\t{e}", LogType.Exception);
+			}
+		}
+
+		private void FormerPlayerPirateFaction(long id)
+		{
+			try
+			{
+				_playerPirateFactionDictionary.Remove(id);
+				_playerFactionDictionary.Add(id, id.GetFactionById());
+				FactionRelationships[id].NoLongerPirate();
+			}
+			catch (Exception e)
+			{
+				WriteToLog("HandleFormerPlayerPirate", $"Exception!\t{e}", LogType.Exception);
+			}
+		}
+
+		/// <summary>
+		/// If no save game exists, this will set factions to their default / new values 
+		/// </summary>
+		private void FirstRunSetup()
+		{	// Should only ever run when no save exists
+			foreach (KeyValuePair<long, IMyFaction> faction in _playerFactionDictionary)
+			{
+				WriteToLog("FirstRunSetup", $"Adding new faction to FactionRelationships [Standard] {faction.Key} - {faction.Value.Tag}", LogType.General);
+				AddNewFaction(faction.Value, faction.Value.Description == null || FactionSettings.PlayerFactionExclusionList.Contains(faction.Value.Description));
+			}
+
+			foreach (KeyValuePair<long, IMyFaction> faction in _playerPirateFactionDictionary)
+			{
+				WriteToLog("FirstRunSetup", $"Adding new faction to FactionRelationships [Pirate] {faction.Key} - {faction.Value.Tag}", LogType.General);
+				AddNewFaction(faction.Value, faction.Value.Description == null || FactionSettings.PlayerFactionExclusionList.Contains(faction.Value.Description));
+			}
+			
+			foreach (IMyIdentity identity in GetIdentities().ToList())
+			{
+				WriteToLog("FirstRunSetup", $"Adding new identity to IdentityRelationships {identity.IdentityId}", LogType.General);
+				AddNewIdentity(identity);
+			}
+			Identities.Clear();
+			// TODO: After initial trial runs with EEM are successful, expand this to support other mods npc factions
+		}
+
+		/// <summary>
+		/// Responsible for calling the methods to decay reputation in all relations
+		/// </summary>
+		public void ReputationDecay()
+		{	// TODO: Call this on a schedule; once every 1 minute.  
+			// TODO: Check to see if updating rep is thread safe
+			
+			foreach (KeyValuePair<long, FactionRelation> relationship in FactionRelationships)
+			{
+				relationship.Value.DecayReputation();
+			}
+
+			foreach (KeyValuePair<long, IdentityRelation> relationship in IdentityRelationships)
+			{
+				relationship.Value.DecayReputation();
+			}
+		}
+
+
+		/// <summary>
+		/// Event register from Faction Core for war declarations
+		/// </summary>
+		/// <param name="from">The faction declaring war</param>
+		/// <param name="to">The identity or faction war was declared against</param>
+		private void DeclareWar(long from, long to)
+		{
+			DeclareWar(new PendingWar(to, from));
+		}
+
+		/// <summary>
+		/// Users for external access to the war reputation hit
+		/// </summary>
+		/// <param name="pendingWar"></param>
+		public void DeclareWar(PendingWar pendingWar)
+		{   // Leaving this a queue for threading purposes; if not threaded, could easily go direct
+			WriteToLog("DeclareWar", $"Pushing the war to the queue... {pendingWar}", LogType.General);
+			WarQueue.Enqueue(pendingWar);
+			ProcessWarQueue();
+		}
+
+		/// <summary>
+		/// Runs through the queue every call to ensure all war requests are met
+		/// </summary>
+		private void ProcessWarQueue()
+		{
+			WriteToLog("ProcessWarQueue", $"Flushing the war queue! {WarQueue.Count}", LogType.General);
+			try
+			{
+				while (WarQueue.Count > 0)
+				{
+					PendingWar pendingWar;
+					if (!WarQueue.TryDequeue(out pendingWar)) break;
+					TriggerWar(pendingWar);
+					WriteToLog("ProcessWarQueue", $"War Triggered! {pendingWar}", LogType.General);
+				}
+			}
+			catch (Exception e)
+			{
+				WriteToLog("ProcessWarQueue", $"Exception!\t{e}", LogType.Exception);
+			}
+		}
+
+		/// <summary>
+		/// Triggers rep hits for negative actions
+		/// </summary>
+		/// <param name="pendingWar"></param>
+		private void TriggerWar(PendingWar pendingWar)
+		{
+
+			if (IdentityRelationships.ContainsKey(pendingWar.IdentityId))
+			{
+				IdentityRelationships[pendingWar.IdentityId].TriggerWar(pendingWar.Against);
+				foreach (KeyValuePair<long, IMyFaction> enforcementFaction in _enforcementFactionDictionary)
+				{
+					if (pendingWar.Against == enforcementFaction.Key) continue;
+					IdentityRelationships[pendingWar.IdentityId].TriggerWar(enforcementFaction.Key);
+				}
+				return;
+			}
+			
+			if (!FactionRelationships.ContainsKey(pendingWar.IdentityId)) return;
+			FactionRelationships[pendingWar.IdentityId].TriggerWar(pendingWar.Against);
+			foreach (KeyValuePair<long, IMyFaction> enforcementFaction in _enforcementFactionDictionary)
+			{
+				if (pendingWar.Against == enforcementFaction.Key) continue;
+				FactionRelationships[pendingWar.IdentityId].TriggerWar(enforcementFaction.Key);
+			}
+		}
+
+		// TODO: * Add SPID to the EEM protected faction list
+		// TODO:	- This needs to include kicking players from it on parsing
+
+		#region Faction States / Events / Triggers
+
+		private void FactionStateChanged(MyFactionStateChange action, long fromFactionId, long toFactionId, long playerId, long senderId)
+		{	//TODO: Review all of these for accuracy / use
+			WriteToLog("FactionStateChanged",
+				$"Action:\t{action.ToString()}\tfromFaction:\t{fromFactionId}\ttag:\t{fromFactionId.GetFactionById()?.Tag}\ttoFaction:\t{toFactionId}\ttag:\t{toFactionId.GetFactionById()?.Tag}\tplayerId:\t{playerId}\tsenderId:\t{senderId}",
+				LogType.General);
 			if (action != MyFactionStateChange.RemoveFaction)
 				if (fromFactionId == 0L || toFactionId == 0L) return;
 
 			switch (action)
 			{
 				case MyFactionStateChange.RemoveFaction:
-					FactionRemoved(fromFactionId);
+					// TODO: Make sure all identities from this faction are added to the identity dictionary; scrub the faction dictionary
+					FactionDissolved(fromFactionId, playerId);
 					break;
 				case MyFactionStateChange.SendPeaceRequest:
-					RequestPeace(fromFactionId, toFactionId);
+					// Note: No such thing anymore as far as EEM is concerned.
+					if (_npcFactionDictionary.ContainsKey(fromFactionId) ||
+					    _npcFactionDictionary.ContainsKey(toFactionId))
+						ClearPeace(fromFactionId, toFactionId);
 					break;
 				case MyFactionStateChange.CancelPeaceRequest:
-					PeaceCancelled(fromFactionId, toFactionId);
+					// Note: No such thing anymore as far as EEM is concerned.
 					break;
 				case MyFactionStateChange.AcceptPeace:
-					PeaceAccepted(fromFactionId, toFactionId);
+					// TODO: Validate this works properly -- KSH WAR likes to do it's own thing.
+					if (_npcFactionDictionary.ContainsKey(fromFactionId) && FactionRelationships.ContainsKey(toFactionId))
+						FactionRelationships[toFactionId].ResetReputation();
 					break;
 				case MyFactionStateChange.DeclareWar:
-					WarDeclared(fromFactionId, toFactionId);
+					// TODO: Validate this works properly -- KSH WAR likes to do it's own thing.
+
+					// An EEM NPC declared war on a player -- unacceptable! 
+					if (_npcFactionDictionary.ContainsKey(fromFactionId) && FactionRelationships.ContainsKey(toFactionId))
+					{
+						FactionRelationships[toFactionId].ResetReputation();
+						break;
+					}
+
+					// A Player declared war on an EEM NPC... asshole.
+					if (_npcFactionDictionary.ContainsKey(toFactionId) && FactionRelationships.ContainsKey(fromFactionId))
+						DeclareWar(new PendingWar(fromFactionId, toFactionId));
+
 					break;
-				case MyFactionStateChange.FactionMemberSendJoin: // Unused
+				case MyFactionStateChange.FactionMemberSendJoin:
+					// Note: Unused
 					break;
-				case MyFactionStateChange.FactionMemberCancelJoin: // Unused
+				case MyFactionStateChange.FactionMemberCancelJoin:
+					// Note: Unused
 					break;
-				case MyFactionStateChange.FactionMemberAcceptJoin: // Unused
-					ValidateFactionJoin(fromFactionId, playerId);
+				case MyFactionStateChange.FactionMemberAcceptJoin:
+					// TODO: Tie into faction system for a new faction member - remove from identity dictionary, re-balance players new faction rep
+					// fromFactionId and toFactionId are identical here, playerId is the new player 
+					NewFactionMember(playerId);
 					break;
 				case MyFactionStateChange.FactionMemberKick:
-					AddFactionMember(fromFactionId.GetFactionById());
+					// TODO: Tie into faction system for a removed faction member - add to identity dictionary
+					// Guessing: From/To faction is the faction who did the kicking, playerId is the person kicked, senderId is the FactionLeader
+					FactionTraitor(fromFactionId, playerId);
+					if (_npcFactionDictionary.ContainsKey(fromFactionId))
+						AddFactionMember(_npcFactionDictionary[fromFactionId]);
+					// TODO: Need the FactionStateChange information (4x longs) for this event
 					break;
-				case MyFactionStateChange.FactionMemberPromote: // Unused
+				case MyFactionStateChange.FactionMemberPromote:
+					// Note: Unused
 					break;
-				case MyFactionStateChange.FactionMemberDemote: // Unused
+				case MyFactionStateChange.FactionMemberDemote:
+					// Note: Unused
 					break;
-				case MyFactionStateChange.FactionMemberLeave: // Unused
+				case MyFactionStateChange.FactionMemberLeave:
+					// TODO: Tie into faction system for a removed faction member - add to identity dictionary
+					// Guessing: From/To faction is the faction who did the kicking, playerId is the person who left, senderId is the FactionLeader
+					FactionTraitor(fromFactionId, playerId);
+					// TODO: Need the FactionStateChange information (4x longs) for this event
 					break;
-				case MyFactionStateChange.FactionMemberNotPossibleJoin: // Unused
+				case MyFactionStateChange.FactionMemberNotPossibleJoin:
+					// Note: Unused
 					break;
 				case MyFactionStateChange.SendFriendRequest:
+					// TODO: Ensure this has nothing to do with a NPC faction
+					// Note: Unused
 					break;
 				case MyFactionStateChange.CancelFriendRequest:
+					// TODO: Ensure this has nothing to do with a NPC faction
+					// Note: Unused
 					break;
 				case MyFactionStateChange.AcceptFriendRequest:
+					// TODO: Ensure this has nothing to do with a NPC faction
+					// Note: Unused
 					break;
 				default:
-					FactionCore.WriteToLog("FactionStateChanged", $"Case not found:\t{nameof(action)}\t{action.ToString()}");
+					WriteToLog("FactionStateChanged", $"Case not found:\t{nameof(action)}\t{action.ToString()}", LogType.General);
 					break;
 			}
 		}
 
+		private static void ClearPeace(long fromFactionId, long toFactionId)
+		{   // Stops the flag from hanging out in the faction menu
+			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.CancelPeaceRequest(toFactionId, fromFactionId));
+			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.CancelPeaceRequest(fromFactionId, toFactionId));
+		}
+
 		private void FactionCreated(long factionId)
 		{
-			FactionCore.WriteToLog("FactionCreated", $"factionId:\t{factionId}", true);
+			WriteToLog("FactionCreated", $"factionId:\t{factionId}", LogType.General);
 			FactionEditedOrCreated(factionId, true);
 		}
 
 		private void FactionEdited(long factionId)
 		{
-			//FactionCore.WriteToLog("FactionEdited", $"factionId:\t{factionId}");
+			WriteToLog("FactionEdited", $"factionId:\t{factionId}", LogType.General);
 			FactionEditedOrCreated(factionId);
 		}
-
-		private void FactionRemoved(long factionId)
-		{
-			//FactionCore.WriteToLog("FactionRemoved", $"factionId:\t{factionId}");
-			ScrubDictionaries(factionId);
-		}
-
+		
 		private void FactionEditedOrCreated(long factionId, bool newFaction = false)
 		{
-			FactionCore.WriteToLog("FactionEditedOrCreated", $"{factionId} | {newFaction}", true);
 			IMyFaction playerFaction = factionId.GetFactionById();
-			if (playerFaction == null || !ValidPlayer(playerFaction.FounderId)) return; // I'm not a player faction, or I don't exist.  Peace out, suckas!
-			if (CheckPiratePlayerOptIn(playerFaction) && _playerPirateFactionDictionary.ContainsKey(factionId)) return; // I'm a player pirate, and you know it.  Laterz!
-			if (CheckPiratePlayerOptIn(playerFaction) && !_playerPirateFactionDictionary.ContainsKey(factionId)) // I'm a player pirate, but this is news to you...
+			if (playerFaction == null || playerFaction.IsEveryoneNpc()) return; // I'm not a player faction, or I don't exist.  Peace out, sucka!
+			if (playerFaction.IsPlayerPirate() && _playerPirateFactionDictionary.ContainsKey(factionId)) return; // I'm a player pirate, and you know it.  Laterz!
+			if (playerFaction.IsPlayerPirate() && !_playerPirateFactionDictionary.ContainsKey(factionId)) // I'm a player pirate, but this is news to you...
 			{
 				_playerPirateFactionDictionary.Add(factionId, playerFaction);
-				DeclarePermanentFullNpcWar(factionId);
+				NewPlayerPirateFaction(factionId);
 				return;
 			}
-			if (!CheckPiratePlayerOptIn(playerFaction) && _playerPirateFactionDictionary.ContainsKey(factionId)) // I was a player pirate, but uh, I changed... I swear... 
+			if (!playerFaction.IsPlayerPirate() && _playerPirateFactionDictionary.ContainsKey(factionId)) // I was a player pirate, but uh, I changed... I swear... 
 			{
 				_playerPirateFactionDictionary.Remove(factionId);
-				HandleFormerPlayerPirate(factionId);
+				FormerPlayerPirateFaction(factionId);
 				return;
 			}
 			if (!newFaction) return;
-			PopulateNewPlayerFactionDictionary(factionId);
-			//_newFactionDictionary.Add(factionId, 0);  // I'm new man, just throw me a bone.
+			AddNewFaction(factionId); // I'm new man, just throw me a bone.
 		}
 
-		private void RequestPeace(long fromFactionId, long toFactionId)
-		{   // So many reasons to clear peace...
-			if (_nonEemNpcFactionDictionary.ContainsKey(fromFactionId) || _nonEemNpcFactionDictionary.ContainsKey(toFactionId)) return; // gtfo non-EEM NPC faction relationship.  NOT MY JOB!!!!!!@#!@#
+		#endregion
+		
+		#region Faction Dictionaries Setup / Management
 
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 0", true);
-			if ((_playerPirateFactionDictionary.ContainsKey(fromFactionId) || _playerPirateFactionDictionary.ContainsKey(toFactionId)) && CheckEitherFactionForNpc(fromFactionId, toFactionId))
-			{   // Is this a player pirate somehow involved in peace accords with a NPC faction?
-				ClearPeace(fromFactionId, toFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 1", true);
-			if (_lawfulFactionDictionary.ContainsKey(fromFactionId) && _pirateFactionDictionary.ContainsKey(toFactionId))
-			{   // Is a NPC proposing peace to a player pirate?
-				ClearPeace(fromFactionId, toFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 2", true);
-			if ((_pirateFactionDictionary.ContainsKey(toFactionId) || _pirateFactionDictionary.ContainsKey(fromFactionId)) && CheckEitherFactionForNpc(fromFactionId, toFactionId))
-			{   // Pirates can't be friends (unless they are both players)!
-				ClearPeace(fromFactionId, toFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 3", true);
-			if (fromFactionId.GetFactionById().IsNeutral(toFactionId.GetFactionById().FounderId))
-			{   // Are these factions already neutral?
-				ClearPeace(fromFactionId, toFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 4", true);
-			if (CheckTimedNegativeRelationshipState(fromFactionId, toFactionId))
-			{   // Is either faction currently experiencing EEM controlled hostile relations?
-				ClearPeace(fromFactionId, toFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 5", true);
-			if (ValidPlayer(fromFactionId.GetFactionById().FounderId) || IsFirstColonists(fromFactionId) && MyAPIGateway.Session.Factions.AreFactionsEnemies(fromFactionId, toFactionId))
-			{   // This player was at war with an NPC by choice, so add them to the mending relationship category
-				ClearPeace(fromFactionId, toFactionId);
-				NewTimedNegativeRelationship(toFactionId, fromFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 6", true);
-			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && !ValidPlayer(toFactionId.GetFactionById().FounderId) && !IsFirstColonists(fromFactionId) && !IsFirstColonists(toFactionId))
-			{   // Aww, look, the NPCs want to be friends!
-				if (_pirateFactionDictionary.ContainsKey(fromFactionId) || _pirateFactionDictionary.ContainsKey(toFactionId))
-				{   // No pirate friends!  NONE!  MY GOLD!!! 
-					ClearPeace(fromFactionId, toFactionId);
-					return;
-				}
-				AcceptPeace(toFactionId, fromFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 7", true);
-			//ValidPlayer(fromFactionId.GetFactionById().FounderId)
-			//ValidPlayer(toFactionId.GetFactionById().FounderId)
-			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && !ValidPlayer(toFactionId.GetFactionById().FounderId))
-			{   // The NPC wants to be friends with the player.  How cute.  
-				AcceptPeace(toFactionId, fromFactionId);
-				return;
-			}
-			//FactionCore.WriteToLog("PeaceRequestSent", $"{fromFactionId} | {toFactionId} -- 8", true);
-			// Condition not accounted for, just accept the request for now (get logs!)
-			FactionCore.WriteToLog("PeaceRequestSent", $"Unknown peace condition detected, please review...\tfromFaction:\t{fromFactionId.GetFactionById().Tag}\ttoFaction:\t{toFactionId.GetFactionById().Tag}", true);
-			DumpEverythingToTheLog(true);
-			SetRep(toFactionId, fromFactionId, false);
-			MyAPIGateway.Session.Factions.AcceptPeace(toFactionId, fromFactionId);
-		}
-
-		private static bool IsFirstColonists(long id)
-		{
-			IMyFaction faction = id.GetFactionById();
-			if (faction == null) return false;
-			return id.GetFactionById().Tag == "FSTC";
-		}
-
-		private void AcceptPeace(long fromFactionId, long toFactionId)
-		{
-			if (_nonEemNpcFactionDictionary.ContainsKey(fromFactionId) || _nonEemNpcFactionDictionary.ContainsKey(toFactionId)) return; // gtfo non-EEM NPC faction
-			if (_newFactionDictionary.ContainsKey(fromFactionId))
-			{
-				FactionCore.WriteToLog("AcceptPeace", $"{fromFactionId} | {toFactionId} - {_newFactionDictionary[fromFactionId]}", true);
-				if (_newFactionDictionary[fromFactionId] > 1)
-					_newFactionDictionary[fromFactionId]--;
-				else
-				{
-					RequestNewFactionDialog(fromFactionId);
-					_newFactionDictionary.Remove(fromFactionId);
-				}
-			}
-			ClearPeace(fromFactionId, toFactionId);
-			SetRep(fromFactionId, toFactionId, false);
-			//MyAPIGateway.Session.Factions.AcceptPeace(fromFactionId, toFactionId);
-		}
-
-		private void RequestDialog(IMyFaction npcFaction, IMyFaction playerFaction, Dialogue.DialogType type)
-		{
-			FactionCore.WriteToLog("RequestDialog", $"{npcFaction.Tag} | {playerFaction.Tag} - {type}", true);
-			if (_nonEemNpcFactionDictionary.ContainsKey(npcFaction.FactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFaction.FactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
-			try
-			{
-				Func<string> message = _dialogue.RequestDialog(npcFaction, type);
-				string npcFactionTag = npcFaction.Tag;
-				if (playerFaction == null || _newFactionDictionary.ContainsKey(playerFaction.FactionId)) return;
-				SendFactionMessageToAllFactionMembers(message.Invoke(), npcFactionTag, playerFaction.Members);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("RequestDialog", $"npcFaction:\t{npcFaction.FactionId}\tplayerFaction:\t{playerFaction.FactionId}\tException!\t{e}");
-			}
-		}
-
-		private void RequestNewFactionDialog(long playerFactionId)
-		{
-			FactionCore.WriteToLog("RequestNewFactionDialog", $"{playerFactionId.GetFactionById().Tag}", true);
-			const string npcFactionTag = "The Lawful";
-			try
-			{
-				Func<string> message = _dialogue.RequestDialog(null, Dialogue.DialogType.CollectiveWelcome);
-				if (playerFactionId.GetFactionById() == null || !_newFactionDictionary.ContainsKey(playerFactionId)) return;
-				SendFactionMessageToAllFactionMembers(message.Invoke(), npcFactionTag, playerFactionId.GetFactionById().Members);
-				_newFactionDictionary.Remove(playerFactionId);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("RequestNewFactionDialog", $"playerFaction:\t{playerFactionId}\tException!\t{e}");
-			}
-		}
-
-		private void RequestNewPirateDialog(long playerFactionId)
-		{
-			FactionCore.WriteToLog("RequestNewPirateDialog", $"{playerFactionId.GetFactionById().Tag}", true);
-			const string npcFactionTag = "The Lawful";
-			try
-			{
-				Func<string> message = _dialogue.RequestDialog(null, Dialogue.DialogType.CollectiveDisappointment);
-				if (playerFactionId.GetFactionById() == null || !_newFactionDictionary.ContainsKey(playerFactionId)) return;
-				SendFactionMessageToAllFactionMembers(message.Invoke(), npcFactionTag, playerFactionId.GetFactionById().Members);
-				_newFactionDictionary.Remove(playerFactionId);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("RequestNewPirateDialog", $"playerFaction:\t{playerFactionId}\tException!\t{e}");
-			}
-		}
-
-		private void RequestFormerPirateDialog(long playerFactionId)
-		{
-			const string npcFactionTag = "The Lawful";
-			try
-			{
-				Func<string> message = _dialogue.RequestDialog(null, Dialogue.DialogType.CollectiveReprieve);
-				if (playerFactionId.GetFactionById() == null || !_newFactionDictionary.ContainsKey(playerFactionId)) return;
-				SendFactionMessageToAllFactionMembers(message.Invoke(), npcFactionTag, playerFactionId.GetFactionById().Members);
-				_newFactionDictionary.Remove(playerFactionId);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("RequestFormerPirateDialog", $"playerFaction:\t{playerFactionId}\tException!\t{e}");
-			}
-		}
-
-		private void SendFactionMessageToAllFactionMembers(string message, string messageSender, DictionaryReader<long, MyFactionMember> target, string color = MyFontEnum.Red)
-		{
-			try
-			{
-				foreach (KeyValuePair<long, MyFactionMember> factionMember in target)
-				{
-					if (IsPlayerOnline(factionMember.Key))
-						MyAPIGateway.Utilities.InvokeOnGameThread(() =>
-							Messaging.SendMessageToPlayer($"{message}", messageSender, factionMember.Key, color));
-				}
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("SendFactionMessageToAllFactionMembers", $"Exception!\t{e}");
-			}
-		}
-
-		private static bool IsPlayerOnline(long player)
-		{
-			List<IMyPlayer> players = new List<IMyPlayer>();
-			MyAPIGateway.Multiplayer.Players.GetPlayers(players);
-			return players.Any(x => x.IdentityId == player);
-		}
-
-		private void PeaceAccepted(long fromFactionId, long toFactionId)
-		{   // Clearing those leftover flags
-			ClearPeace(fromFactionId, toFactionId);
-		}
-
-		private void PeaceCancelled(long fromFactionId, long toFactionId)
-		{   // The only time this matters is if a former player pirate declares war on a NPC, then declares peace, then revokes the peace declaration
-			if (!CheckMendingRelationship(fromFactionId, toFactionId)) return;
-			RemoveMendingRelationship(toFactionId, fromFactionId);
-		}
-
-		// Dictionary methods
-
-		private void SetupFactionRelations()
+		private void SetupFactionDictionaries()
 		{
 			foreach (KeyValuePair<long, IMyFaction> faction in MyAPIGateway.Session.Factions.Factions)
 			{
 				try
 				{
 					if (faction.Value == null) continue;
-					if (Constants.EnforcementFactionsTags.Contains(faction.Value.Tag))
+					if (FactionSettings.EnforcementFactionsTags.Contains(faction.Value.Tag))
 					{
-						FactionCore.WriteToLog("SetupFactionDictionaries", $"AddToEnforcementFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}");
+						WriteToLog("SetupFactionDictionaries", $"AddToEnforcementFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}", LogType.General);
 						AddToEnforcementFactionDictionary(faction.Key, faction.Value);
 						AddToLawfulFactionDictionary(faction.Key, faction.Value);
 						AddToNpcFactionDictionary(faction.Key, faction.Value);
 						continue;
 					}
 
-					if (Constants.LawfulFactionsTags.Contains(faction.Value.Tag))
+					if (FactionSettings.LawfulFactionsTags.Contains(faction.Value.Tag))
 					{
-						FactionCore.WriteToLog("SetupFactionDictionaries", $"AddToLawfulFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}");
+						WriteToLog("SetupFactionDictionaries", $"AddToLawfulFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}", LogType.General);
 						AddToLawfulFactionDictionary(faction.Key, faction.Value);
 						AddToNpcFactionDictionary(faction.Key, faction.Value);
 						continue;
 					}
 
-					if (!ValidPlayer(faction.Value.FounderId) && Constants.AllNpcFactions.Contains(faction.Value.Tag))
+					if (!Statics.ValidPlayer(faction.Value.FounderId) && FactionSettings.AllNpcFactions.Contains(faction.Value.Tag))
 					{ // If it's not an Enforcement or Lawful faction, it's a pirate.
-						FactionCore.WriteToLog("SetupFactionDictionaries", $"AddToPirateFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}");
+						WriteToLog("SetupFactionDictionaries", $"AddToPirateFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}", LogType.General);
 						AddToPirateFactionDictionary(faction.Key, faction.Value);
 						AddToNpcFactionDictionary(faction.Key, faction.Value);
 						continue;
 					}
 
-					if (CheckPiratePlayerOptIn(faction.Value))
+					if (faction.Value.IsPlayerPirate())
 					{
-						FactionCore.WriteToLog("SetupFactionDictionaries", $"PlayerFactionExclusionList.Add:\t{faction.Key}\t{faction.Value.Tag}");
+						WriteToLog("SetupFactionDictionaries", $"PlayerFactionExclusionList.Add:\t{faction.Key}\t{faction.Value.Tag}", LogType.General);
 						AddToPlayerPirateFactionDictionary(faction.Key, faction.Value);
 						continue;
 					}
 
-					if (ValidPlayer(faction.Value.FounderId) || faction.Value.Tag == "FSTC") // Players! 
+					if (Statics.ValidPlayer(faction.Value.FounderId)) // Players! 
 					{
-						FactionCore.WriteToLog("SetupFactionDictionaries", $"PlayerFaction.Add:\t{faction.Key}\t{faction.Value.Tag}");
+						WriteToLog("SetupFactionDictionaries", $"PlayerFaction.Add:\t{faction.Key}\t{faction.Value.Tag}", LogType.General);
 						AddToPlayerFactionDictionary(faction.Key, faction.Value);
 						continue;
 					}
@@ -431,100 +890,11 @@ namespace Eem.Thraxus.Factions.Models
 				}
 				catch (Exception e)
 				{
-					ExceptionWriter("SetupFactionDictionaries", $"Exception caught - e: {e}\tfaction.Key:\t{faction.Key}\tfaction.Value: {faction.Value}\tfaction.Tag:\t{faction.Value?.Tag}");
+					WriteToLog("SetupFactionDictionaries", $"Exception caught - e: {e}\tfaction.Key:\t{faction.Key}\tfaction.Value: {faction.Value}\tfaction.Tag:\t{faction.Value?.Tag}", LogType.Exception);
 				}
 
 			}
-
-			SetupPlayerRelations();
-			SetupNpcRelations();
-			SetupPirateRelations();
-			SetupAutoRelations();
-			SetupFactionDeletionProtection();
-			DumpEverythingToTheLog(true);
-			_setupComplete = true;
 		}
-
-		public static bool ValidPlayer(long identityId)
-		{
-			return MyAPIGateway.Players.TryGetSteamId(identityId) != 0;
-		}
-
-		public static bool ValidPlayerFaction(long factionId)
-		{
-			IMyFaction faction = factionId.GetFactionById();
-			if (faction == null) return false;
-			return MyAPIGateway.Players.TryGetSteamId(faction.FounderId) != 0;
-		}
-
-		//private void SetupFactionDeletionProtection()
-		//{
-		//	foreach (KeyValuePair<long, IMyFaction> npcFaction in _npcFactionDictionary)
-		//		AddFactionMember(npcFaction.Value);
-		//}
-
-		//private static void AddFactionMember(IMyFaction npcFaction)
-		//{
-		//	if (ValidPlayer(npcFaction.FounderId)) return;
-		//	if (npcFaction.Members.Count < 2)
-		//		MyAPIGateway.Session.Factions.AddNewNPCToFaction(npcFaction.FactionId);
-		//}
-
-		private void SetupPlayerRelations()
-		{
-			foreach (KeyValuePair<long, IMyFaction> playerFaction in _playerFactionDictionary)
-			{
-				foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-				{
-					AutoPeace(playerFaction.Key, lawfulFaction.Key);
-				}
-			}
-		}
-
-		private void SetupNpcRelations()
-		{
-			foreach (KeyValuePair<long, IMyFaction> leftPair in _lawfulFactionDictionary)
-			{
-				foreach (KeyValuePair<long, IMyFaction> rightPair in _lawfulFactionDictionary)
-				{
-					if (leftPair.Key == rightPair.Key || !MyAPIGateway.Session.Factions.AreFactionsEnemies(leftPair.Key, rightPair.Key)) continue;
-					AutoPeace(leftPair.Key, rightPair.Key);
-				}
-			}
-		}
-
-		private void SetupPirateRelations()
-		{
-			foreach (KeyValuePair<long, IMyFaction> faction in MyAPIGateway.Session.Factions.Factions)
-			{
-				foreach (KeyValuePair<long, IMyFaction> pirate in _pirateFactionDictionary)
-				{
-					if (faction.Key == pirate.Key) continue;
-					DeclareWar(faction.Key, pirate.Key);
-				}
-			}
-		}
-
-		//private void SetupAutoRelations()
-		//{
-		//	foreach (KeyValuePair<long, IMyFaction> npcFaction in _npcFactionDictionary)
-		//	{
-		//		foreach (KeyValuePair<long, IMyFaction> playerFaction in _playerFactionDictionary)
-		//			MyAPIGateway.Session.Factions.ChangeAutoAccept(npcFaction.Key, playerFaction.Value.FounderId, false, false);
-
-		//		foreach (KeyValuePair<long, IMyFaction> playerPirateFaction in _playerPirateFactionDictionary)
-		//			MyAPIGateway.Session.Factions.ChangeAutoAccept(npcFaction.Key, playerPirateFaction.Value.FounderId, false, false);
-		//	}
-		//}
-
-		//private void MonitorAutoAccept(long factionId, bool acceptPeace, bool acceptMember)
-		//{
-		//	if (!_setupComplete) return;
-		//	if (!acceptPeace && !acceptMember) return;
-		//	if (!_npcFactionDictionary.ContainsKey(factionId)) return;
-		//	SetupAutoRelations();
-		//	FactionCore.WriteToLog("MonitorAutoAccept", $"NPC Faction bypass detected, resetting relationship controls.", true);
-		//}
 
 		private void AddToLawfulFactionDictionary(long factionId, IMyFaction faction)
 		{
@@ -558,646 +928,23 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void ScrubDictionaries(long factionId)
 		{
-			if (_lawfulFactionDictionary.ContainsKey(factionId)) _lawfulFactionDictionary.Remove(factionId);
-			if (_enforcementFactionDictionary.ContainsKey(factionId)) _enforcementFactionDictionary.Remove(factionId);
-			if (_pirateFactionDictionary.ContainsKey(factionId)) _pirateFactionDictionary.Remove(factionId);
-			if (_playerFactionDictionary.ContainsKey(factionId)) _playerFactionDictionary.Remove(factionId);
-			if (_playerPirateFactionDictionary.ContainsKey(factionId)) _playerPirateFactionDictionary.Remove(factionId);
-			if (_npcFactionDictionary.ContainsKey(factionId)) _npcFactionDictionary.Remove(factionId);
-			if (_newFactionDictionary.ContainsKey(factionId)) _newFactionDictionary.Remove(factionId);
-			ClearRemovedFactionFromRelationships(factionId);
-		}
-
-
-		// Checks and balances, internal and external, mostly static
-
-		private static bool CheckPiratePlayerOptIn(IMyFaction faction)
-		{
-			if (faction.Description == null) return false;
-			return Constants.PlayerFactionExclusionList.Any(x => faction.Description.StartsWith(x));
-		}
-
-		private static bool CheckEitherFactionForNpc(long leftFactionId, long rightFactionId)
-		{
-			if (!IsFirstColonists(leftFactionId) && !IsFirstColonists(rightFactionId)) return !ValidPlayer(leftFactionId.GetFactionById().FounderId) || !ValidPlayer(rightFactionId.GetFactionById().FounderId);
-			//FactionCore.WriteToLog("CheckEitherFactionForNpc", "FSTC Call", true);
-			return false;
-		}
-
-		private static void AutoPeace(long fromFactionId, long toFactionId)
-		{
-			SetRep(fromFactionId, toFactionId, false);
-			//MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.SendPeaceRequest(fromFactionId, toFactionId));
-			//MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.AcceptPeace(toFactionId, fromFactionId));
-			ClearPeace(fromFactionId, toFactionId);
-		}
-
-		private static void ClearPeace(long fromFactionId, long toFactionId)
-		{   // Stops the flag from hanging out in the faction menu
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.CancelPeaceRequest(toFactionId, fromFactionId));
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.CancelPeaceRequest(fromFactionId, toFactionId));
-		}
-
-		private static void DeclareWar(long npcFaction, long playerFaction)
-		{   // Vanilla war declaration, ensures invoking on main thread
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.DeclareWar(npcFaction, playerFaction));
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.DeclareWar(playerFaction, npcFaction));
-			SetRep(npcFaction, playerFaction, true);
-		}
-
-		private bool CheckTimedNegativeRelationshipState(long npcFaction, long playerFaction)
-		{
-			return TimedNegativeRelationships.IndexOf(new TimedRelationship(npcFaction.GetFactionById(), playerFaction.GetFactionById(), 0)) > -1 || TimedNegativeRelationships.IndexOf(new TimedRelationship(playerFaction.GetFactionById(), npcFaction.GetFactionById(), 0)) > -1;
-		}
-
-		private bool CheckMendingRelationship(long fromFactionId, long toFactionId)
-		{
-			return MendingRelationships.Contains(new PendingRelation(fromFactionId, toFactionId));
-		}
-
-
-		// Methods that handle relationships
-
-		// Peace
-
-		private void DeclareFullNpcPeace(long factionId)
-		{
 			try
 			{
-				foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-					AutoPeace(lawfulFaction.Key, factionId);
+				_playerFactionDictionary.Remove(factionId);
+				_playerPirateFactionDictionary.Remove(factionId);
+				_pirateFactionDictionary.Remove(factionId);
+				_enforcementFactionDictionary.Remove(factionId);
+				_lawfulFactionDictionary.Remove(factionId);
+				_npcFactionDictionary.Remove(factionId);
+				_nonEemNpcFactionDictionary.Remove(factionId);
 			}
 			catch (Exception e)
 			{
-				ExceptionWriter("DeclareFullNpcPeace", $"Exception!\t{e}");
+				WriteToLog("ScrubDictionaries", $"Exception!\t{e}", LogType.Exception);
 			}
 		}
-
-		// War
-
-		private void WarDeclared(long fromFactionId, long toFactionId)
-		{   // Going to take the stance that if a war is declared by an NPC that is from EEM, it's a valid war
-			// TODO Add dialogue for when a player declares war on an NPC directly
-			//FactionCore.WriteToLog("WarDeclared", $"fromFaction:\t{fromFactionId}\ttoFaction:\t{toFactionId}", true);
-			if (!ValidPlayer(fromFactionId.GetFactionById().FounderId) && _npcFactionDictionary.ContainsKey(fromFactionId))
-				VetNewWar(fromFactionId, toFactionId);
-			//// This is for when a player declares war on an NPC 
-			//if (!fromFactionId.GetFactionById().IsEveryoneNpc() && toFactionId.GetFactionById().IsEveryoneNpc())
-			//	DeclarePermanentNpcWar(toFactionId, fromFactionId);
-		}
-
-		private void War(long npcFactionId, long playerFactionId)
-		{
-			// TODO just a bookmark!
-			//FactionCore.WriteToLog("War", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
-			NewTimedNegativeRelationship(npcFactionId, playerFactionId);
-			RequestDialog(npcFactionId.GetFactionById(), playerFactionId.GetFactionById(), Dialogue.DialogType.WarDeclared);
-			DeclareWar(npcFactionId, playerFactionId);
-		}
-
-		private void DeclarePermanentNpcWar(long npcFaction, long playerFaction)
-		{   // Used for when a player declares war on a NPC
-			DeclareWar(npcFaction, playerFaction);
-		}
-
-		private void DeclarePermanentFullNpcWar(long playerFaction)
-		{   // Used to declare war against a player pirate
-			try
-			{
-				foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-					DeclareWar(lawfulFaction.Key, playerFaction);
-				RequestNewPirateDialog(playerFaction);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DeclarePermanentFullNpcWar", $"Exception!\t{e}");
-			}
-		}
-
-		private void HandleFormerPlayerPirate(long playerFactionId)
-		{
-			try
-			{
-				foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-					NewTimedNegativeRelationship(lawfulFaction.Key, playerFactionId);
-				RequestNewPirateDialog(playerFactionId);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("HandleFormerPlayerPirate", $"Exception!\t{e}");
-			}
-		}
-
-		private void DeclareFullNpcWar(long playerFactionId)
-		{   // TODO: Used to declare war against a player for violating the rules of engagement (unused for now, but in place for when it's required)
-			try
-			{
-				foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-					NewTimedNegativeRelationship(lawfulFaction.Key, playerFactionId);
-				//RequestNewPirateDialog(playerFactionId); replace this with collective disappointment
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DeclareFullNpcWar", $"Exception!\t{e}");
-			}
-		}
-
-		private void ProcessWarQueue()
-		{
-			FactionCore.WriteToLog("ProcessWarQueue", $"Start", true);
-			
-			try
-			{
-				while (WarQueue.Count > 0)
-				{
-					bool found = false;
-					PendingRelation tmpRelation = WarQueue.Dequeue();
-					if (_nonEemNpcFactionDictionary.ContainsKey(tmpRelation.NpcFaction) || _nonEemNpcFactionDictionary.ContainsKey(tmpRelation.PlayerFaction)) continue; // Some side isn't an EEM faction; fuck em
-					if (IsFirstColonists(tmpRelation.NpcFaction) && ValidPlayer(tmpRelation.PlayerFaction.GetFactionById().FounderId) && _newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
-					{
-						//FactionCore.WriteToLog("ProcessWarQueue", $"FSTC found trying to war the player... {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
-						SetRep(tmpRelation.NpcFaction, tmpRelation.PlayerFaction, false);
-						return;
-					}
-					if (_newPlayerFactionDictionary.ContainsKey(tmpRelation.PlayerFaction))
-					{
-						//FactionCore.WriteToLog("ProcessWarQueue", $"New player faction found, ignoring. {_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count}", true);
-						
-						IMyFaction npcFaction = tmpRelation.NpcFaction.GetFactionById();
-						if (npcFaction == null) return;
-						if (_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Contains(npcFaction.Tag))
-						{
-							SetRep(tmpRelation.NpcFaction, tmpRelation.PlayerFaction, false);
-							_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Remove(npcFaction.Tag);
-						}
-
-						if (_newPlayerFactionDictionary[tmpRelation.PlayerFaction].Count != 0) return;
-						//FactionCore.WriteToLog("ProcessWarQueue", $"New player faction dictionary empty - deleting.", true);
-						_newPlayerFactionDictionary.Remove(tmpRelation.PlayerFaction);
-						return;
-					}
-					if (tmpRelation.NpcFaction == 0L || tmpRelation.PlayerFaction == 0L) continue;
-					if (_playerPirateFactionDictionary.ContainsKey(tmpRelation.PlayerFaction) || _pirateFactionDictionary.ContainsKey(tmpRelation.NpcFaction)) continue;
-					TimedRelationship newTimedRelationship = new TimedRelationship(tmpRelation.NpcFaction.GetFactionById(), tmpRelation.PlayerFaction.GetFactionById(), Helpers.Constants.FactionNegativeRelationshipCooldown);
-					for (int i = TimedNegativeRelationships.Count - 1; i >= 0; i--)
-					{
-						if (!TimedNegativeRelationships[i].Equals(newTimedRelationship)) continue;
-						TimedNegativeRelationships[i].CooldownTime = Helpers.Constants.FactionNegativeRelationshipCooldown;
-						found = true;
-					}
-					//FactionCore.WriteToLog("ProcessWarQueue", $"Nothing found, declaring new war: {tmpRelation.PlayerFaction}", true);
-					if (!found) War(tmpRelation.NpcFaction, tmpRelation.PlayerFaction);
-
-					foreach (KeyValuePair<long, IMyFaction> enforcementFaction in _enforcementFactionDictionary)
-					{
-						found = false;
-						newTimedRelationship = new TimedRelationship(enforcementFaction.Value, tmpRelation.PlayerFaction.GetFactionById(), Helpers.Constants.FactionNegativeRelationshipCooldown);
-						for (int i = TimedNegativeRelationships.Count - 1; i >= 0; i--)
-						{
-							if (!TimedNegativeRelationships[i].Equals(newTimedRelationship)) continue;
-							TimedNegativeRelationships[i].CooldownTime = Helpers.Constants.FactionNegativeRelationshipCooldown;
-							found = true;
-						}
-						//FactionCore.WriteToLog("ProcessWarQueue", $"Nothing found, declaring lawful war against: {tmpRelation.PlayerFaction}", true);
-						if (!found) War(enforcementFaction.Key, tmpRelation.PlayerFaction);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("ProcessWarQueue", $"Exception!\t{e}");
-			}
-		}
-
-		public void WarDeclaration(long npcFactionId, long playerFactionId)
-		{   // Used by BotBase to declare war until I have the time to redo bots/ai
-			// May revisit parallel threading for this in the future, for now, it's fine as is
-			//MyAPIGateway.Parallel.Start(delegate
-			//{ 
-			//FactionCore.WriteToLog("WarDeclaration", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}", true);
-			WarQueue.Enqueue(new PendingRelation(npcFactionId, playerFactionId));
-			ProcessWarQueue();
-			//});
-		}
-
-		private readonly Dictionary<long, List<string>> _newPlayerFactionDictionary = new Dictionary<long, List<string>>();
-
-		private void PopulateNewPlayerFactionDictionary(long playerFactionId)
-		{
-			List<string> lawfulFactions = new List<string>()
-			{
-				"UCMF", "SEPD", "CIVL", "ISTG", "MA-I", "EXMC", "KUSS", "HS", "AMPH", "IMDC"
-			};
-
-			_newPlayerFactionDictionary.Add(playerFactionId, lawfulFactions);
-		}
-
-		private void VetNewWar(long npcFactionId, long playerFactionId)
-		{
-			try
-			{
-				//FactionCore.WriteToLog("VetNewWar", $"{npcFactionId} | {playerFactionId}", true);
-				//if (_newPlayerFactionDictionary.ContainsKey(playerFactionId))
-				//{
-				//	IMyFaction npcFaction = npcFactionId.GetFactionById();
-				//	if (npcFaction == null) return;
-				//	if (_newPlayerFactionDictionary[playerFactionId].Contains(npcFaction.Tag))
-				//	{
-				//		SetRep(npcFactionId, playerFactionId, false);
-				//		_newPlayerFactionDictionary[playerFactionId].Remove(npcFaction.Tag);
-				//	}
-				//}
-				//if (_newFactionDictionary.ContainsKey(playerFactionId))
-				//{
-					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 0", true);
-					//if (_lawfulFactionDictionary.ContainsKey(npcFactionId)) _newFactionDictionary[playerFactionId]++;
-					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 1", true);
-					//if (_newFactionDictionary[playerFactionId] != _lawfulFactionDictionary.Count) return;
-					//FactionCore.WriteToLog("VetNewWar", $"{_lawfulFactionDictionary.ContainsKey(npcFactionId)} | {_newFactionDictionary[playerFactionId]} -- 2", true);
-					//DeclareFullNpcPeace(playerFactionId);
-					//return;
-				//}
-
-				if (_playerPirateFactionDictionary.ContainsKey(playerFactionId)) return;
-				WarDeclaration(npcFactionId, playerFactionId);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("VetNewWar", $"Exception!\t{e}");
-			}
-		}
-
-		// Relationship Managers
-
-		private void NewMendingRelationship(long npcFactionId, long playerFactionId)
-		{
-			try
-			{
-				if (_nonEemNpcFactionDictionary.ContainsKey(npcFactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
-				PendingRelation newMendingRelation = new PendingRelation(npcFactionId, playerFactionId);
-				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
-				{
-					if (MendingRelationships[i].Equals(newMendingRelation))
-						return;
-				}
-				RequestDialog(npcFactionId.GetFactionById(), playerFactionId.GetFactionById(), Dialogue.DialogType.PeaceConsidered);
-				AddToMendingRelationships(newMendingRelation);
-				FactionTimer(MyUpdateOrder.BeforeSimulation);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("NewMendingRelationship", $"Exception!\t{e}");
-			}
-		}
-
-		private void RemoveMendingRelationship(long npcFactionId, long playerFactionId)
-		{
-			try
-			{
-				PendingRelation newMendingRelation = new PendingRelation(npcFactionId, playerFactionId);
-				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
-				{
-					if (MendingRelationships[i].Equals(newMendingRelation))
-						MendingRelationships.RemoveAtFast(i);
-					ClearPeace(playerFactionId, npcFactionId);
-				}
-				CheckCounts();
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("RemoveMendingRelationship", $"Exception!\t{e}");
-			}
-		}
-
-		private void NewTimedNegativeRelationship(long npcFactionId, long playerFactionId)
-		{
-			if (_nonEemNpcFactionDictionary.ContainsKey(npcFactionId) || _nonEemNpcFactionDictionary.ContainsKey(playerFactionId)) return; // fuck these dudes, someone is a non-EEM NPC faction
-			int cooldown = Helpers.Constants.FactionNegativeRelationshipCooldown + Helpers.Constants.Random.Next(Helpers.Constants.TicksPerSecond * 30, Helpers.Constants.TicksPerMinute * 2);
-			AddToTimedNegativeRelationships(new TimedRelationship(npcFactionId.GetFactionById(), playerFactionId.GetFactionById(), cooldown));
-		}
-
-		private void AddToTimedNegativeRelationships(TimedRelationship newTimedRelationship)
-		{
-			//FactionCore.WriteToLog("AddToTimedNegativeRelationships", $"newTimedRelationship:\t{newTimedRelationship}", true);
-			TimedNegativeRelationships.Add(newTimedRelationship);
-			RemoveMendingRelationship(newTimedRelationship.NpcFaction.FactionId, newTimedRelationship.PlayerFaction.FactionId);
-			DumpEverythingToTheLog();
-			FactionTimer(MyUpdateOrder.BeforeSimulation);
-		}
-
-		private void AddToMendingRelationships(PendingRelation newMendingRelation)
-		{
-			//FactionCore.WriteToLog("AddToMendingRelationships", $"newTimedRelationship:\t{newMendingRelation}", true);
-			MendingRelationships.Add(newMendingRelation);
-		}
-
-		private void AssessNegativeRelationships()
-		{
-			try
-			{
-				//FactionCore.WriteToLog("AssessNegativeRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}", true);
-				DumpTimedNegativeFactionRelationships();
-				for (int i = TimedNegativeRelationships.Count - 1; i >= 0; i--)
-				{
-					if ((TimedNegativeRelationships[i].CooldownTime -= Helpers.Constants.FactionNegativeRelationshipAssessment) > 0) continue;
-					NewMendingRelationship(TimedNegativeRelationships[i].NpcFaction.FactionId, TimedNegativeRelationships[i].PlayerFaction.FactionId);
-					TimedNegativeRelationships.RemoveAtFast(i);
-				}
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("AssessNegativeRelationships", $"Exception!\t{e}");
-			}
-		}
-
-		private void AssessMendingRelationships()
-		{
-			try
-			{
-				//FactionCore.WriteToLog("AssessMendingRelationships", $"MendingRelationships.Count:\t{TimedNegativeRelationships.Count}", true);
-				DumpMendingRelationshipsRelationships();
-				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
-				{
-					if (Helpers.Constants.Random.Next(0, 100) < 75) continue;
-					PendingRelation relationToRemove = MendingRelationships[i];
-					MendingRelationships.RemoveAtFast(i);
-					RequestDialog(relationToRemove.NpcFaction.GetFactionById(), relationToRemove.PlayerFaction.GetFactionById(), Dialogue.DialogType.PeaceAccepted);
-					AutoPeace(relationToRemove.NpcFaction, relationToRemove.PlayerFaction);
-				}
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("AssessMendingRelationships", $"Exception!\t{e}");
-			}
-		}
-
-		private void ClearRemovedFactionFromRelationships(long factionId)
-		{
-			try
-			{
-				for (int i = MendingRelationships.Count - 1; i >= 0; i--)
-				{
-					if (MendingRelationships[i].NpcFaction == factionId || MendingRelationships[i].PlayerFaction == factionId)
-						MendingRelationships.RemoveAtFast(i);
-				}
-				for (int i = TimedNegativeRelationships.Count - 1; i >= 0; i--)
-				{
-					if (TimedNegativeRelationships[i].NpcFaction.FactionId == factionId || TimedNegativeRelationships[i].PlayerFaction.FactionId == factionId)
-						TimedNegativeRelationships.RemoveAtFast(i);
-				}
-				CheckCounts();
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("ClearRemovedFactionFromRelationships", $"Exception!\t{e}");
-			}
-		}
-
-		private void CheckCounts()
-		{
-			if (MendingRelationships.Count == 0 && TimedNegativeRelationships.Count == 0) FactionTimer(MyUpdateOrder.NoUpdate);
-			//FactionCore.WriteToLog("CheckCounts", $"MendingRelationships:\t{MendingRelationships.Count}\tTimedNegativeRelationship:\t{TimedNegativeRelationships.Count}", true);
-		}
-
-		private static void FactionTimer(MyUpdateOrder updateOrder)
-		{
-			if (FactionCore.FactionCoreStaticInstance.UpdateOrder != updateOrder)
-				MyAPIGateway.Utilities.InvokeOnGameThread(() => FactionCore.FactionCoreStaticInstance.SetUpdateOrder(updateOrder));
-			//MyAPIGateway.Utilities.InvokeOnGameThread(() => FactionCore.WriteToLog("FactionTimer", $"SetUpdateOrder:\t{updateOrder}\tActual:\t{FactionCore.FactionCoreStaticInstance.UpdateOrder}"));
-		}
-
-		// External calls to manage internal relationships
-
-		public void CheckNegativeRelationships()
-		{
-			AssessNegativeRelationships();
-			CheckCounts();
-		}
-
-		public void CheckMendingRelationships()
-		{
-			AssessMendingRelationships();
-			CheckCounts();
-		}
-
-		//Debug Outputs
-
-		private void DumpEverythingToTheLog(bool general = false)
-		{
-			if (!Helpers.Constants.DebugMode && !general) return;
-			try
-			{
-				const string callerName = "FactionsDump";
-				List<TimedRelationship> tempTimedRelationship = TimedNegativeRelationships;
-				foreach (TimedRelationship negativeRelationship in tempTimedRelationship)
-					FactionCore.WriteToLog(callerName, $"negativeRelationship:\t{negativeRelationship}", general);
-				List<PendingRelation> tempMendingRelations = MendingRelationships;
-				foreach (PendingRelation mendingRelationship in tempMendingRelations)
-					FactionCore.WriteToLog(callerName, $"mendingRelationship:\t{mendingRelationship}", general);
-				Dictionary<long, IMyFaction> tempFactionDictionary = _enforcementFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"enforcementDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _lawfulFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"lawfulDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _pirateFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"pirateDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _npcFactionDictionary; //_nonEemNpcFactionDictionary
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"npcDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _nonEemNpcFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"_nonEemNpcFactionDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _playerFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"playerDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				tempFactionDictionary = _playerPirateFactionDictionary;
-				foreach (KeyValuePair<long, IMyFaction> faction in tempFactionDictionary)
-					FactionCore.WriteToLog(callerName, $"playerPirateDictionary:\t{faction.Key}\t{faction.Value.Tag}", general);
-				Dictionary<long, int> tempNewFactionDictioanry = _newFactionDictionary;
-				foreach (KeyValuePair<long, int> faction in tempNewFactionDictioanry)
-					FactionCore.WriteToLog(callerName, $"newFactionDictionary:\t{faction}\t{faction.Key.GetFactionById()?.Tag}", general);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DumpEverythingToTheLog", $"Exception!\t{e}");
-			}
-		}
-
-		private void DumpNewFactionDictionary(bool general = false)
-		{
-			try
-			{
-				FactionCore.WriteToLog("DumpNewFactionDictionary", $"newFactionDictionary.Count:\t{_newFactionDictionary.Count}", general);
-				Dictionary<long, int> tempNewFactionDictioanry = _newFactionDictionary;
-				foreach (KeyValuePair<long, int> faction in tempNewFactionDictioanry)
-					FactionCore.WriteToLog("DumpNewFactionDictionary", $"newFactionDictionary:\t{faction}\t{faction.Key.GetFactionById()?.Tag}", general);
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DumpNewFactionDictionary", $"Exception!\t{e}");
-			}
-		}
-
-		private void DumpTimedNegativeFactionRelationships(bool general = false)
-		{
-			if (!Helpers.Constants.DebugMode && !general) return;
-			try
-			{
-				FactionCore.WriteToLog("DumpTimedNegativeFactionRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}", general);
-				const string callerName = "DumpTimedNegativeFactionRelationships";
-				List<TimedRelationship> tempTimedRelationship = TimedNegativeRelationships;
-				foreach (TimedRelationship negativeRelationship in tempTimedRelationship)
-					FactionCore.WriteToLog(callerName, $"negativeRelationship:\t{negativeRelationship}");
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DumpTimedNegativeFactionRelationships", $"Exception!\t{e}");
-			}
-		}
-
-		private void DumpMendingRelationshipsRelationships(bool general = false)
-		{
-			if (!Helpers.Constants.DebugMode && !general) return;
-			try
-			{
-				const string callerName = "DumpMendingRelationshipsRelationships";
-				List<PendingRelation> tempMendingRelations = MendingRelationships;
-				foreach (PendingRelation mendingRelationship in tempMendingRelations)
-					FactionCore.WriteToLog(callerName, $"mendingRelationship:\t{mendingRelationship}");
-			}
-			catch (Exception e)
-			{
-				ExceptionWriter("DumpMendingRelationshipsRelationships", $"Exception!\t{e}");
-			}
-		}
-
-		private void ExceptionWriter(string caller, string message)
-		{
-			FactionCore.WriteToLog(caller, message, true);
-			if (!"DumpEverythingToTheLog, DumpTimedNegativeFactionRelationships, DumpMendingRelationshipsRelationships, DumpNewFactionDictionary".Contains(caller))
-				DumpEverythingToTheLog(true);
-		}
-
-		// Structs and other enums as necessary
-
-		private struct PendingRelation
-		{
-			public readonly long NpcFaction;
-			public readonly long PlayerFaction;
-
-			/// <inheritdoc />
-			public override string ToString()
-			{
-				return $"NpcFaction:\t{NpcFaction}\t{NpcFaction.GetFactionById()?.Tag}\tNpcFaction:\t{PlayerFaction}\t{PlayerFaction.GetFactionById()?.Tag}";
-			}
-
-			public PendingRelation(long npcFactionId, long playerFactionId)
-			{
-				NpcFaction = npcFactionId;
-				PlayerFaction = playerFactionId;
-			}
-		}
-
-		// Used to manage relations using the new rep system.  Temp until the faction rewrite. 
-
-		//private static bool ranOnce = false;
-		//private static Dictionary<long, string> _identityDictionary = new Dictionary<long, string>();
-		//private static void GetAllPlayerInfo()
-		//{
-		//	List<IMyIdentity> identities = new List<IMyIdentity>();
-		//	MyAPIGateway.Players.GetAllIdentites(identities);
-
-		//	FactionCore.WriteToLog("GetAllPlayerInfo", $"Identity Count: {identities.Count}", true);
-		//	int counter = 0;
-		//	foreach (IMyIdentity myIdentity in identities)
-		//	{
-		//		FactionCore.WriteToLog("GetAllPlayerInfo", $"Identity {counter++}: {myIdentity.IdentityId} | {myIdentity.DisplayName}", true);
-		//		_identityDictionary.Add(myIdentity.IdentityId, myIdentity.DisplayName);
-		//	}
-		//}
-
-		private static void SetRep(long npcFactionId, long playerFactionId, bool hostile)
-		{
-			//FactionCore.WriteToLog("SetRep", $"{npcFactionId} | {playerFactionId} | {hostile}", true);
-			int value;
-
-			if (hostile)
-				value = -750;
-			else
-				value = 250;
-
-			//if (!ranOnce)
-			//{
-			//	GetAllPlayerInfo();
-			//	ranOnce = true;
-			//}
-
-			//DebugRep("SetRep-Pre", npcFactionId, playerFactionId, hostile);
-
-			try
-			{
-				//MyAPIGateway.Utilities.InvokeOnGameThread(() => { 
-				MyAPIGateway.Session.Factions.SetReputation(npcFactionId, playerFactionId, value);
-				MyAPIGateway.Session.Factions.SetReputation(playerFactionId, npcFactionId, value);
-
-				SetRepPlayers(npcFactionId, playerFactionId, hostile);
-				//});
-
-
-				//SetRepWithPlayers(npcFactionId, playerFactionId, hostile);
-				//DebugRep("SetRep-Post", npcFactionId, playerFactionId, hostile);
-
-			}
-			catch (Exception)
-			{
-				// ignored
-			}
-		}
-
-		private static void SetRepPlayers(long npcFactionId, long playerFactionId, bool hostile)
-		{
-			IMyFaction npcFaction = npcFactionId.GetFactionById();
-			IMyFaction playerFaction = playerFactionId.GetFactionById();
-			int value;
-
-			if (hostile)
-				value = -750;
-			else
-				value = 250;
-
-			try
-			{
-				//FactionCore.WriteToLog($"SetRepPlayers", $"npcFactionMemberCount: {npcFaction.Members.Count}", true);
-				foreach (KeyValuePair<long, MyFactionMember> npcFactionMember in npcFaction.Members)
-				{
-					MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(npcFactionMember.Value.PlayerId, playerFactionId, value);
-					//FactionCore.WriteToLog($"SetRepPlayers", $"npcFactionMemberId: {npcFactionMember.Value.PlayerId} | {_identityDictionary[npcFactionMember.Value.PlayerId]}", true);
-				}
-
-				//FactionCore.WriteToLog($"SetRepPlayers", $"playerFactionMemberCount: {playerFaction.Members.Count}", true);
-				foreach (KeyValuePair<long, MyFactionMember> playerFactionMember in playerFaction.Members)
-				{
-					MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(playerFactionMember.Value.PlayerId, npcFactionId, value);
-					//FactionCore.WriteToLog($"SetRepPlayers", $"playerFactionMemberId: {playerFactionMember.Value.PlayerId} | {_identityDictionary[playerFactionMember.Value.PlayerId]}", true);
-				}
-
-				//DebugRep("SetRepPlayers-Post", npcFactionId, playerFactionId, hostile);
-			}
-			catch (Exception)
-			{
-				// ignored
-			}
-		}
-
-		//private static void DebugRep(string caller, long npcFactionId, long playerFactionId, bool hostile)
-		//{
-		//	FactionCore.WriteToLog($"{caller} npc: {npcFactionId} player: {playerFactionId} hostile: {hostile}", $"Player/Faction between NPC: {npcFactionId} and Player: {playerFactionId} = {MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(npcFactionId, playerFactionId).ToString()}", true);
-		//	FactionCore.WriteToLog($"{caller} npc: {npcFactionId} player: {playerFactionId} hostile: {hostile}", $"Player/Faction between Player: {playerFactionId} and NPC: {npcFactionId} = {MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(playerFactionId, npcFactionId).ToString()}", true);
-		//	FactionCore.WriteToLog($"{caller} npc: {npcFactionId} player: {playerFactionId} hostile: {hostile}", $"Faction/Faction between NPC: {npcFactionId} and Player: {playerFactionId} = {MyAPIGateway.Session.Factions.GetReputationBetweenFactions(npcFactionId, playerFactionId).ToString()}", true);
-		//	FactionCore.WriteToLog($"{caller} npc: {npcFactionId} player: {playerFactionId} hostile: {hostile}", $"Faction/Faction between Player: {playerFactionId} and NPC: {npcFactionId} = {MyAPIGateway.Session.Factions.GetReputationBetweenFactions(playerFactionId, npcFactionId).ToString()}", true);
-		//}
+		
+		#endregion
 
 		#region Faction Proection Measures
 
@@ -1209,12 +956,12 @@ namespace Eem.Thraxus.Factions.Models
 
 		private static void AddFactionMember(IMyFaction npcFaction)
 		{
-			if (ValidPlayer(npcFaction.FounderId)) return;
+			if (!npcFaction.IsEveryoneNpc()) return;
 			if (npcFaction.Members.Count < 2)
 				MyAPIGateway.Session.Factions.AddNewNPCToFaction(
 					npcFaction.FactionId,
-					$"[{npcFaction.Tag}] {NpcFirstNames[Random.Next(0, NpcFirstNames.Count - 1)]}" +
-					$" {NpcLastNames[Random.Next(0, NpcLastNames.Count - 1)]}");
+					$"[{npcFaction.Tag}] {FactionSettings.NpcFirstNames[CommonSettings.Random.Next(0, FactionSettings.NpcFirstNames.Count - 1)]}" +
+					$" {FactionSettings.NpcLastNames[CommonSettings.Random.Next(0, FactionSettings.NpcLastNames.Count - 1)]}");
 		}
 
 		private void SetupAutoRelations()
@@ -1236,100 +983,15 @@ namespace Eem.Thraxus.Factions.Models
 			if (!_npcFactionDictionary.ContainsKey(factionId) && !_nonEemNpcFactionDictionary.ContainsKey(factionId)) return;
 
 			if (MyAPIGateway.Session.Factions.Factions[factionId].AutoAcceptMember ||
-				MyAPIGateway.Session.Factions.Factions[factionId].AutoAcceptPeace)
+			    MyAPIGateway.Session.Factions.Factions[factionId].AutoAcceptPeace)
 				foreach (IMyPlayer player in GetPlayers())
 					MyAPIGateway.Session.Factions.ChangeAutoAccept(factionId, player.IdentityId, false, false);
-
+			
 			//SetupAutoRelations();
-			FactionCore.WriteToLog("MonitorAutoAccept", $"NPC Faction bypass detected, resetting relationship controls. {factionId} | {acceptPeace} | {acceptMember}");
+			WriteToLog("MonitorAutoAccept", $"NPC Faction bypass detected, resetting relationship controls. {factionId} | {acceptPeace} | {acceptMember}", LogType.General);
 		}
-
-		private void ValidateFactionJoin(long fromId, long playerId)
-		{
-			if (!ValidPlayer(playerId)) return;
-			if (ValidPlayer(fromId.GetFactionById().FounderId)) return;
-			if (fromId.GetFactionById().Tag == "FSTC") return;
-			ulong id = MyAPIGateway.Players.TryGetSteamId(playerId);
-			if (id != 0)
-			{
-				MyPromoteLevel level = MyAPIGateway.Session.GetUserPromoteLevel(id);
-				if (level == MyPromoteLevel.Admin || level == MyPromoteLevel.Moderator || level == MyPromoteLevel.SpaceMaster) return;
-			}
-			MyAPIGateway.Session.Factions.KickMember(fromId, playerId);
-		}
-
-		/// <summary>
-		/// Used to keep the Player List; avoids having to allocate a new list every time it's required
-		/// </summary>
-		protected readonly List<IMyPlayer> Players = new List<IMyPlayer>();
-
-		/// <summary>
-		/// Populates the player list with a fresh set of players
-		/// </summary>
-		/// <returns>All currently active players</returns>
-		protected List<IMyPlayer> GetPlayers()
-		{
-			Players.Clear();
-			MyAPIGateway.Players.GetPlayers(Players);
-			return Players;
-		}
-
-		public static Random Random { get; } = new Random();
-
-		public static List<string> NpcFirstNames { get; } = new List<string>
-		{
-			"Rosae", "Davith", "Soaph", "Elrin", "Svjetlana", "Zan", "Riya", "Kasdy", "Betrice", "Jaycobe", "Crayg",
-			"Emilyse", "Edan", "Brialeagh", "Stanka", "Asan", "Dragoslav", "Vena", "Flyx", "Svetoslav", "Zaid",
-			"Timoth", "Katlina", "Kimly", "Jenzen", "Megn", "Juith", "Cayedn", "Jaenelle", "Jayedn", "Alestra", "Madn",
-			"Cayelyn", "Rayelyn", "Naethan", "Jaromil", "Laeila", "Aleigha", "Balee", "Kurson", "Kalina", "Allan",
-			"Iskren", "Alexi", "Malax", "Baelleigh", "Harp", "Haelee", "Tijan", "Klatko", "Vojta", "Tasya", "Maslinka",
-			"Ljupka", "Aubriena", "Danuella", "Jastin", "Idania", "Xandr", "Koba", "Roemary", "Dlilah", "Tanr",
-			"Sobeska", "Zaiyah", "Lubka", "Bogomila", "Roderock", "Dayne", "Pribuska", "Kyel", "Svilena", "Laylah",
-			"Tray", "Bobbyx", "Kaence", "Rade", "Gojslav", "Tugomir", "Drahomir", "Aldon", "Gyanna", "Jezzy", "Roseya",
-			"Zand", "Saria", "Own", "Adriyel", "Ayana", "Spasena", "Vlade", "Kimbr", "Billix", "Landn", "Ylena",
-			"Canning", "Slavka", "Gayge", "Dobroslaw", "Jasemine", "Jaden", "Ayna", "Slavomir", "Milaia", "Koale",
-			"Elriot", "Ondrea", "Viliana", "Emex", "Ashir", "Yce", "Lyuboslav", "Makenna", "Senka", "Radacek", "Lilea",
-			"Wilm", "Burian", "Randis", "Bentom", "Olver", "Charliza", "Vjera", "Caera", "Yasen", "Roselyna", "Venka",
-			"Lana", "Nayla", "Ayaan", "Ryliea", "Nicholya", "Adriaenne", "Armanix", "Jazon", "Sulvan", "Roys", "Liyam",
-			"Aebby", "Alextra", "Bogomil", "Kole", "Desree", "Zyre", "Haral", "Aerav", "Doriyan", "Rayely", "Helna",
-			"Arman", "Zavyr", "Xavis", "Winson", "Arihan", "Adrihan", "Walkr", "Laera", "Victr", "Dobroniega", "Yan",
-			"Maianna", "Leshi", "Niklas", "Rebexa", "Renaya", "Jaelyne", "Catlea", "Zdik", "Sereya", "Barba", "Desmon",
-			"Arjun", "Boleslava", "Jaxson", "Thalira", "Leslaw", "Aevangelina", "Kade", "Jaro", "Charlise", "Loriya",
-			"Ljubica", "Rober", "Iveanne", "Slavena", "Maikle", "Vladica", "Zdiska", "Berivoj", "Shaene", "Brencis",
-			"Karina", "Yavor", "Darilan", "Aellana", "Landan", "Adit", "Jazzly", "Ozren", "Nyala", "Azarea", "Sveta",
-			"Jaessa", "Aedyn", "Maecey", "Braeylee", "Julyen", "Vela", "Amelise", "Benjam", "Vierka", "Aibram"
-		};
-
-		public static List<string> NpcLastNames { get; } = new List<string>
-		{
-			"Fusepelt", "Andichanteau", "Aubemont", "Kantorovich", "Lomafort", "Borisov", "Wyverneyes", "Abaleilles",
-			"Snowreaver", "Litvinchuk", "Vigny", "Vinet", "Milenkovic", "Lamassac", "Masterflower", "Holyblaze",
-			"Boberel", "Deathcaller", "Saintimeur", "Châtissac", "Marblemane", "Calic", "Golitsyn", "Aboret",
-			"Hardstalker", "Humblevalor", "Sergeyev", "Rameur", "Grassfire", "Forestrock", "Snowsteel", "Chaykovskiy",
-			"Smartwoods", "Lightningeyes", "Vassemeur", "Proksch", "Saurriver", "Albignes", "Clarifort", "Pridemaul",
-			"Deathhelm", "Vinogradov", "Châtiffet", "Wolinsk", "Limoze", "Chananas", "Hanak", "Popovic", "Noblearm",
-			"Belemond", "Runemane", "Chamidras", "Chamigné", "Mildlight", "Kergatillon", "Truedreamer", "Slivkin",
-			"Frostbone", "Greatthorne", "Woodtaker", "Nerevilliers", "Abavau", "Stamenkovikj", "Hardlight",
-			"Roughsworn", "Nobleroot", "Chaunteau", "Lomages", "Vichanteau", "Laurelet", "Brichagnon", "Shieldsnout",
-			"Nozac", "Burningwalker", "Peaceseeker", "Kavka", "Mistseeker", "Sugné", "Sedlak", "Firemore", "Prokesch",
-			"Sendula", "Perlich", "Bricharel", "Morningwhisk", "Keenwoods", "Sublirac", "Vilart", "Raunas", "Dewheart",
-			"Balaban", "Ravenpike", "Snowcreek", "Sarrarel", "Yellen", "Rochevès", "Croivès", "Chauvetelet", "Polyakov",
-			"Mourningroar", "Rambunac", "Woodensworn", "Chabastel", "Fogshaper", "Fistbranch", "Chauthier", "Crerel",
-			"Springhand", "Bougaiffet", "Angestel", "Stojanovska", "Bladekeeper", "Heartgloom", "Vajda", "Bloodwound",
-			"Mucibaba", "Lhotsky", "Pinekeeper", "Abitillon", "Spiderarm", "Limolot", "Ragnac", "Chaustel", "Croille",
-			"Michalek", "Cloudtoe", "Cressier", "Regalshadow", "Cabarkapa", "Snowchewer", "Twerski", "Voronov",
-			"Shieldbane", "Gaibannes", "Roquemont", "Gaiffet", "Lamodieu", "Silentwhirl", "Fuseforce", "Farwood",
-			"Bouldershade", "Rochedras", "Smolensky", "Bougairelli", "Graysnout", "Korda", "Lonebraid", "Agueleilles",
-			"Chanaron", "Chanagnes", "Barassac", "Hnilo", "Popov", "Grayhair", "Younghorn", "Volinsky", "Boberon",
-			"Topolski", "Kergassec", "Humblewhisk", "Longbend", "Whitrage", "Pyredrifter", "Wyvernflow", "Vernissier",
-			"Dudar", "Chamiveron", "Carlowitz", "Waterbough", "Commonmight", "Raullane", "Boyko", "Wyvernhair",
-			"Kovalevsky", "Astateuil", "Bonnetillon", "Dawnleaf", "Laurenteau", "Aguefelon", "Bonnemoux", "Baragre",
-			"Kergallane", "Warvale", "Chanaffet", "Polyak", "Kohout", "Wach", "Dolezal", "Doomsprinter", "Malenkov",
-			"Woodgazer", "Janowitz", "Golovin", "Milosevic", "Mourningkiller", "Novak", "Barleycrag", "Rabinowicz",
-			"Bizelle", "Bohatec", "Rockstrider", "Snowore", "Chauvelet", "Andimtal", "Bonespirit", "Nerelle",
-			"Ostrovsky", "Heavystriker", "Cindercutter", "Grasslance", "Baraffet", "Svehla"
-		};
 
 		#endregion
+
 	}
 }
