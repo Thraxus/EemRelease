@@ -6,7 +6,7 @@ using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Common.Reporting
 {
-	public static class GameSettings
+	public static class BasicGameInformation
 	{
 		public static StringBuilder Report()
 		{
@@ -45,7 +45,7 @@ namespace Eem.Thraxus.Common.Reporting
 			sb.AppendLine("Installed Mods");
 			sb.AppendLine("═══════════════════════════════════════════");
 			foreach (MyObjectBuilder_Checkpoint.ModItem mod in MyAPIGateway.Session.Mods)
-				sb.AppendLine($"{x}Name (Id): {mod} |Is a dependency: {mod.IsDependency}");
+				sb.AppendLine($"{x}[Name (Id)]: {mod} [Is a dependency]: {mod.IsDependency}");
 
 			sb.AppendLine();
 			sb.AppendLine("Stored Identities");
@@ -53,13 +53,14 @@ namespace Eem.Thraxus.Common.Reporting
 			List<IMyIdentity> identityList = new List<IMyIdentity>();
 			MyAPIGateway.Players.GetAllIdentites(identityList);
 			foreach (IMyIdentity identity in identityList)
-				sb.AppendLine($"{x}Id: {identity.IdentityId} |Display Name: {identity.DisplayName} |Dead: {identity.IsDead} |SteamId > 0: {MyAPIGateway.Players.TryGetSteamId(identity.IdentityId) > 0}"); // SteamId > 0 denotes player; no reason to see / save their ID though
+				sb.AppendFormat("{0,-4}[Id] {1,-18} [Display Name] {2,-18} [Is Dead] {3,-4} [SteamId > 0] {4,-4}\n", " ",identity.IdentityId, identity.DisplayName, identity.IsDead, MyAPIGateway.Players.TryGetSteamId(identity.IdentityId) > 0); // SteamId > 0 denotes player; no reason to see / save their ID though
 
 			sb.AppendLine();
 			sb.AppendLine("Factions");
 			sb.AppendLine("═══════════════════════════════════════════");
+			sb.AppendLine();
 			foreach (var faction in MyAPIGateway.Session.Factions.Factions)
-				sb.AppendLine($"{x}Name: {faction.Value.Name} |Tag: {faction.Value.Tag}");
+				sb.AppendFormat("{0,-4}[Tag] {1, -10} [ID] {2, -18} [Name] {3,-30}\n", " ", faction.Value.Tag, faction.Value.FactionId, faction.Value.Name);
 
 			sb.AppendLine();
 			sb.AppendLine("Information Export End");

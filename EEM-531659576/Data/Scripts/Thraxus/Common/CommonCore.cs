@@ -22,7 +22,7 @@ namespace Eem.Thraxus.Common
 		{
 			base.LateSetup();
 			FactionDictionaries.Initialize();
-			WriteToLog($"{CompName} - Game Settings", $"{GameSettings.Report()}", LogType.General);
+			WriteToLog($"{CompName} - Basic Game Information", $"{BasicGameInformation.Report()}", LogType.General);
 			WriteToLog($"{CompName} - Factions", $"{FactionDictionaries.Report()}", LogType.General);
 		}
 	}

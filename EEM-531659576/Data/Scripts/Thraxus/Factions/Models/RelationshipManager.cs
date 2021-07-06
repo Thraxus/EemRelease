@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Enums;
 using Eem.Thraxus.Common.Utilities;
@@ -234,14 +235,14 @@ namespace Eem.Thraxus.Factions.Models
 		/// <returns></returns>
 		public SaveData GetSaveData()
 		{
-			HashSet<RelationSave> factionRelations = new HashSet<RelationSave>();
+			List<RelationSave> factionRelations = new List<RelationSave>();
 			foreach (KeyValuePair<long, FactionRelation> factionRelationship in FactionRelationships)
 			{
 				factionRelations.Add(factionRelationship.Value.GetSaveState());
 				WriteToLog("GetSaveState", $"Adding to FactionRelationships save: {factionRelationship.Value.GetSaveState().ToStringExtended()}", LogType.General);
 			}
 
-			HashSet<RelationSave> identityRelations = new HashSet<RelationSave>();
+			List<RelationSave> identityRelations = new List<RelationSave>();
 			foreach (KeyValuePair<long, IdentityRelation> identityRelationship in IdentityRelationships)
 			{
 				identityRelations.Add(identityRelationship.Value.GetSaveState());
@@ -256,22 +257,45 @@ namespace Eem.Thraxus.Factions.Models
 		/// </summary>
 		private void LoadSaveData()
 		{
-			if(_saveData.IsEmpty)
+			var sb = new StringBuilder();
+			sb.AppendLine();
+			sb.AppendLine();
+			sb.AppendLine("Saved Data Report - Start");
+			sb.AppendLine("═══════════════════════════════════════════");
+			sb.AppendLine();
+
+			if (_saveData.IsEmpty)
 			{
+				sb.AppendLine("No saved data present.  Switching to first run setup.");
+				sb.AppendLine();
+				sb.AppendLine("═══════════════════════════════════════════");
+				sb.AppendLine("Saved Data Report - End");
+
+				WriteToLog("Factions - Load Report: Saved Relationship Data", sb.ToString(), LogType.General);
 				FirstRunSetup();
 				return;
 			}
 
-			WriteToLog("LoadSaveData-Factions", $"Loading save: {_saveData.IsEmpty} | {_saveData.ToString()}", LogType.General);
-			
+			sb.AppendFormat("{0,-4}Loading saved data with the following counts: {1,-50}\n"," ", _saveData);
+
+			//WriteToLog("LoadSaveData-Factions", $"Loading save: {_saveData.IsEmpty} | {_saveData}", LogType.General);
+
 			if (_saveData.FactionSave != null)
 			{
+				sb.AppendLine();
+				sb.AppendFormat("{0,-4}**** Faction Save Data ****\n", " ");
+				sb.AppendLine("");
 				foreach (RelationSave factionRelation in _saveData.FactionSave)
 				{
-					WriteToLog("LoadSaveData-factionRelation", $"Loading faction relation: {factionRelation.ToStringExtended()}", LogType.General);
+					sb.AppendLine(factionRelation.ToStringExtended());
+					//WriteToLog("LoadSaveData-factionRelation", $"Loading faction relation: {factionRelation.ToStringExtended()}", LogType.General);
+
 					IMyFaction fromFaction = MyAPIGateway.Session.Factions.TryGetFactionById(factionRelation.FromId);
+
 					if (fromFaction == null) continue;
+
 					FactionRelationships.Add(fromFaction.FactionId, new FactionRelation(fromFaction));
+
 					foreach (Relation relation in factionRelation.ToFactionRelations)
 					{
 						//	TODO: This inner loop is the same in both faction and identity - perhaps extract to a common method instead?
@@ -282,12 +306,16 @@ namespace Eem.Thraxus.Factions.Models
 					}
 				}
 			}
+			else sb.AppendFormat("{0,-4}No saved Faction data.\n", " ");
 
 			if (_saveData.IdentitySave != null)
 			{
+				sb.AppendFormat("{0,-4}**** Identity Save Data ****\n", " ");
+				sb.AppendLine("");
 				foreach (RelationSave identityRelation in _saveData.IdentitySave)
 				{
-					WriteToLog("LoadSaveData-identityRelation", $"Loading identity relation: {identityRelation.ToStringExtended()}", LogType.General);
+					sb.AppendLine(identityRelation.ToStringExtended());
+					//WriteToLog("LoadSaveData-identityRelation", $"Loading identity relation: {identityRelation.ToStringExtended()}", LogType.General);
 
 					// Possible default condition catch
 					if (identityRelation.FromId == 0) continue;
@@ -297,15 +325,23 @@ namespace Eem.Thraxus.Factions.Models
 
 					foreach (Relation relation in identityRelation.ToFactionRelations.Where(relation => MyAPIGateway.Session.Factions.TryGetFactionById(relation.FactionId) != null))
 					{
-						WriteToLog("LoadSaveData-identityRelation", $"Loop for {relation.ToString()}", LogType.General);
+						//WriteToLog("LoadSaveData-identityRelation", $"Loop for {relation}", LogType.General);
 						if (!IdentityRelationships.ContainsKey(identityRelation.FromId))
 							IdentityRelationships.Add(identityRelation.FromId, new IdentityRelation(GetIdentityFromId(identityRelation.FromId)));
 						IdentityRelationships[identityRelation.FromId].AddNewRelation(relation.FactionId, relation.Rep);
 					}
 				}
 			}
-			
-			WriteToLog("LoadSaveData-gameIdentities", $"Adding new identities for the rest...", LogType.General);
+			else sb.AppendFormat("{0,-4}No saved Identity data.\n"," ");
+
+			sb.AppendLine();
+			sb.AppendFormat("{0,-4}Saved data loading complete.  Adding the remaining found Identities as new entries...\n", " ");
+			sb.AppendLine();
+			sb.AppendLine("═══════════════════════════════════════════");
+			sb.AppendLine("Saved Data Report - End");
+			WriteToLog("Factions - Load Report: Saved Relationship Data", sb.ToString(), LogType.General);
+
+			//WriteToLog("LoadSaveData-gameIdentities", $"Adding new identities for the rest...", LogType.General);
 			foreach (IMyIdentity identity in GetIdentities().ToList())
 			{
 				AddNewIdentity(identity);
@@ -322,27 +358,27 @@ namespace Eem.Thraxus.Factions.Models
 			// Remove stale identities
 			if (GetIdentityFromId(id) == null)
 			{
-				WriteToLog("ValidIdentityRelationship", $"Identity {id} was stale, invalidating.", LogType.General);
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was stale, discarding.", LogType.General);
 				return false;
 			}
 
 			// Remove bots
 			if (!Statics.ValidPlayer(id))
 			{
-				WriteToLog("ValidIdentityRelationship", $"Identity {id} was invalid, invalidating.", LogType.General);
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was invalid, discarding.", LogType.General);
 				return false;
 			}
 
 			// Remove players managed by factions
 			if (MyAPIGateway.Session.Factions.TryGetPlayerFaction(id) != null)
 			{
-				WriteToLog("ValidIdentityRelationship", $"Identity {id} was in a faction, invalidating.", LogType.General);
+				WriteToLog("ValidIdentityRelationship", $"Identity {id} was in a faction, discarding.", LogType.General);
 				return false;
 			}
 
 			// Remove already managed identities
 			if (!IdentityRelationships.ContainsKey(id)) return true;
-			WriteToLog("ValidIdentityRelationship", $"Identity {id} was already managed, invalidating.", LogType.General);
+			WriteToLog("ValidIdentityRelationship", $"Identity {id} was already managed, discarding.", LogType.General);
 			return false;
 
 		}

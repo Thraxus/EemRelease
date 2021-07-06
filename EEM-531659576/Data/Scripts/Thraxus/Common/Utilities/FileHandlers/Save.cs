@@ -6,7 +6,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 {
 	public static class Save
 	{
-		public static void WriteToBinaryFile<T>(string fileName, T data, Type type)
+		public static void WriteBinaryFileToWorldStorage<T>(string fileName, T data, Type type)
 		{
 			if (MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				MyAPIGateway.Utilities.DeleteFileInWorldStorage(fileName, type);
@@ -18,10 +18,11 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 				byte[] binary = MyAPIGateway.Utilities.SerializeToBinary(data);
 				binaryWriter.Write(binary.Length);
 				binaryWriter.Write(binary);
+				binaryWriter.Flush();
 			}
 		}
 
-		public static void WriteToXmlFile<T>(string fileName, T data, Type type)
+		public static void WriteXmlFileToWorldStorage<T>(string fileName, T data, Type type)
 		{
 			if (MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				MyAPIGateway.Utilities.DeleteFileInWorldStorage(fileName, type);
@@ -33,10 +34,11 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 				string text = MyAPIGateway.Utilities.SerializeToXML(data);
 				textWriter.Write(text.Length);
 				textWriter.Write(text);
+				textWriter.Flush();
 			}
 		}
 
-		public static void WriteToFile<T>(string fileName, T data, Type type)
+		public static void WriteTextFileToWorldStorage<T>(string fileName, T data, Type type)
 		{
 			if (MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				MyAPIGateway.Utilities.DeleteFileInWorldStorage(fileName, type);
@@ -46,6 +48,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 				if (textWriter == null)
 					return;
 				textWriter.Write(data);
+				textWriter.Flush();
 			}
 		}
 

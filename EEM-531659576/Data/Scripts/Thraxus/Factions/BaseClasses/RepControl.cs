@@ -161,7 +161,7 @@ namespace Eem.Thraxus.Factions.BaseClasses
 
 		public RelationSave GetSaveState()
 		{
-			HashSet<Relation> relations = new HashSet<Relation>();
+			List<Relation> relations = new List<Relation>();
 			foreach (KeyValuePair<long, int> toFaction in ToFactions)
 			{
 				relations.Add(new Relation(toFaction.Key, toFaction.Value));

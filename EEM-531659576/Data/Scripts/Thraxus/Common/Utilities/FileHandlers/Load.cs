@@ -6,7 +6,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 {
 	internal static class Load
 	{
-		public static T ReadFromBinaryFile<T>(string fileName, Type type)
+		public static T ReadBinaryFileInWorldStorage<T>(string fileName, Type type)
 		{
 			if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				return default(T);
@@ -17,7 +17,7 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 			}
 		}
 
-		public static T ReadFromXmlFile<T>(string fileName, Type type)
+		public static T ReadXmlFileInWorldStorage<T>(string fileName, Type type)
 		{
 			if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
 				return default(T);
@@ -28,10 +28,10 @@ namespace Eem.Thraxus.Common.Utilities.FileHandlers
 			}
 		}
 
-		public static string ReadFileFromWorldStorage(string fileName, Type type)
+		public static string ReadTextFileInWorldStorage<T>(string fileName, Type type)
 		{
 			if (!MyAPIGateway.Utilities.FileExistsInWorldStorage(fileName, type))
-				return string.Empty;
+				return default(string);
 
 			using (TextReader textReader = MyAPIGateway.Utilities.ReadFileInWorldStorage(fileName, type))
 			{

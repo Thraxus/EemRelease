@@ -121,6 +121,7 @@ namespace Eem.Thraxus.Common.Factions.Models
 			StringBuilder report = new StringBuilder();
 			const string x = "    ";
 			report.AppendLine();
+			report.AppendLine();
 			report.AppendLine("Factions Report - Begin");
 			report.AppendLine("═══════════════════════════════════════════");
 
@@ -169,7 +170,6 @@ namespace Eem.Thraxus.Common.Factions.Models
 			report.AppendLine();
 
 			report.AppendLine("All NPC Factions");
-			if (AllNonEemNpcFactions.Count == 0) report.AppendLine($"{x}None");
 			foreach (var faction in NonTraderNpcFactions)
 			{
 				report.AppendLine($"{x}{faction.Value.Tag}");

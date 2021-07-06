@@ -659,7 +659,7 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\ICommon.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Models\BufferedBinaryReader.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Models\FastQueue.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\GameSettings.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\BasicGameInformation.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\CommonSettings.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\FileHandlers\Load.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\FileHandlers\Save.cs" />

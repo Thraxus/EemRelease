@@ -39,7 +39,7 @@ namespace Eem.Thraxus.Factions
 		public override void LoadData()
 		{
 			base.LoadData();
-			_relationshipManager = new RelationshipManager(Load.ReadFromBinaryFile<SaveData>(SaveFileName, typeof(SaveData)));
+			_relationshipManager = new RelationshipManager(Load.ReadBinaryFileInWorldStorage<SaveData>(SaveFileName, typeof(SaveData)));
 			FactionCoreStaticInstance = this;
 		}
 		
@@ -57,7 +57,8 @@ namespace Eem.Thraxus.Factions
 		public override MyObjectBuilder_SessionComponent GetObjectBuilder()
 		{   // Always return base.GetObjectBuilder() after your code! 
 			if (_relationshipManager == null) base.GetObjectBuilder();
-			Save.WriteToFile(SaveFileName, _relationshipManager.GetSaveData(), typeof(SaveData));
+			Save.WriteXmlFileToWorldStorage(string.Concat(SaveFileName, ".xml"), _relationshipManager.GetSaveData(), typeof(SaveData));
+			Save.WriteBinaryFileToWorldStorage(SaveFileName, _relationshipManager.GetSaveData(), typeof(SaveData)); // Human readable reference only
 			WriteToLog("GetObjectBuilder", $"Saved state", LogType.General);
 			return base.GetObjectBuilder();
 		}

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 using ProtoBuf;
 
 namespace Eem.Thraxus.Factions.DataTypes
@@ -46,13 +47,14 @@ namespace Eem.Thraxus.Factions.DataTypes
 		}
 	}
 
+	[XmlRoot("SaveData", IsNullable = false)]
 	[ProtoContract]
 	public struct SaveData
 	{
-		[ProtoMember(1)] public readonly HashSet<RelationSave> FactionSave;
-		[ProtoMember(2)] public readonly HashSet<RelationSave> IdentitySave;
+		[XmlArray("FactionSaves")] [ProtoMember(1)] public readonly List<RelationSave> FactionSave;
+		[XmlArray("IdentitySaves")] [ProtoMember(2)] public readonly List<RelationSave> IdentitySave;
 
-		public SaveData(HashSet<RelationSave> relationSave, HashSet<RelationSave> identitySave)
+		public SaveData(List<RelationSave> relationSave, List<RelationSave> identitySave)
 		{
 			FactionSave = relationSave;
 			IdentitySave = identitySave;
@@ -62,18 +64,24 @@ namespace Eem.Thraxus.Factions.DataTypes
 
 		public override string ToString()
 		{
-			return $"FactionSave.Count: {FactionSave?.Count} | IdentitySave.Count: {IdentitySave?.Count}";
+			return $"[FactionSave.Count] {FactionSave?.Count ?? 0} [IdentitySave.Count] {IdentitySave?.Count ?? 0}";
 		}
 	}
 
+	[XmlInclude(typeof(RelationSave))]
 	[ProtoContract]
 	public struct RelationSave
 	{
-		[ProtoMember(1)] public readonly long FromId;
-		[ProtoMember(2)] public readonly HashSet<Relation> ToFactionRelations;
+		[XmlAttribute("FromID")]
+		[ProtoMember(1)] 
+		public long FromId;
 
-
-		public RelationSave(long fromId, HashSet<Relation> toFactionRelations)
+		[XmlArray("Relations")] 
+		[XmlArrayItem(typeof(Relation), ElementName = "Relation")] 
+		[ProtoMember(2)] 
+		public List<Relation> ToFactionRelations;
+		
+		public RelationSave(long fromId, List<Relation> toFactionRelations)
 		{
 			FromId = fromId;
 			ToFactionRelations = toFactionRelations;
@@ -81,26 +89,33 @@ namespace Eem.Thraxus.Factions.DataTypes
 
 		public override string ToString()
 		{
-			return $"FromId: {FromId} | ToFactionIds Count: {ToFactionRelations.Count}";
+			return $"[FromId] {FromId} [Saved Relations] {ToFactionRelations.Count}";
 		}
 
 		public string ToStringExtended()
 		{
-			StringBuilder returnString = new StringBuilder();
-			returnString.Append("\n");
+			var sb = new StringBuilder();
+			sb.AppendFormat("{0,-4}Faction ID {1,-18} has the following relationships:\n", " ", FromId);
+			sb.AppendLine();
 			foreach (Relation relation in ToFactionRelations)
 			{
-				returnString.Append($"FromId: {FromId} | {relation}\n");
+				sb.AppendFormat("{0,-8}[Faction] {1,-18} [Rep] {2,-5} \n", " ", relation.FactionId, relation.Rep);
 			}
-			return returnString.ToString();
+			return sb.ToString();
 		}
 	}
 
+	[XmlInclude(typeof(Relation))]
 	[ProtoContract]
 	public struct Relation
 	{
-		[ProtoMember(2)] public readonly long FactionId;
-		[ProtoMember(3)] public readonly int Rep;
+		[XmlAttribute("FactionId")] 
+		[ProtoMember(1)] 
+		public long FactionId;
+		
+		[XmlAttribute("Rep")] 
+		[ProtoMember(2)] 
+		public int Rep;
 
 		public Relation(long factionId, int rep)
 		{
@@ -110,7 +125,7 @@ namespace Eem.Thraxus.Factions.DataTypes
 
 		public override string ToString()
 		{
-			return $"FactionId: {FactionId} | Rep: {Rep}";
+			return $"[FactionId] {FactionId} [Rep] {Rep}";
 		}
 	}
 
