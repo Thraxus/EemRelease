@@ -20658,10 +20658,10 @@ private void DisplayOnScreen()
 		info += Tab + _menuText[15] + Empty + credit + Empty + CurrencyUnit + errorPrefix + error + errorSuffix + Blank;
 
 		// Display _info on Screen
-		_tradeDisplay.WritePublicText(info);
+		_tradeDisplay.WriteText(info);
 
 		// Ensure that screen is updating (SE Bug avoidance)
-		_tradeDisplay.ShowPublicTextOnScreen();
+		//_tradeDisplay.ShowPublicTextOnScreen();
 	}
 	else
 	{
@@ -20670,8 +20670,8 @@ private void DisplayOnScreen()
 	if (_debugger != null)
 	{
 		// Ensure that screen is updating (SE Bug avoidance)
-		_debugger.WritePublicText(GetDebugInfo);
-		_debugger.ShowPublicTextOnScreen();
+		_debugger.WriteText(GetDebugInfo);
+		//_debugger.ShowPublicTextOnScreen();
 	}
 
 	if (_tutorialDisplay == null) return;
@@ -20685,9 +20685,9 @@ private void DisplayOnScreen()
 		}
 		info += Blank;
 
-		_tutorialDisplay.WritePublicText(info + DoManualScreen(true));
-		_tutorialDisplay.ShowTextureOnScreen();
-		_tutorialDisplay.ShowPublicTextOnScreen();
+		_tutorialDisplay.WriteText(info + DoManualScreen(true));
+		//_tutorialDisplay.ShowTextureOnScreen();
+		//_tutorialDisplay.ShowPublicTextOnScreen();
 	}
 }
 
@@ -21885,7 +21885,7 @@ private void LoadExternalConfigData()
 	Echo("Loading External Config Data");
 	if (_config != null)
 	{
-		string[] data = _config.GetPublicText().Split(ConfigSeperator);
+		string[] data = _config.GetText().Split(ConfigSeperator);
 		foreach (string t in data)
 		{
 			if (t.Contains(ConfigKeyPlatformId))
@@ -22048,9 +22048,9 @@ private void Debug(string msg, bool updateInstant)
 	{
 		if (_debugger != null)
 		{
-			_debugger.WritePublicText(GetDebugInfo);
-			_debugger.ShowTextureOnScreen();
-			_debugger.ShowPublicTextOnScreen();
+			_debugger.WriteText(GetDebugInfo);
+			//_debugger.ShowTextureOnScreen();
+			//_debugger.ShowPublicTextOnScreen();
 		}
 	}
 }

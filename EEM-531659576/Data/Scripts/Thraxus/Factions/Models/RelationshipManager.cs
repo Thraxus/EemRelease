@@ -50,7 +50,7 @@ namespace Eem.Thraxus.Factions.Models
 			MyAPIGateway.Session.Factions.FactionStateChanged += FactionStateChanged;
 			MyAPIGateway.Session.Factions.FactionCreated += FactionCreated;
 			MyAPIGateway.Session.Factions.FactionEdited += FactionEdited;
-			MyAPIGateway.Session.Factions.FactionAutoAcceptChanged += MonitorAutoAccept;
+			//MyAPIGateway.Session.Factions.FactionAutoAcceptChanged += MonitorAutoAccept;
 			SetupFactionRelations();
 			FactionCore.WriteToLog("RelationshipManager", $"Constructed!", true);
 		}
@@ -61,7 +61,7 @@ namespace Eem.Thraxus.Factions.Models
 			MyAPIGateway.Session.Factions.FactionStateChanged -= FactionStateChanged;
 			MyAPIGateway.Session.Factions.FactionCreated -= FactionCreated;
 			MyAPIGateway.Session.Factions.FactionEdited -= FactionEdited;
-			MyAPIGateway.Session.Factions.FactionAutoAcceptChanged -= MonitorAutoAccept;
+			//MyAPIGateway.Session.Factions.FactionAutoAcceptChanged -= MonitorAutoAccept;
 			WarQueue.Clear();
 			_playerFactionDictionary.Clear();
 			_playerPirateFactionDictionary.Clear();

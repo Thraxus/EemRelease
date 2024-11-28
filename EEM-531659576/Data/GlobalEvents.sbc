@@ -22,9 +22,9 @@
 				<TypeId>EventDefinition</TypeId>
 				<SubtypeId>SpawnCargoShip</SubtypeId>
 			</Id>
-			<MinActivationTimeMs>100000</MinActivationTimeMs>
-			<MaxActivationTimeMs>100000</MaxActivationTimeMs>
-			<FirstActivationTimeMs>50000</FirstActivationTimeMs>
+			<MinActivationTimeMs>500</MinActivationTimeMs>
+			<MaxActivationTimeMs>500</MaxActivationTimeMs>
+			<FirstActivationTimeMs>500</FirstActivationTimeMs>
 		</GlobalEvent>-->
 	  
 

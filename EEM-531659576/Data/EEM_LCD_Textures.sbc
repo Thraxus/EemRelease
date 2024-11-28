@@ -9,6 +9,7 @@
         <TypeId>LCDTextureDefinition</TypeId>
         <SubtypeId>-----[SCI-FI]-----</SubtypeId>
       </Id>
+      <TexturePath>Textures\Video\U4\Null_1x1.dds</TexturePath>
     </LCDTextureDefinition>
 
     <LCDTextureDefinition>
@@ -220,6 +221,7 @@
         <TypeId>LCDTextureDefinition</TypeId>
         <SubtypeId>-----[MXAD] 1x2-----</SubtypeId>
       </Id>
+      <TexturePath>Textures\Video\U4\Null_1x1.dds</TexturePath>
     </LCDTextureDefinition>
 	
 	<LCDTextureDefinition>
@@ -344,6 +346,7 @@
         <TypeId>LCDTextureDefinition</TypeId>
         <SubtypeId>-----[MXAD] 2x1-----</SubtypeId>
       </Id>
+    <TexturePath>Textures\Video\U4\Null_1x1.dds</TexturePath>
     </LCDTextureDefinition>
 	
     <LCDTextureDefinition>
@@ -476,6 +479,7 @@
         <TypeId>LCDTextureDefinition</TypeId>
         <SubtypeId>-----[MXAD] 1x1-----</SubtypeId>
       </Id>
+    <TexturePath>Textures\Video\U4\Null_1x1.dds</TexturePath>
     </LCDTextureDefinition>	
 	
     <LCDTextureDefinition>

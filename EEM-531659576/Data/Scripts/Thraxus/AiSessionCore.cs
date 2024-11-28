@@ -93,61 +93,76 @@ namespace Eem.Thraxus
 			_initialized = true;
 		}
 
-		private static void InitLogs()
-		{
-			//if (Constants.EnableProfilingLog) ProfilingLog = new Log(Constants.ProfilingLogName);
-			if (Constants.EnableGeneralLog) GeneralLog = new Log(Constants.GeneralLogName);
-			LogSetupComplete = true;
-			
-			GeneralLog.WriteToLog("LateSetup", $"Cargo: {MyAPIGateway.Session.SessionSettings.CargoShipsEnabled}");
-			GeneralLog.WriteToLog("LateSetup", $"Encounters: {MyAPIGateway.Session.SessionSettings.EnableEncounters}");
-			GeneralLog.WriteToLog("LateSetup", $"Drones: {MyAPIGateway.Session.SessionSettings.EnableDrones}");
-			GeneralLog.WriteToLog("LateSetup", $"Scripts: {MyAPIGateway.Session.SessionSettings.EnableIngameScripts}");
-			GeneralLog.WriteToLog("LateSetup", $"Sync: {MyAPIGateway.Session.SessionSettings.SyncDistance}");
-			GeneralLog.WriteToLog("LateSetup", $"View: {MyAPIGateway.Session.SessionSettings.ViewDistance}");
-			GeneralLog.WriteToLog("LateSetup", $"PiratePCU: {MyAPIGateway.Session.SessionSettings.PiratePCU}");
-			GeneralLog.WriteToLog("LateSetup", $"TotalPCU: {MyAPIGateway.Session.SessionSettings.TotalPCU}");
-
-			foreach (MyObjectBuilder_Checkpoint.ModItem mod in MyAPIGateway.Session.Mods)
-				GeneralLog.WriteToLog("LateSetup", $"Mod: {mod}");
-			List<IMyIdentity> identityList = new List<IMyIdentity>();
-			MyAPIGateway.Players.GetAllIdentites(identityList);
-			foreach (IMyIdentity identity in identityList)
-				GeneralLog.WriteToLog("LateSetup", $"Identity: {identity.IdentityId} | {identity.DisplayName} | {identity.IsDead} | {MyAPIGateway.Players.TryGetSteamId(identity.IdentityId)}");
-		}
-
-		private static void CloseLogs()
-		{
-			//if (Constants.DebugMode) DebugLog?.Close();
-			//if (Constants.EnableProfilingLog) ProfilingLog?.Close();
-			if (Constants.EnableGeneralLog) GeneralLog?.Close();
-		}
-
-		public override void LoadData()
-		{
-			base.LoadData();
-			MyAPIGateway.Session.SessionSettings.EnableIngameScripts = true;
-			MyAPIGateway.Session.SessionSettings.EnableDrones = true;
-			if (MyAPIGateway.Session.SessionSettings.PiratePCU > 50000) return;
-			if (MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled == MyBlockLimitsEnabledEnum.NONE)
-				MyAPIGateway.Session.SessionSettings.PiratePCU = 1000000;
-			else
-			{
-				MyAPIGateway.Session.SessionSettings.PiratePCU = MyAPIGateway.Session.SessionSettings.TotalPCU * 3;
-			}
-		}
+        private static void InitLogs()
+        {
+            //if (Constants.EnableProfilingLog) ProfilingLog = new Log(Constants.ProfilingLogName);
+            if (Constants.EnableGeneralLog) GeneralLog = new Log(Constants.GeneralLogName);
+            LogSetupComplete = true;
 
 
-		///// <summary>
-		///// Initial setup
-		///// </summary>
-		///// <param name="sessionComponent"></param>
-		//public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
-		//{
-		//	base.Init(sessionComponent);
-		//}
 
-		public override void BeforeStart()
+            GeneralLog.WriteToLog("LateSetup", $"Cargo: {MyAPIGateway.Session.SessionSettings.CargoShipsEnabled}");
+            GeneralLog.WriteToLog("LateSetup", $"EnableEncounters: {MyAPIGateway.Session.SessionSettings.EnableEncounters}");
+            GeneralLog.WriteToLog("LateSetup", $"EncounterDensity: {MyAPIGateway.Session.SessionSettings.EncounterDensity}");
+            GeneralLog.WriteToLog("LateSetup", $"EncounterGeneratorVersion: {MyAPIGateway.Session.SessionSettings.EncounterGeneratorVersion}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterCap: {MyAPIGateway.Session.SessionSettings.GlobalEncounterCap}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterEnableRemovalTimer: {MyAPIGateway.Session.SessionSettings.GlobalEncounterEnableRemovalTimer}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterMaxRemovalTimer: {MyAPIGateway.Session.SessionSettings.GlobalEncounterMaxRemovalTimer}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterMinRemovalTimer: {MyAPIGateway.Session.SessionSettings.GlobalEncounterMinRemovalTimer}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterRemovalTimeClock: {MyAPIGateway.Session.SessionSettings.GlobalEncounterRemovalTimeClock}");
+            GeneralLog.WriteToLog("LateSetup", $"GlobalEncounterTimer: {MyAPIGateway.Session.SessionSettings.GlobalEncounterTimer}");
+            GeneralLog.WriteToLog("LateSetup", $"PlanetaryEncounterDesiredSpawnRange: {MyAPIGateway.Session.SessionSettings.PlanetaryEncounterDesiredSpawnRange}");
+            GeneralLog.WriteToLog("LateSetup", $"Drones: {MyAPIGateway.Session.SessionSettings.EnableDrones}");
+            GeneralLog.WriteToLog("LateSetup", $"Scripts: {MyAPIGateway.Session.SessionSettings.EnableIngameScripts}");
+            GeneralLog.WriteToLog("LateSetup", $"Sync: {MyAPIGateway.Session.SessionSettings.SyncDistance}");
+            GeneralLog.WriteToLog("LateSetup", $"View: {MyAPIGateway.Session.SessionSettings.ViewDistance}");
+            GeneralLog.WriteToLog("LateSetup", $"BlockLimitsEnabled: {MyAPIGateway.Session.SessionSettings.BlockLimitsEnabled}");
+            GeneralLog.WriteToLog("LateSetup", $"Global Encounter PCU: {MyAPIGateway.Session.SessionSettings.GlobalEncounterPCU}");
+            GeneralLog.WriteToLog("LateSetup", $"Pirate PCU: {MyAPIGateway.Session.SessionSettings.PiratePCU}");
+            GeneralLog.WriteToLog("LateSetup", $"Total PCU: {MyAPIGateway.Session.SessionSettings.TotalPCU}");
+
+            foreach (MyObjectBuilder_Checkpoint.ModItem mod in MyAPIGateway.Session.Mods)
+                GeneralLog.WriteToLog("LateSetup", $"Mod: {mod}");
+            List<IMyIdentity> identityList = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(identityList);
+            foreach (IMyIdentity identity in identityList)
+                GeneralLog.WriteToLog("LateSetup", $"Identity: {identity.IdentityId} | {identity.DisplayName} | {identity.IsDead} | {MyAPIGateway.Players.TryGetSteamId(identity.IdentityId)}");
+        }
+
+        private static void CloseLogs()
+        {
+            if (Constants.EnableGeneralLog) GeneralLog?.Close();
+        }
+
+        public override void LoadData()
+        {
+            base.LoadData();
+            const int eemPcuLimit = 500000;
+            MyAPIGateway.Session.SessionSettings.EnableIngameScripts = true;
+            //MyAPIGateway.Session.SessionSettings.EnableDrones = true;
+            if (MyAPIGateway.Session.SessionSettings.PiratePCU < eemPcuLimit)
+            {
+                MyAPIGateway.Session.SessionSettings.PiratePCU = eemPcuLimit;
+            }
+            if (MyAPIGateway.Session.SessionSettings.GlobalEncounterPCU < eemPcuLimit)
+            {
+                MyAPIGateway.Session.SessionSettings.GlobalEncounterPCU = eemPcuLimit;
+            }
+            MyAPIGateway.Session.SessionSettings.EncounterDensity = 0.65f;
+            MyAPIGateway.Session.SessionSettings.GlobalEncounterTimer = 10;
+        }
+
+
+        ///// <summary>
+        ///// Initial setup
+        ///// </summary>
+        ///// <param name="sessionComponent"></param>
+        //public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
+        //{
+        //	base.Init(sessionComponent);
+        //}
+
+        public override void BeforeStart()
 		{
 			InitLogs();
 		}
