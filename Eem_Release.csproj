@@ -263,9 +263,14 @@
     <None Include="EEM-531659576\Data\CubeBlocks.sbc" />
     <None Include="EEM-531659576\Data\CubeBlocks_EEM.sbc" />
     <None Include="EEM-531659576\Data\DroneBehaviors_EEM.sbc" />
+    <None Include="EEM-531659576\Data\DronePilots_nukeguard_EEMModified.sbc" />
     <None Include="EEM-531659576\Data\EEM_LCD_Textures.sbc" />
+    <None Include="EEM-531659576\Data\FactionIconTextures.sbc" />
+    <None Include="EEM-531659576\Data\FactionNames.sbc" />
     <None Include="EEM-531659576\Data\Factions.sbc" />
+    <None Include="EEM-531659576\Data\FactionTypes.sbc" />
     <None Include="EEM-531659576\Data\GlobalEvents.sbc" />
+    <None Include="EEM-531659576\Data\Localization\Eem\Eem_Strings.sbl" />
     <None Include="EEM-531659576\Data\Particles.sbc" />
     <None Include="EEM-531659576\Data\PirateAntennas.sbc" />
     <None Include="EEM-531659576\Data\PirateAntennas_EEM.sbc" />
@@ -581,11 +586,10 @@
     <None Include="EEM-531659576\Data\Prefabs\XMC %28EXMC%29\XMC_Type_2_Cargo.sbc" />
     <None Include="EEM-531659576\Data\Prefabs\XMC %28EXMC%29\XMC_Valkyrie_II_Escort.sbc" />
     <None Include="EEM-531659576\Data\Prefabs\XMC %28EXMC%29\XMC_Valkyrie_II_Security.sbc" />
-    <None Include="EEM-531659576\Data\Reputation\ReputationSettings.sbc" />
     <None Include="EEM-531659576\Data\RespawnShips.sbc" />
     <None Include="EEM-531659576\Data\SoundBlock.sbc" />
-    <None Include="EEM-531659576\Data\SpawnGroups_EEM_Atmo_Drones.sbc" />
-    <None Include="EEM-531659576\Data\SpawnGroups_EEM_CargoShips.sbc" />
+    <None Include="EEM-531659576\Data\SpawnGroups_EEM_Cargoships.sbc" />
+    <None Include="EEM-531659576\Data\SpawnGroups_EEM_Cargoships_AMPH.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_CargoShips_Disabled.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Drones.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Encounters.sbc" />
@@ -594,7 +598,6 @@
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Encounters_POI.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Traders.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Weapons.sbc" />
-    <None Include="EEM-531659576\Data\SpawnGroups_Vanilla_CargoShips.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_Vanilla_Encounters.sbc" />
     <None Include="EEM-531659576\Data\VoxelMapStorages.sbc" />
     <None Include="EEM-531659576\Models\Components\Scrap1.mwm" />
@@ -608,9 +611,11 @@
     <None Include="EEM-531659576\Models\Components\Scrap7.mwm" />
     <None Include="EEM-531659576\Models\Components\Scrap8.mwm" />
     <None Include="EEM-531659576\Models\Components\Scrap9.mwm" />
+    <None Include="EEM-531659576\Models\Cubes\AIControlSeat.mwm" />
     <None Include="EEM-531659576\Models\Cubes\CockpitFighterPiloted.mwm" />
     <None Include="EEM-531659576\Models\Cubes\large\ThrustSmall.mwm" />
     <None Include="EEM-531659576\Models\Cubes\LBCockpitPiloted.mwm" />
+    <None Include="EEM-531659576\Models\Cubes\LBDeadSeat.mwm" />
     <None Include="EEM-531659576\Models\Cubes\LBSeatPiloted.mwm" />
     <None Include="EEM-531659576\Models\Cubes\OpenCockpitPilot.mwm" />
     <None Include="EEM-531659576\Models\Cubes\SBCockpitPiloted.mwm" />
@@ -636,7 +641,6 @@
     <None Include="EEM-531659576\VoxelMaps\wi_mesa1.vx2" />
     <None Include="EEM-531659576\VoxelMaps\wi_reno.vx2" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\AiSessionCore.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotAi.cs" />
@@ -714,6 +718,9 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Log.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Profiler.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Queue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="EEM-531659576\Data\Localization\Eem\Eem_Strings.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

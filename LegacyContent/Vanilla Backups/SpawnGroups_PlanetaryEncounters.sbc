@@ -1,0 +1,1785 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <SpawnGroups>
+    <!--
+
+	Example SpawnGroup for Planetary Encounters
+	<SpawnGroup>
+		<Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="UniqueIdentifier" />
+		<IsPlanetaryEncounter>true</IsPlanetaryEncounter>     Flags the spawn as a planetary installation
+		<Frequency>1</Frequency>     The weight value assigned to this grid. Higher value will cause it to spawn more frequently.
+		<ReactorsOn>true</ReactorsOn>     Determins if the grid starts powered.
+		<Prefabs>     The prefab file to use for this spawn.
+			<Prefab SubtypeId="P1_SupplyPost">
+			</Prefab>
+		</Prefabs>
+		<FactionTypes>     The faction types that should use this grid. For static factions, use <Factions> instead of <FactionTypes>, and <SubtypeId> instead of <Type>
+			<Type>Builder</Type>
+			<Type>Miner</Type>
+			<Type>Trader</Type>
+			<Type>Pirate</Type>
+			<Type>Military</Type>
+		</FactionTypes>
+		<RandomizedPaint>true</RandomizedPaint>     Overrides faction based paint and gives the grid specific colors based on values defined in Game.sbc
+		<PlanetaryInstallationSettings>     These are all settings specific to planetary installations, as described in detail below.
+			<Planets>     Planetary whitelist. If this list is not present, the encounter can spawn anywhere.
+				<PlanetName>Europa</PlanetName>
+				<PlanetName>Triton</PlanetName>
+			</Planets>
+			<VoxelMaterials>     Voxel whitelist. If this is not present, this grid can spawn on anything.
+				<MaterialTypeName>Ice</MaterialTypeName>
+				<MaterialTypeName>Snow</MaterialTypeName>
+			</VoxelMaterials>
+            <RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.20" RollLimitMax="0.20" />     Optional, adjusts the grid's rotation. Good for shipwrecks. See below for more details.
+            <AlignToSurface>true</AlignToSurface>     Align the grid to voxel surface, instead of gravity vector.
+		</PlanetaryInstallationSettings>
+	</SpawnGroup>
+	
+	
+    RandomizedOrientation: if this node exists, prefab would be rotated by +/-[0, PI] unless limit attributes are specified (YawLimitMin, PitchLimitMin, RollLimitMin, YawLimitMax, ...) in radians
+            - There is probably no point in setting YawLimit, as usually there is no need to constrain an azimuth rotation
+            - By default there is no randomization, all prefabs would "face" the same direction which is world-dependent, up vector aligned with gravity
+            - Setting the same min/max limits is an alternative way to set orientation (editor/prefab built-in orientation is ignored)
+    AlignToSurface: if true, a grid would be spawned aligned to local voxel surface instead of gravity vector. RandomizedOrientation would be applied on top of that rotation
+
+    -->
+
+        <!-- Builder Outposts -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P1_SupplyPost" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P1_SupplyPost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P1_SupplyPost_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P1_SupplyPost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P1_SupplyPost_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P1_SupplyPost_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P2_StorageDepot" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P2_StorageDepot">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P2_StorageDepot_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P2_StorageDepot">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P2_StorageDepot_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P2_StorageDepot_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P3_ManufacturingFacility" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P3_ManufacturingFacility">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P3_ManufacturingFacility_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P3_ManufacturingFacility">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P3_ManufacturingFacility_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P3_ManufacturingFacility_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Builder</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        
+        <!-- Miner Outposts -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P4_ProcessingPlant" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P4_ProcessingPlant">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P4_ProcessingPlant_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P4_ProcessingPlant">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P4_ProcessingPlant_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P4_ProcessingPlant_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P5_ProspectingStation" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P5_ProspectingStation">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P5_ProspectingStation_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P5_ProspectingStation">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P5_ProspectingStation_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P5_ProspectingStation_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P6_OreProcessingFacility" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P6_OreProcessingFacility">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P6_OreProcessingFacility_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P6_OreProcessingFacility">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P6_OreProcessingFacility_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P6_OreProcessingFacility_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Miner</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        
+        <!-- Trader Outposts -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P7_FieldResearchOutpost" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P7_FieldResearchOutpost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P7_FieldResearchOutpost_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P7_FieldResearchOutpost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P7_FieldResearchOutpost_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P7_FieldResearchOutpost_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P8_ShippingPlatform" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P8_ShippingPlatform">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P8_ShippingPlatform_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P8_ShippingPlatform">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P8_ShippingPlatform_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P8_ShippingPlatform_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P9_RegionalHeadquarters" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P9_RegionalHeadquarters">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P9_RegionalHeadquarters_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P9_RegionalHeadquarters">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P9_RegionalHeadquarters_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P9_RegionalHeadquarters_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+		<!-- Military Outposts -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P10_MilitaryBarracks" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P10_MilitaryBarracks">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P10_MilitaryBarracks_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P10_MilitaryBarracks">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P10_MilitaryBarracks_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P10_MilitaryBarracks_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P11_VanguardOutpost" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P11_VanguardOutpost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>-
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P11_VanguardOutpost_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P11_VanguardOutpost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P11_VanguardOutpost_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P11_VanguardOutpost_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P12_MilitaryWatchtower" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P12_MilitaryWatchtower">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P12_MilitaryWatchtower_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P12_MilitaryWatchtower">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P12_MilitaryWatchtower_Moon" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P12_MilitaryWatchtower_Moon">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Military</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Moon</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        
+        <!-- Pirate Outposts -->        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P13_PirateRelayPost" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P13_PirateRelayPost">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+					<MaterialTypeName>MoonSoil</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+					<MaterialTypeName>Grass</MaterialTypeName>
+					<MaterialTypeName>GrassDry</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+					<MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+					<MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P13_PirateRelayPost_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P13_PirateRelayPostFrozen">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P14_SalvageYard" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P14_SalvageYard">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Sand</MaterialTypeName>
+                    <MaterialTypeName>MarsSoil</MaterialTypeName>
+                    <MaterialTypeName>Grass</MaterialTypeName>
+                    <MaterialTypeName>GrassDry</MaterialTypeName>
+                    <MaterialTypeName>Soil</MaterialTypeName>
+                    <MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+                    <MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+                    <MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+                    <MaterialTypeName>SoilDry</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P14_SalvageYard_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P14_FrozenSalvageYard">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+                <Planets>
+                    <PlanetName>Europa</PlanetName>
+                    <PlanetName>Triton</PlanetName>
+                </Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Ice</MaterialTypeName>
+                    <MaterialTypeName>Snow</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P15_PirateStronghold" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P15_PirateStronghold">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Sand</MaterialTypeName>
+                    <MaterialTypeName>MarsSoil</MaterialTypeName>
+                    <MaterialTypeName>Grass</MaterialTypeName>
+                    <MaterialTypeName>GrassDry</MaterialTypeName>
+                    <MaterialTypeName>Soil</MaterialTypeName>
+                    <MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+                    <MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+                    <MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+                    <MaterialTypeName>SoilDry</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P15_PirateStronghold_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P15_PirateStrongholdFrozen">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Pirate</Type>
+            </FactionTypes>
+            <PlanetaryInstallationSettings>
+                <Planets>
+                    <PlanetName>Europa</PlanetName>
+                    <PlanetName>Triton</PlanetName>
+                </Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Ice</MaterialTypeName>
+                    <MaterialTypeName>Snow</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+        
+        
+        <!-- Snow / Frozen Wrecks -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P16_FrozenRover" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P16_FrozenRover">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P16_FrozenRover_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P16_FrozenRover">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P18_FrozenShuttle" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P18_FrozenShuttle">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.20" RollLimitMax="0.20" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P18_FrozenShuttle_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P18_FrozenShuttle">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.20" RollLimitMax="0.20" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P20_FrozenExplorer" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P20_FrozenExplorer">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="0.05" PitchLimitMax="0.13" RollLimitMin="-0.35" RollLimitMax="0.35" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P20_FrozenExplorer_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P20_FrozenExplorer">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="0.05" PitchLimitMax="0.13" RollLimitMin="-0.35" RollLimitMax="0.35" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P22_FrozenColonyShip" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P22_FrozenColonyShip">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="-0.1" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+		
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P22_FrozenColonyShip_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P22_FrozenColonyShip">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="-0.1" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Europa</PlanetName>
+					<PlanetName>Triton</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Ice</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>        
+        
+        <!-- Desert / Rusted Wrecks -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P17_RustedRover" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P17_RustedRover">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P19_RustedShuttle" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P19_RustedShuttle">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.20" RollLimitMax="0.20" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P21_RustedExplorer" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P21_RustedExplorer">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="0.05" PitchLimitMax="0.13" RollLimitMin="-0.35" RollLimitMax="0.35" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P23_RustedColonyShip" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P23_RustedColonyShip">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+			<PlanetaryInstallationSettings>
+				<RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="-0.1" RollLimitMin="-0.30" RollLimitMax="0.30" />
+				<AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>Soil</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>MarsSoil</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <!-- Alien Planet // Easter Egg -->
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P24_Alien1" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>0.20</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P24_Alien1">
+                    <BeaconText>Strange Signal</BeaconText>
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P25_Alien2" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>0.20</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P25_Alien2">
+                    <BeaconText>Strange Signal</BeaconText>
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+			<PlanetaryInstallationSettings>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+				</Planets>
+				<VoxelMaterials>
+					<MaterialTypeName>Sand</MaterialTypeName>
+					<MaterialTypeName>SoilDry</MaterialTypeName>
+					<MaterialTypeName>Snow</MaterialTypeName>
+				</VoxelMaterials>
+			</PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P26_HaulerWreckRusted" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P26_HaulerWreck">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+                <AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+					<PlanetName>Pertam</PlanetName>
+					<PlanetName>Titan</PlanetName>
+				</Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Sand</MaterialTypeName>
+                    <MaterialTypeName>Soil</MaterialTypeName>
+                    <MaterialTypeName>SoilDry</MaterialTypeName>
+                    <MaterialTypeName>MarsSoil</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P26_HaulerWreckFrozen" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P26_HaulerWreckFrozen">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+                <AlignToSurface>true</AlignToSurface>
+				<Planets>
+					<PlanetName>Alien</PlanetName>
+					<PlanetName>EarthLike</PlanetName>
+					<PlanetName>Mars</PlanetName>
+				</Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Snow</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P26_HaulerWreck_IcePlanet" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P26_HaulerWreckFrozen">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <RandomizedOrientation PitchLimitMin="-0.15" PitchLimitMax="0.15" RollLimitMin="-0.30" RollLimitMax="0.30" />
+                <AlignToSurface>true</AlignToSurface>
+                <Planets>
+                    <PlanetName>Europa</PlanetName>
+                    <PlanetName>Triton</PlanetName>
+                </Planets>
+                <VoxelMaterials>
+                    <MaterialTypeName>Ice</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P27_TradeRunnerWreck" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P27_TradeRunnerWreck">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <RandomizedOrientation PitchLimitMin="0" PitchLimitMax="-0.15" RollLimitMin="-0.03" RollLimitMax="-0.30" />
+                <AlignToSurface>true</AlignToSurface>
+                <Planets>
+                    <PlanetName>Moon</PlanetName>
+                    <PlanetName>Titan</PlanetName>
+                    <PlanetName>Europa</PlanetName>
+                </Planets>
+            </PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P28_LogisticsPost" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P28_LogisticsPost">
+                </Prefab>
+            </Prefabs>
+            <Factions>
+                <SubtypeId>Unknown</SubtypeId>
+            </Factions>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <VoxelMaterials>
+                    <MaterialTypeName>Sand</MaterialTypeName>
+                    <MaterialTypeName>MarsSoil</MaterialTypeName>
+                    <MaterialTypeName>Snow</MaterialTypeName>
+                    <MaterialTypeName>Grass</MaterialTypeName>
+                    <MaterialTypeName>GrassDry</MaterialTypeName>
+                    <MaterialTypeName>Soil</MaterialTypeName>
+                    <MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+                    <MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+                    <MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+                    <MaterialTypeName>SoilDry</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id Type="MyObjectBuilder_SpawnGroupDefinition" Subtype="P29_WreckedHopper" />
+            <IsPlanetaryEncounter>true</IsPlanetaryEncounter>
+            <Frequency>1</Frequency>
+            <ReactorsOn>true</ReactorsOn>
+            <Prefabs>
+                <Prefab SubtypeId="P29_WreckedHopper">
+                </Prefab>
+            </Prefabs>
+            <FactionTypes>
+                <Type>Trader</Type>
+            </FactionTypes>
+            <RandomizedPaint>true</RandomizedPaint>
+            <PlanetaryInstallationSettings>
+                <RandomizedOrientation PitchLimitMin="0" PitchLimitMax="-0.20" RollLimitMin="-0.40" RollLimitMax="0.40" />
+                <AlignToSurface>true</AlignToSurface>
+                <VoxelMaterials>
+                    <MaterialTypeName>Sand</MaterialTypeName>
+                    <MaterialTypeName>MarsSoil</MaterialTypeName>
+                    <MaterialTypeName>Grass</MaterialTypeName>
+                    <MaterialTypeName>GrassDry</MaterialTypeName>
+                    <MaterialTypeName>Soil</MaterialTypeName>
+                    <MaterialTypeName>AlienGreenGrass</MaterialTypeName>
+                    <MaterialTypeName>OrangeAlienGrass</MaterialTypeName>
+                    <MaterialTypeName>AlienYellowGrass</MaterialTypeName>
+                    <MaterialTypeName>SoilDry</MaterialTypeName>
+                </VoxelMaterials>
+            </PlanetaryInstallationSettings>
+        </SpawnGroup>
+
+    </SpawnGroups>
+</Definitions>

@@ -1246,7 +1246,8 @@ namespace Eem.Thraxus.Factions.Models
 
 		private void ValidateFactionJoin(long fromId, long playerId)
 		{
-			if (!ValidPlayer(playerId)) return;
+            if (_nonEemNpcFactionDictionary.ContainsKey(fromId)) return;
+            if (!ValidPlayer(playerId)) return;
 			if (ValidPlayer(fromId.GetFactionById().FounderId)) return;
 			if (fromId.GetFactionById().Tag == "FSTC") return;
 			ulong id = MyAPIGateway.Players.TryGetSteamId(playerId);

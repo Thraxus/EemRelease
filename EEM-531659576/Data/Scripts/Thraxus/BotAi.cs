@@ -36,13 +36,16 @@ namespace Eem.Thraxus
 		private bool WelcomeMessageDisplayed { get; set; } = true;  // Remove = true for debug
 
 		public override void UpdateOnceBeforeFrame()
-		{
+        {
+            if (AiSessionCore.DisableAi) { return; }
 			if (!_inited) InitAi();
 		}
 
 		public override void UpdateBeforeSimulation10()
 		{
-			if (!CanOperate) return;
+            if (AiSessionCore.DisableAi) { return; }
+
+            if (!CanOperate) { return; }
 
 			if (!WelcomeMessageDisplayed)
 			{
@@ -82,7 +85,8 @@ namespace Eem.Thraxus
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder)
 		{
 			base.Init(objectBuilder);
-			Rc = Entity as IMyRemoteControl;
+            if (AiSessionCore.DisableAi) { return; }
+            Rc = Entity as IMyRemoteControl;
 			Grid = Rc?.CubeGrid.GetTopMostParent() as IMyCubeGrid;
 			if (Rc != null) 
 				NeedsUpdate |= MyEntityUpdateEnum.BEFORE_NEXT_FRAME | MyEntityUpdateEnum.EACH_10TH_FRAME | MyEntityUpdateEnum.EACH_100TH_FRAME;

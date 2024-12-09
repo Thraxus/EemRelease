@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!--<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+        <Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_AMPH" />
+        <BackgroundColorRanges>
+            <Color x="0" y="-0.8" z="-0.45" /> --><!-- #000000, Black --><!--
+        </BackgroundColorRanges>
+        <Icon>Textures\GUI\FactionLogo\AMPH.dds</Icon>
+    </Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_CIVL" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\CIVL.dds</Icon>
+	</Definition>
+	
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_EXMC" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\EXMC.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_HS" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\HS.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_IMDC" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\IMDC.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_ISTG" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\ISTG.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_KUSS" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\KUSS.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_MA-I" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\MA-I.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_MMEC" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\MMEC.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_SEPD" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\SEPD.dds</Icon>
+	</Definition>
+
+	<Definition xsi:type="MyObjectBuilder_FactionIconsDefinition">
+		<Id Type="MyObjectBuilder_FactionIconsDefinition" Subtype="EEM_Faction_UCMF" />
+		<BackgroundColorRanges>
+			<Color x="0" y="-0.8" z="-0.45" />
+			--><!-- #000000, Black --><!--
+		</BackgroundColorRanges>
+		<Icon>Textures\GUI\FactionLogo\UCMF.dds</Icon>
+	</Definition>-->
+
+</Definitions>

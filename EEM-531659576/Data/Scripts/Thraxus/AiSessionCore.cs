@@ -19,7 +19,30 @@ namespace Eem.Thraxus
 	[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	// ReSharper disable once ClassNeverInstantiated.Global
 	public class AiSessionCore : MySessionComponentBase
-	{
+    {
+		/* TODO
+		 
+		1) Create new Faction Types in FactionTypes.sbc for EEM specifically
+		2) Decide how the prefabs should be distributed to this new system
+		3) Spawn all prefabs in specific saves per category type (i.e. all traders in one save, cargos in another, encounters in another?)
+		4) Remove AI init that sets factions from all RCs 
+            - Can keep behavior or other items as necessary? 
+		5) Update EEM to use the Common framework from my other mods
+		6) Make bots not suck as a simple first pass, and divorce them from "AiSessionCore"
+            - NO FANCY SHIT THIS TIME AROUND ASSHOLE!!!
+            - Pull them off GameLogic of the RC into Session Logic
+            - Simplify the setup routine
+            - Fix the awful threat detection
+		7) Rename "AiSessionCore" to "EemCore"
+		8) Stop Factions from caring about any faction but EEM for protections
+		9) See if you can remove all reliance on the Client Code
+            - Code change done, but still should look deeper into Factions and keeping all stuff to EEM only
+
+		*/
+
+
+        public const bool DisableAi = false;
+
 		private static readonly Dictionary<long, BotBase.OnDamageTaken> DamageHandlers = new Dictionary<long, BotBase.OnDamageTaken>();
 
 		public static void AddDamageHandler(long gridId, BotBase.OnDamageTaken handler)
@@ -85,12 +108,16 @@ namespace Eem.Thraxus
 
 		private void Initialize()
 		{
-			//if (Constants.DebugMode) DebugLog.WriteToLog("Initialize", $"Debug Active - IsServer: {Constants.IsServer}", true, 20000);
-			Messaging.Register();
+            _initialized = true;
+            if (DisableAi)
+            { return; }
+
+            //if (Constants.DebugMode) DebugLog.WriteToLog("Initialize", $"Debug Active - IsServer: {Constants.IsServer}", true, 20000);
+            Messaging.Register();
 			MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageRefHandler);
 			MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler(0, GenericDamageHandler);
 			MyAPIGateway.Session.DamageSystem.RegisterDestroyHandler(0, GenericDamageHandler);
-			_initialized = true;
+			
 		}
 
         private static void InitLogs()
@@ -98,9 +125,7 @@ namespace Eem.Thraxus
             //if (Constants.EnableProfilingLog) ProfilingLog = new Log(Constants.ProfilingLogName);
             if (Constants.EnableGeneralLog) GeneralLog = new Log(Constants.GeneralLogName);
             LogSetupComplete = true;
-
-
-
+            
             GeneralLog.WriteToLog("LateSetup", $"Cargo: {MyAPIGateway.Session.SessionSettings.CargoShipsEnabled}");
             GeneralLog.WriteToLog("LateSetup", $"EnableEncounters: {MyAPIGateway.Session.SessionSettings.EnableEncounters}");
             GeneralLog.WriteToLog("LateSetup", $"EncounterDensity: {MyAPIGateway.Session.SessionSettings.EncounterDensity}");
@@ -139,7 +164,7 @@ namespace Eem.Thraxus
             base.LoadData();
             const int eemPcuLimit = 500000;
             MyAPIGateway.Session.SessionSettings.EnableIngameScripts = true;
-            //MyAPIGateway.Session.SessionSettings.EnableDrones = true;
+            MyAPIGateway.Session.SessionSettings.EnableDrones = true;
             if (MyAPIGateway.Session.SessionSettings.PiratePCU < eemPcuLimit)
             {
                 MyAPIGateway.Session.SessionSettings.PiratePCU = eemPcuLimit;

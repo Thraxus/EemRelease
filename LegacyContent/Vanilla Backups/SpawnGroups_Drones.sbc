@@ -1,0 +1,684 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <SpawnGroups>
+        <!-- Factorum Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Assault_Support</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>100.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_AutomatedGunShip</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_AutomatedGunShip">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Automated GunShip</BeaconText>
+                    <Speed>10.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_AutomatedGunShip">
+                    <Position>
+                        <X>400.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Automated GunShip</BeaconText>
+                    <Speed>10.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_HighProfileEscort</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="HighProfileEscort">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>High Profile Escort</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>100.0</X>
+                        <Y>100.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_ReclaimerDrone</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="GE_Reclaimer">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Reclaimer</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_M2Barage</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_M2_Barage">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>M2 Barage</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>100.0</X>
+                        <Y>100.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>FactorumWarship</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="GE_FactorumWarshipC">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Factorum Warship</BeaconText>
+                    <Speed>1.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>FactorumShips</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_M2_Barage">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>M2 Barage</BeaconText>
+                    <Speed>1.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_M2_Barage">
+                    <Position>
+                        <X>200.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>M2 Barage</BeaconText>
+                    <Speed>1.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>200.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_Assault_Support">
+                    <Position>
+                        <X>200.0</X>
+                        <Y>200.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Assault Support Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="HighProfileEscort">
+                    <Position>
+                        <X>-200.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>High Profile Escort</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="HighProfileEscort">
+                    <Position>
+                        <X>-200.0</X>
+                        <Y>200.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>High Profile Escort</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+
+        <!-- Builder Faction Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Gunboat_B</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Gunboat_B">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Gunboat</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+
+		<!-- Mining Faction Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Gunboat</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Gunboat">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Gunboat</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+
+		<!-- Trade Faction Drones -->
+
+
+		<!-- Military Faction Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Harbinger</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Harbinger">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Harbinger</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Adjudicator</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Adjudicator">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Adjudicator</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_TwinrailDrone</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_TwinrailDrone">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Twinrail Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+
+		<!-- Pirate Faction Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>Drones_Pirate_Space_Light</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Pirate_Scimitar">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Scimitar</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DA_TripropAssaultDrone</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DA_TripropAssaultDrone">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Triprop Assault Drone</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DA_TwinTailedShiv</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DA_TwinTailedShiv">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Twin Tailed Shiv</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DA_Pirate_TwinTailedShiv</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DA_TwinTailedShiv">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Twin Tailed Shiv</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DA_BullyBot</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DA_BullyBot">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Bully Bot</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DA_Pirate_Bastion</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DA_Bastion">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>B-4 Bastion</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+            <RandomizedPaint>true</RandomizedPaint>
+        </SpawnGroup>
+
+
+		<!-- Universal Defense Drones -->
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Sentinel</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Sentinel">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Sentinel</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Enforcer</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Enforcer">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Enforcer</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_Avenger</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_Avenger">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Avenger</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+
+        <!-- Missile Drones -->
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_BummbleMissile</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_BumbleMissile">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+        
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_BummbleMissiles</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_BumbleMissile">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_BumbleMissile">
+                    <Position>
+                        <X>40.0</X>
+                        <Y>40.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Bummble Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_BumbleMissile">
+                    <Position>
+                        <X>-40.0</X>
+                        <Y>-40.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Bummble Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+
+        <SpawnGroup>
+            <Id>
+                <TypeId>SpawnGroupDefinition</TypeId>
+                <SubtypeId>DS_MilitaryMissile</SubtypeId>
+            </Id>
+            <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+            <IsEncounter>false</IsEncounter>
+            <IsPirate>true</IsPirate>
+            <ReactorsOn>true</ReactorsOn>
+            <Frequency>1</Frequency>
+            <Prefabs>
+                <Prefab SubtypeId="DS_MilitaryMissile">
+                    <Position>
+                        <X>0.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+                <Prefab SubtypeId="DS_MilitaryMissile">
+                    <Position>
+                        <X>200.0</X>
+                        <Y>0.0</Y>
+                        <Z>0.0</Z>
+                    </Position>
+                    <BeaconText>Missile</BeaconText>
+                    <Speed>0.0</Speed>
+                </Prefab>
+            </Prefabs>
+        </SpawnGroup>
+    </SpawnGroups>
+</Definitions>

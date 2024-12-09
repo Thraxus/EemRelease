@@ -1,0 +1,1714 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!--Begin BlockCategories -->
+  <!--Block Groups -->
+  <BlockVariantGroups>
+    <!-- Reactors -->
+    <BlockVariantGroup>
+      <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="PilotedRemoteControl" />
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <DisplayName>DisplayName_BlockGroup_RemoteControl</DisplayName>
+      <Description>Piloted Control Seats [Remote Control]</Description>
+      <Blocks>
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="LBPilotedSeat" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="PilotedControlSeat" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="PilotedOpenCockpit" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="PilotedFighterCockpit" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="SBCockpitPiloted" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="LBCockpitPiloted" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="LBPilotedSeat" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="SBPilotedSeat" />
+        <Block Type="MyObjectBuilder_RemoteControl" Subtype="LBDeadSeat" />
+      </Blocks>
+    </BlockVariantGroup>
+    <BlockVariantGroup>
+      <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="PilotedProgrammableBlock" />
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <DisplayName>DisplayName_BlockGroup_AutomationGroup</DisplayName>
+      <Description>Piloted Control Seats [Programmable Block]</Description>
+      <Blocks>
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="LBPilotedSeatPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="PilotedControlSeatPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="PilotedOpenCockpitPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="PilotedFighterCockpitPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="SBCockpitPilotedPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="LBCockpitPilotedPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="SBPilotedSeatPB" />
+        <Block Type="MyObjectBuilder_MyProgrammableBlock" Subtype="LBDeadSeatPB" />
+      </Blocks>
+    </BlockVariantGroup>
+    <BlockVariantGroup>
+      <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="PilotedControlBlock" />
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <DisplayName>DisplayName_Block_Cockpit2</DisplayName>
+      <Description>Piloted Control Seats [Control Seat]</Description>
+      <Blocks>
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="LBPilotedSeatCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="PilotedControlSeatCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="PilotedOpenCockpitCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="PilotedFighterCockpitCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="SBCockpitPilotedCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="LBCockpitPilotedCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="SBPilotedSeatCB" />
+        <Block Type="MyObjectBuilder_Cockpit" Subtype="LBDeadSeatCB" />
+      </Blocks>
+    </BlockVariantGroup>
+  </BlockVariantGroups>
+  <!--Block Entity Components-->
+  <EntityComponents>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMPilotedOpenCockpit</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMPilotedControlSeat</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMPilotedFighterCockpit</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMSBCockpitPiloted</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMLBCockpitPiloted</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMLBPilotedSeat</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMSBPilotedSeat</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+    <EntityComponent xsi:type="MyObjectBuilder_AutopilotComponentDefinition">
+      <Id>
+        <TypeId>AutopilotComponent</TypeId>
+        <SubtypeId>EEMLBDeadSeat</SubtypeId>
+      </Id>
+      <MinHeightAlignmentEnabled>false</MinHeightAlignmentEnabled>
+      <CoastingTestEnabled>false</CoastingTestEnabled>
+      <CourseCorrectionMaxDistanceSmallGrid>5</CourseCorrectionMaxDistanceSmallGrid>
+      <CourseCorrectionMaxDistanceLargeGrid>10</CourseCorrectionMaxDistanceLargeGrid>
+      <CourseCorrectionMaxThrustPercentage>50</CourseCorrectionMaxThrustPercentage>
+      <CourseCorrectionMaxRemainingRotationBeforeThrust>0.5</CourseCorrectionMaxRemainingRotationBeforeThrust>
+      <CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>0.2</CourseCorrectionMaxRemainingRotationBeforeThrustInPrecisionMode>
+      <CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>0.3</CourseCorrectionMaxDistanceInPrecisionModeGridSizeMultiple>
+      <PrecisionModeRotationVelocitySlowFactor>4</PrecisionModeRotationVelocitySlowFactor>
+      <RotationVelocitySlowFactorAutomaticBehavior>3</RotationVelocitySlowFactorAutomaticBehavior>
+      <RotationVelocitySlowFactorAutomaticBehaviorTreshold>0.1</RotationVelocitySlowFactorAutomaticBehaviorTreshold>
+    </EntityComponent>
+  </EntityComponents>
+  <EntityContainers>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedOpenCockpit</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="PilotedOpenCockpit" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedControlSeat</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="PilotedControlSeat" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedFighterCockpit</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="PilotedFighterCockpit" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMSBCockpitPiloted</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="SBCockpitPiloted" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBCockpitPiloted</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="LBCockpitPiloted" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBPilotedSeat</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="LBPilotedSeat" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMSBPilotedSeat</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="SBPilotedSeat" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+    <Container>
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBDeadSeat</SubtypeId>
+      </Id>
+      <DefaultComponents>
+        <Component BuilderType="MyObjectBuilder_AutopilotComponent" SubtypeId="LBDeadSeat" ForceCreate="true"/>
+      </DefaultComponents>
+    </Container>
+  </EntityContainers>
+  <!--Begin Cubeblocks definitions-->
+  <CubeBlocks>
+    <!--Begin Test Block-->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedOpenCockpit</SubtypeId>
+      </Id>
+      <DisplayName>AI Remote Open Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIOpenCockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\OpenCockpitPilot.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotedCockpitOpen</BlockPairName>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="128" ScreenWidth="9" ScreenHeight="2" />
+      </ScreenAreas>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <GuiVisible>false</GuiVisible>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedControlSeat</SubtypeId>
+      </Id>
+      <DisplayName>AI Remote Control Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\AIControlSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotControlSeat</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Fighter Cockpit Piloted -->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMPilotedFighterCockpit</SubtypeId>
+        <!-- Fighter cockpit -->
+      </Id>
+      <DisplayName>AI Remote Fighter Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIFighterCockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="3" y="4" z="6" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\CockpitFighterPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\small\CockpitFighterInterior.mwm</InteriorModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="2" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="MetalGrid" Count="10" />
+        <Component Subtype="InteriorPlate" Count="15" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Computer" Count="20" />
+        <Component Subtype="BulletproofGlass" Count="40" />
+        <Component Subtype="SteelPlate" Count="8" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="6" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3.5" />
+        <MountPoint Side="Back" StartX="0.5" StartY="3.5" EndX="2.5" EndY="4" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1.5" />
+        <MountPoint Side="Front" StartX="0.5" StartY="1.5" EndX="2.5" EndY="2" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Left" StartX="4" StartY="1" EndX="5" EndY="2" />
+        <MountPoint Side="Left" StartX="5" StartY="1" EndX="6" EndY="3" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="1" EndX="1" EndY="3" />
+        <MountPoint Side="Right" StartX="1" StartY="1" EndX="2" EndY="2" />
+      </MountPoints>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\small\CockpitFighterConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\small\CockpitFighterConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\small\CockpitFighterConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotFighterCockpit</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <GuiVisible>false</GuiVisible>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Small Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMSBCockpitPiloted</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Remote Piloted Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\Small\cockpitinterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Small\cockpitglass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="Construction" Count="10" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="5" />
+        <Component Subtype="Computer" Count="15" />
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="BulletproofGlass" Count="30" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="3" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="3" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <GuiVisible>false</GuiVisible>
+      <BlockPairName>PilotedCockpit</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Large Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBCockpitPiloted</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Remote Piloted Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitLrg</PrimarySound>
+      <InteriorModel>Models\Cubes\Large\CockpitInterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Large\CockpitGlass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="20" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="8" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="BulletproofGlass" Count="60" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.5" File="Models\Cubes\Large\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedCockpit</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+      <OxygenCapacity>60</OxygenCapacity>
+      <IsPressurized>true</IsPressurized>
+    </Definition>
+    <!-- PassengerSeat Piloted -->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBPilotedSeat</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>AI Remote Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedSeat</BlockPairName>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="Tablet" TextureResolution="256" ScreenWidth="13" ScreenHeight="9" Script="TSS_ArtificialHorizon" />
+        <ScreenArea Name="CockpitScreen_02" DisplayName="Arm Screen" TextureResolution="128" ScreenWidth="13" ScreenHeight="9" Script="TSS_ClockDigital" />
+      </ScreenAreas>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMSBPilotedSeat</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>AI Remote Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="30" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.4" StartY="0.6" EndX="2.1" EndY="2.5" Default="true"/>
+        <MountPoint Side="Back" StartX="0.4" StartY="0" EndX="2.1" EndY="2" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Small\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\PassengerSeatConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <GuiVisible>false</GuiVisible>
+      <BlockPairName>PilotedSeat</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Dead Pilot Seats and Cockpits -->
+    <Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+      <Id>
+        <TypeId>RemoteControl</TypeId>
+        <SubtypeId>EEMLBDeadSeat</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>Dead AI Remote Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Remote Control]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBDeadSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>LBDeadinSeat</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Programming Blocks Piloted Seats -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMPilotedOpenCockpitPB</SubtypeId>
+      </Id>
+      <DisplayName>AI Programming Open Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIOpenCockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\OpenCockpitPilot.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotedCockpitOpenPB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="128" ScreenWidth="9" ScreenHeight="2" />
+      </ScreenAreas>
+      <MirroringY>Z</MirroringY>
+      <GuiVisible>false</GuiVisible>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMPilotedControlSeatPB</SubtypeId>
+      </Id>
+      <DisplayName>AI Programming Control Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\AIControlSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotControlSeatPB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <GuiVisible>false</GuiVisible>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Fighter Cockpit Piloted -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMPilotedFighterCockpitPB</SubtypeId>
+        <!-- Fighter cockpit -->
+      </Id>
+      <DisplayName>AI Programming Fighter Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIFighterCockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="3" y="4" z="6" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\CockpitFighterPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\small\CockpitFighterInterior.mwm</InteriorModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="2" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="MetalGrid" Count="10" />
+        <Component Subtype="InteriorPlate" Count="15" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Computer" Count="20" />
+        <Component Subtype="BulletproofGlass" Count="40" />
+        <Component Subtype="SteelPlate" Count="8" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="6" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3.5" />
+        <MountPoint Side="Back" StartX="0.5" StartY="3.5" EndX="2.5" EndY="4" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1.5" />
+        <MountPoint Side="Front" StartX="0.5" StartY="1.5" EndX="2.5" EndY="2" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Left" StartX="4" StartY="1" EndX="5" EndY="2" />
+        <MountPoint Side="Left" StartX="5" StartY="1" EndX="6" EndY="3" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="1" EndX="1" EndY="3" />
+        <MountPoint Side="Right" StartX="1" StartY="1" EndX="2" EndY="2" />
+      </MountPoints>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\small\CockpitFighterConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\small\CockpitFighterConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\small\CockpitFighterConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotFighterCockpitPB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <GuiVisible>false</GuiVisible>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Small Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMSBCockpitPilotedPB</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Programming Piloted Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\Small\cockpitinterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Small\cockpitglass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="Construction" Count="10" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="5" />
+        <Component Subtype="Computer" Count="15" />
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="BulletproofGlass" Count="30" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="3" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="3" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedCockpitPB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Large Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMLBCockpitPilotedPB</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Programming Piloted Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitLrg</PrimarySound>
+      <InteriorModel>Models\Cubes\Large\CockpitInterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Large\CockpitGlass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="20" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="8" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="BulletproofGlass" Count="60" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.5" File="Models\Cubes\Large\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedCockpitPB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <GuiVisible>false</GuiVisible>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+      <OxygenCapacity>60</OxygenCapacity>
+      <IsPressurized>true</IsPressurized>
+    </Definition>
+    <!-- PassengerSeat Piloted -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMLBPilotedSeatPB</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>AI Programming Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedSeatPB</BlockPairName>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="Tablet" TextureResolution="256" ScreenWidth="13" ScreenHeight="9" Script="TSS_ArtificialHorizon" />
+        <ScreenArea Name="CockpitScreen_02" DisplayName="Arm Screen" TextureResolution="128" ScreenWidth="13" ScreenHeight="9" Script="TSS_ClockDigital" />
+      </ScreenAreas>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMSBPilotedSeatPB</SubtypeId>
+        <!-- Small block passenger seat -->
+      </Id>
+      <DisplayName>AI Programming Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="30" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.4" StartY="0.6" EndX="2.1" EndY="2.5" Default="true"/>
+        <MountPoint Side="Back" StartX="0.4" StartY="0" EndX="2.1" EndY="2" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Small\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\PassengerSeatConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedSeatPB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Dead Pilot Seats and Cockpits -->
+    <Definition xsi:type="MyObjectBuilder_ProgrammableBlockDefinition">
+      <Id>
+        <TypeId>MyProgrammableBlock</TypeId>
+        <SubtypeId>EEMLBDeadSeatPB</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>Dead AI Programming Piloted Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Programmable Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBDeadSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>LBDeadinSeatPB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>false</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <GuiVisible>false</GuiVisible>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMPilotedOpenCockpitCB</SubtypeId>
+      </Id>
+      <DisplayName>AI Control Open Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIOpenCockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\OpenCockpitPilot.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotedCockpitOpenCB</BlockPairName>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="128" ScreenWidth="9" ScreenHeight="2" />
+      </ScreenAreas>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMPilotedControlSeatCB</SubtypeId>
+      </Id>
+      <DisplayName>AI Control Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AIControlSeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\AIControlSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="15" />
+        <Component Subtype="Motor" Count="2" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Construction" Count="5" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.25" EndX="0.7" EndY="0.85" Default="true" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\CockpitOpenConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\CockpitOpenConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitOpenConstruction_3.mwm" />
+      </BuildProgressModels>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="512" ScreenWidth="5" ScreenHeight="3" />
+      </ScreenAreas>
+      <BlockPairName>PilotControlSeatCB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Fighter Cockpit Piloted -->
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMPilotedFighterCockpitCB</SubtypeId>
+        <!-- Fighter cockpit -->
+      </Id>
+      <DisplayName>AI Fighter Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AIFighterCockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="3" y="4" z="6" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\CockpitFighterPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\small\CockpitFighterInterior.mwm</InteriorModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="2" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="MetalGrid" Count="10" />
+        <Component Subtype="InteriorPlate" Count="15" />
+        <Component Subtype="Display" Count="4" />
+        <Component Subtype="Computer" Count="20" />
+        <Component Subtype="BulletproofGlass" Count="40" />
+        <Component Subtype="SteelPlate" Count="8" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="6" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3.5" />
+        <MountPoint Side="Back" StartX="0.5" StartY="3.5" EndX="2.5" EndY="4" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1.5" />
+        <MountPoint Side="Front" StartX="0.5" StartY="1.5" EndX="2.5" EndY="2" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Left" StartX="4" StartY="1" EndX="5" EndY="2" />
+        <MountPoint Side="Left" StartX="5" StartY="1" EndX="6" EndY="3" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="6" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="1" EndX="1" EndY="3" />
+        <MountPoint Side="Right" StartX="1" StartY="1" EndX="2" EndY="2" />
+      </MountPoints>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\small\CockpitFighterConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\small\CockpitFighterConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\small\CockpitFighterConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>PilotFighterCockpitCB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <GuiVisible>false</GuiVisible>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Small Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMSBCockpitPilotedCB</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Control Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitSm</PrimarySound>
+      <InteriorModel>Models\Cubes\Small\cockpitinterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Small\cockpitglass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="Construction" Count="10" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="5" />
+        <Component Subtype="Computer" Count="15" />
+        <Component Subtype="SteelPlate" Count="5" />
+        <Component Subtype="BulletproofGlass" Count="30" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="3" EndY="3" Default="true" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="3" />
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="3" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="3" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <GuiVisible>false</GuiVisible>
+      <BlockPairName>PilotedCockpitCB</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <MirroringY>Z</MirroringY>
+      <ResourceSinkGroup>Utility</ResourceSinkGroup>
+      <RequiredPowerInput>0.0003</RequiredPowerInput>
+      <EnableFirstPerson>false</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <Public>false</Public>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Large Cockpit -->
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMLBCockpitPilotedCB</SubtypeId>
+        <!-- Small cockpit -->
+      </Id>
+      <DisplayName>AI Control Cockpit</DisplayName>
+      <Icon>Textures\GUI\Icons\AICockpit.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBCockpitPiloted.mwm</Model>
+      <PrimarySound>BlockCockpitLrg</PrimarySound>
+      <InteriorModel>Models\Cubes\Large\CockpitInterior.mwm</InteriorModel>
+      <GlassModel>Models\Cubes\Large\CockpitGlass.mwm</GlassModel>
+      <Components>
+        <Component Subtype="SteelPlate" Count="20" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Motor" Count="1" />
+        <Component Subtype="Display" Count="8" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="SteelPlate" Count="10" />
+        <Component Subtype="BulletproofGlass" Count="60" />
+      <Component Subtype="EEMPilotSoul" Count="1" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.5" File="Models\Cubes\Large\CockpitConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Large\CockpitConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>OutsideVoxel</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>PilotedCockpitCB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>50</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+      <OxygenCapacity>60</OxygenCapacity>
+      <IsPressurized>true</IsPressurized>
+    </Definition>
+    <!-- PassengerSeat Piloted -->
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMLBPilotedSeatCB</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>AI Control Seat (Cockpit)</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="Tablet" TextureResolution="256" ScreenWidth="13" ScreenHeight="9" Script="TSS_ArtificialHorizon" />
+        <ScreenArea Name="CockpitScreen_02" DisplayName="Arm Screen" TextureResolution="128" ScreenWidth="13" ScreenHeight="9" Script="TSS_ClockDigital" />
+      </ScreenAreas>
+      <BlockPairName>PilotedSeatCB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMSBPilotedSeatCB</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>AI Control Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Small</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="3" y="3" z="3" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\SBSeatPiloted.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="30" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.4" StartY="0.6" EndX="2.1" EndY="2.5" Default="true"/>
+        <MountPoint Side="Back" StartX="0.4" StartY="0" EndX="2.1" EndY="2" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Small\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\PassengerSeatConstruction_2.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <GuiVisible>false</GuiVisible>
+      <BlockPairName>PilotedSeatCB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+    <!-- Dead Pilot Seats and Cockpits -->
+    <Definition xsi:type="MyObjectBuilder_CockpitDefinition">
+      <Id>
+        <TypeId>Cockpit</TypeId>
+        <SubtypeId>EEMLBDeadSeatCB</SubtypeId>
+        <!-- Large block passenger seat -->
+      </Id>
+      <DisplayName>Dead AI Control Seat</DisplayName>
+      <Icon>Textures\GUI\Icons\AISeat.dds</Icon>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Description>AI Piloted Control [Control Seat]</Description>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\LBDeadSeat.mwm</Model>
+      <Components>
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="Construction" Count="20" />
+        <Component Subtype="Computer" Count="100" />
+        <Component Subtype="InteriorPlate" Count="10" />
+        <Component Subtype="EEMPilotSoul" Count="1" />
+      </Components>
+      <CriticalComponent Subtype="EEMPilotSoul" Index="0" />
+      <MountPoints>
+        <MountPoint Side="Bottom" StartX="0.3" StartY="0.6" EndX="0.7" EndY="1" Default="true"/>
+        <MountPoint Side="Back" StartX="0.3" StartY="0" EndX="0.7" EndY="0.4" />
+      </MountPoints>
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\PassengerSeatConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\PassengerSeatConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\PassengerSeatConstruction_3.mwm" />
+      </BuildProgressModels>
+      <VoxelPlacement>
+        <StaticMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </StaticMode>
+        <DynamicMode>
+          <PlacementMode>Volumetric</PlacementMode>
+          <MaxAllowed>0.2</MaxAllowed>
+          <MinAllowed>0</MinAllowed>
+        </DynamicMode>
+      </VoxelPlacement>
+      <BlockPairName>LBDeadinSeatCB</BlockPairName>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+      <EdgeType>Light</EdgeType>
+      <GuiVisible>false</GuiVisible>
+      <BuildTimeSeconds>15</BuildTimeSeconds>
+      <EnableFirstPerson>true</EnableFirstPerson>
+      <EnableShipControl>true</EnableShipControl>
+      <EnableBuilderCockpit>false</EnableBuilderCockpit>
+      <IsPressurized>false</IsPressurized>
+      <DamageEffectId>214</DamageEffectId>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+    </Definition>
+  </CubeBlocks>
+  <BlockPositions>
+    <BlockPosition>
+      <Name>PilotControlSeat</Name>
+      <Position>
+        <X>7</X>
+        <Y>4</Y>
+      </Position>
+    </BlockPosition>
+    <BlockPosition>
+      <Name>PilotControlSeatPB</Name>
+      <Position>
+        <X>8</X>
+        <Y>4</Y>
+      </Position>
+    </BlockPosition>
+    <BlockPosition>
+      <Name>PilotControlSeatCB</Name>
+      <Position>
+        <X>9</X>
+        <Y>4</Y>
+      </Position>
+    </BlockPosition>
+  </BlockPositions>
+  <!--End Block Positions-->
+</Definitions>
