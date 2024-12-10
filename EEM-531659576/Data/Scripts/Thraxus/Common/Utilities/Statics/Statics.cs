@@ -1,9 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Eem.Thraxus.Common.Enums;
-using Eem.Thraxus.Common.Utilities.Tools.Logging;
-using Sandbox.Game;
+using Eem.Thraxus.Common.Extensions;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces;
@@ -17,6 +18,7 @@ using VRageMath;
 using IMyCubeGrid = VRage.Game.ModAPI.IMyCubeGrid;
 using IMyEntity = VRage.ModAPI.IMyEntity;
 using IMyInventory = VRage.Game.ModAPI.IMyInventory;
+
 
 namespace Eem.Thraxus.Common.Utilities.Statics
 {
@@ -71,7 +73,7 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 			List<MyEntity> pruneList = new List<MyEntity>();
 			MyGamePruningStructure.GetAllTopMostEntitiesInSphere(ref pruneSphere, pruneList);
 			List<IMyPlayer> players = new List<IMyPlayer>();
-			MyAPIGateway.Multiplayer.Players.GetPlayers(players, x => ValidPlayer(x.IdentityId));
+			MyAPIGateway.Multiplayer.Players.GetPlayers(players, x => x.IdentityId.ValidPlayer());
 			pruneList.RemoveAll(x => players.Any(y => y.IdentityId != x.EntityId));
 			foreach (MyEntity ent in pruneList)
 			{
@@ -87,33 +89,33 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 			return myPlayers.FirstOrDefault();
 		}
 
-		public static IMyIdentity GetIdentityById(long playerId)
+		public static IMyIdentity GetIdentityById(this long playerId)
 		{
 			List<IMyIdentity> identityList = new List<IMyIdentity>();
 			MyAPIGateway.Players.GetAllIdentites(identityList);
 			return identityList.FirstOrDefault(x => x.IdentityId == playerId);
 		}
 
-		public static void CreateFakeSmallExplosion(Vector3D position)
-		{
-			MyExplosionInfo explosionInfo = new MyExplosionInfo()
-			{
-				PlayerDamage = 0.0f,
-				Damage = 0f,
-				ExplosionType = MyExplosionTypeEnum.WARHEAD_EXPLOSION_02,
-				ExplosionSphere = new BoundingSphereD(position, 0d),
-				LifespanMiliseconds = 0,
-				ParticleScale = 1f,
-				Direction = Vector3.Down,
-				VoxelExplosionCenter = position,
-				ExplosionFlags = MyExplosionFlags.CREATE_PARTICLE_EFFECT,
-				VoxelCutoutScale = 0f,
-				PlaySound = true,
-				ApplyForceAndDamage = false,
-				ObjectsRemoveDelayInMiliseconds = 0
-			};
-			MyExplosions.AddExplosion(ref explosionInfo);
-		}
+		//public static void CreateFakeSmallExplosion(Vector3D position)
+		//{
+		//	MyExplosionInfo explosionInfo = new MyExplosionInfo()
+		//	{
+		//		PlayerDamage = 0.0f,
+		//		Damage = 0f,
+		//		ExplosionType = MyExplosionTypeEnum.WARHEAD_EXPLOSION_02,
+		//		ExplosionSphere = new BoundingSphereD(position, 0d),
+		//		LifespanMiliseconds = 0,
+		//		ParticleScale = 1f,
+		//		Direction = Vector3.Down,
+		//		VoxelExplosionCenter = position,
+		//		ExplosionFlags = MyExplosionFlags.CREATE_PARTICLE_EFFECT,
+		//		VoxelCutoutScale = 0f,
+		//		PlaySound = true,
+		//		ApplyForceAndDamage = false,
+		//		ObjectsRemoveDelayInMiliseconds = 0
+		//	};
+		//	MyExplosions.AddExplosion(ref explosionInfo);
+		//}
 
 		public static int CalculateGridThreat(MyCubeGrid grid)
 		{
@@ -240,7 +242,7 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 			Vector3D missileToTarget = Vector3D.Normalize(targetPosition - missilePos);
 			Vector3D relativeVelocity = targetVelocity - missileVelocity;
 			Vector3D parallelVelocity = relativeVelocity.Dot(missileToTarget) * missileToTarget;
-			Vector3D normalVelocity = (relativeVelocity - parallelVelocity);
+			Vector3D normalVelocity = relativeVelocity - parallelVelocity;
 
 			Vector3D normalMissileAcceleration = normalVelocity * compensationFactor;
 
@@ -256,54 +258,38 @@ namespace Eem.Thraxus.Common.Utilities.Statics
 			return Math.Sqrt(diff) * missileToTarget + normalMissileAcceleration;
 		}
 
-		public static IMyFaction GetFactionById(this long factionId)
-		{
-			return MyAPIGateway.Session.Factions.TryGetFactionById(factionId);
-		}
 
-		public static bool IsPlayerFaction(this long faction)
-		{
-			return !MyAPIGateway.Session.Factions.TryGetFactionById(faction).IsEveryoneNpc();
-		}
+        public static bool ValidateFactions(IMyFaction leftFaction, IMyFaction rightFaction)
+        {
+            return leftFaction == null || rightFaction == null;
+        }
 
-		public static bool IsNpcFaction(this long faction)
-		{
-			return MyAPIGateway.Session.Factions.TryGetFactionById(faction).IsEveryoneNpc();
-		}
+        #region Debug methods - should not be used in production code
 
-		public static bool ValidateFactions(IMyFaction leftFaction, IMyFaction rightFaction)
-		{
-			return (leftFaction == null || rightFaction == null);
-		}
-
-		/// <summary>
-		/// Utility method. Checks whether an identity is a bot or not
-		/// </summary>
-		/// <param name="identityId"></param>
-		/// <returns>Returns true if the identity is not a bot</returns>
-		public static bool ValidPlayer(long identityId)
-		{
-			return MyAPIGateway.Players.TryGetSteamId(identityId) != 0;
-		}
-
-		#region Debug methods - should not be used in production code
-
-		public static void PrintTerminalActions(IMyEntity block)
+        public static string PrintTerminalActions(IMyEntity block)
 		{
 			IMyTerminalBlock myTerminalBlock = block as IMyTerminalBlock;
-			if (myTerminalBlock == null) return;
+			if (myTerminalBlock == null) return "";
 			List<ITerminalAction> results = new List<ITerminalAction>();
 			myTerminalBlock.GetActions(results);
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine();
+			sb.AppendLine();
+			sb.AppendFormat("{0,-2}Terminal Actions", " ");
+			sb.AppendLine();
 			foreach (ITerminalAction terminalAction in results)
 			{
-				StaticLog.WriteToLog("PrintTerminalActions", $"Actions: {terminalAction.Id} | {terminalAction.Name}", LogType.General);
+				sb.AppendFormat("{0,-4}[{1}]{2}", " ", terminalAction.Id, terminalAction.Name);
+				sb.AppendLine();
 			}
+			sb.AppendLine();
+			return sb.ToString();
 		}
 
-		public static void AddGpsLocation(string message, Vector3D location)
-		{
-			MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.LocalHumanPlayer.IdentityId, MyAPIGateway.Session.GPS.Create(message, "", location, true));
-		}
+        public static void AddGpsLocation(string message, Vector3D location)
+        {
+	        MyAPIGateway.Session.GPS.AddGps(MyAPIGateway.Session.LocalHumanPlayer.IdentityId, MyAPIGateway.Session.GPS.Create(message, "", location, true));
+        }
 
 		#endregion
 

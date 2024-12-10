@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Eem</RootNamespace>
     <AssemblyName>Eem</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -589,7 +589,6 @@
     <None Include="EEM-531659576\Data\RespawnShips.sbc" />
     <None Include="EEM-531659576\Data\SoundBlock.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Cargoships.sbc" />
-    <None Include="EEM-531659576\Data\SpawnGroups_EEM_Cargoships_AMPH.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_CargoShips_Disabled.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Drones.sbc" />
     <None Include="EEM-531659576\Data\SpawnGroups_EEM_Encounters.sbc" />
@@ -642,33 +641,51 @@
     <None Include="EEM-531659576\VoxelMaps\wi_reno.vx2" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\AiSessionCore.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotAi.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotBase.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotFabric.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotTypeBase.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotTypeFighter.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotTypeFreighter.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\BotTypeStation.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseClosableClass.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotAiCore.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\EemCore.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotAi.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotBase.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotDamageHandler.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotTypeBase.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotTypeFighter.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotTypeFreighter.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Bots\BotTypeStation.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseController.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseFactory.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseGameLogicComp.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseLoggingClass.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseSessionComp.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseXmlUserSettings.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Enums\CompType.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Enums\FactionRelationship.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Enums\FactionTypes.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Enums\LogType.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Extensions\Bools.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Extensions\Longs.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Generics\ActionQueue.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Generics\ObjectPool.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IActionQueue.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IClose.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\ICommon.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IHaveEvents.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IInit.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\ILog.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IReset.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IResetWithEvent.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IUpdate.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Models\BufferedBinaryReader.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Models\FastQueue.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Settings.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\References.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\ExistingFactions.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\GameSettings.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\InstalledMods.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Reporting\StoredItentities.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\FileHandlers\Load.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\FileHandlers\Save.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Statics\Statics.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Statics\ThrusterCalculations.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Statics\VectorManipulations.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Logging\Log.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Logging\StaticLog.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Networking\ChatHandler.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Networking\MessageBase.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Networking\Messages\ExampleMessage.cs" />
@@ -704,7 +721,6 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Factions\Utilities\Messages\Ucmf.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Factions\Utilities\StaticMethods.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Helpers\CleanEem.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Helpers\CleanEemRc.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Helpers\Constants.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Helpers\DamageHelper.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Helpers\DebugHelper.cs" />
@@ -714,10 +730,6 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Networking\ChatMessages.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Networking\MessageBase.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Networking\Messaging.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\SpawnManager\SpawnManagerCore.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Log.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Profiler.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\Queue.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EEM-531659576\Data\Localization\Eem\Eem_Strings.resx" />

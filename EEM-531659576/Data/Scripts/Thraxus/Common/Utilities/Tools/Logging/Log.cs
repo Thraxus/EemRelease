@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using Eem.Thraxus.Common.Models;
-using Eem.Thraxus.Common.Utilities.Tools.Networking;
 using Sandbox.ModAPI;
-using VRage.Game;
+using VRage;
+using VRage.Utils;
 
 namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 {
@@ -13,9 +12,7 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 
 		private TextWriter TextWriter { get; set; }
 
-		private static string TimeStamp => DateTime.Now.ToString("MMddyy-HH:mm:ss:ffff");
-
-		private readonly FastQueue<string> _messageQueue = new FastQueue<string>(20);
+		private static string TimeStamp => DateTime.Now.ToString("ddMMMyy_HH:mm:ss:ffff");
 
 		private const int DefaultIndent = 4;
 
@@ -27,7 +24,7 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 			Init();
 		}
 
-		private void Init()
+        private void Init()
 		{
 			if (TextWriter != null) return;
 			TextWriter = MyAPIGateway.Utilities.WriteFileInLocalStorage(LogName, typeof(Log));
@@ -36,45 +33,32 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Logging
 		public void Close()
 		{
 			TextWriter?.Flush();
-			TextWriter?.Close();
+            TextWriter?.Dispose();
+            TextWriter?.Close();
 			TextWriter = null;
 		}
 
-		public void WriteToLog(string caller, string message, bool showOnHud = false, int duration = Settings.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
+		public void WriteGeneral(string caller = "", string message = "")
 		{
 			BuildLogLine(caller, message);
-			if (!showOnHud) return;
-			BuildHudNotification(caller, message, duration, color);
 		}
 
-		public void GetTailMessages()
-		{
-			lock (_lockObject)
-			{
-				MyAPIGateway.Utilities.ShowMissionScreen(LogName, "", "", string.Join($"{Environment.NewLine}{Environment.NewLine}", _messageQueue.GetQueue()));
-			}
-		}
-
-		private static void BuildHudNotification(string caller, string message, int duration, string color)
-		{
-			Messaging.ShowLocalNotification($"{caller}{Indent}{message}", duration, color);
-		}
-
-		private readonly object _lockObject = new object();
+        private readonly FastResourceLock _lockObject = new FastResourceLock();
 
 		private void BuildLogLine(string caller, string message)
 		{
-			lock (_lockObject)
-			{
-				WriteLine($"{TimeStamp}{Indent}{caller}{Indent}{message}");
-			}
+            using (_lockObject.AcquireExclusiveUsing())
+            {
+                var newMessage = $"{TimeStamp}{Indent}{caller}{Indent}{message}";
+                WriteLine(newMessage);
+                MyLog.Default.WriteLineAndConsole(newMessage);
+            }
 		}
 
 		private void WriteLine(string line)
 		{
-			_messageQueue?.Enqueue(line);
-			TextWriter?.WriteLine(line);
-			TextWriter?.Flush();
+            TextWriter?.WriteLine(line);
+            TextWriter?.Flush();
 		}
 	}
 }

@@ -1,28 +1,19 @@
-﻿using Eem.Thraxus.Common.Enums;
-using Eem.Thraxus.Common.Utilities.Tools.Logging;
-using VRage.Game.Components;
+﻿using VRage.Game.Components;
+using VRage.ObjectBuilders;
 
 namespace Eem.Thraxus.Common.BaseClasses
 {
-	internal abstract class BaseGameLogicComp : MyGameLogicComponent
+	public abstract class BaseGameLogicComp : MyGameLogicComponent
 	{
 		protected string EntityName = "PlaceholderName";
 		protected long EntityId = 0L;
 		protected long Ticks;
 
-		public void WriteToLog(string caller, string message, LogType logType)
+		public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
 		{
-			switch (logType)
-			{
-				case LogType.General:
-					GeneralLog(caller, message);
-					return;
-				case LogType.Exception:
-					ExceptionLog(caller, message);
-					return;
-				default:
-					return;
-			}
+			// Always return base.GetObjectBuilder(); after your code! 
+			// Do all saving here, make sure to return the OB when done;
+			return base.GetObjectBuilder(copy);
 		}
 
 		public override void UpdateBeforeSimulation()
@@ -33,15 +24,5 @@ namespace Eem.Thraxus.Common.BaseClasses
 		}
 
 		protected abstract void TickTimer();
-
-		private void GeneralLog(string caller, string message)
-		{
-			StaticLog.WriteToLog($"{EntityName} ({EntityId}): {caller}", message, LogType.General);
-		}
-
-		private void ExceptionLog(string caller, string message)
-		{
-			StaticLog.WriteToLog($"{EntityName} ({EntityId}): {caller}", $"Exception! {message}", LogType.Exception);
-		}
 	}
 }

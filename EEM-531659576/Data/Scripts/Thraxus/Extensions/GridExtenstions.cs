@@ -7,289 +7,284 @@ using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.ModAPI;
-using VRage.ModAPI;
 
 namespace Eem.Thraxus.Extensions
 {
-	public static class GridExtenstions
-	{
-		/// <summary>
-		/// Returns world speed cap, in m/s.
-		/// </summary>
-		public static float GetSpeedCap(this IMyShipController ShipController)
-		{
-			switch (ShipController.CubeGrid.GridSizeEnum)
-			{
-				case MyCubeSize.Small:
-					return MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
-				case MyCubeSize.Large:
-					return MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed;
-				default:
-					return 100;
-			}
-		}
+    public static class GridExtenstions
+    {
+        /// <summary>
+        /// Returns world speed cap, in m/s.
+        /// </summary>
+        public static float GetSpeedCap(this IMyShipController shipController)
+        {
+            switch (shipController.CubeGrid.GridSizeEnum)
+            {
+                case MyCubeSize.Small:
+                    return MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
+                case MyCubeSize.Large:
+                    return MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed;
+                default:
+                    return 100;
+            }
+        }
 
-		/// <summary>
-		/// Returns world speed cap ratio to default cap of 100 m/s.
-		/// </summary>
-		//public static float GetSpeedCapRatioToDefault(this IMyShipController ShipController)
-		//{
-		//	return ShipController.GetSpeedCap() / 100;
-		//}
+        /// <summary>
+        /// Returns world speed cap ratio to default cap of 100 m/s.
+        /// </summary>
+        //public static float GetSpeedCapRatioToDefault(this IMyShipController ShipController)
+        //{
+        //	return ShipController.GetSpeedCap() / 100;
+        //}
 
-		public static IMyPlayer FindControllingPlayer(this IMyCubeGrid Grid, bool Write = true)
-		{
-			try
-			{
-				IMyPlayer Player = null;
-				IMyGridTerminalSystem Term = Grid.GetTerminalSystem();
-				List<IMyShipController> ShipControllers = Term.GetBlocksOfType<IMyShipController>(collect: x => x.IsUnderControl);
-				if (ShipControllers.Count == 0)
-				{
-					ShipControllers = Term.GetBlocksOfType<IMyShipController>(x => x.GetBuiltBy() != 0);
-					if (ShipControllers.Count > 0)
-					{
-						IMyShipController MainController = ShipControllers.FirstOrDefault(x => x.IsMainCockpit()) ?? ShipControllers.First();
-						long ID = MainController.GetBuiltBy();
-						Player = MyAPIGateway.Players.GetPlayerById(ID);
-						if (Write && Player != null) Grid.DebugWrite("Grid.FindControllingPlayer", $"Found cockpit built by player {Player.DisplayName}.");
-						return Player;
-					}
-					if (Write) Grid.DebugWrite("Grid.FindControllingPlayer", "No builder player was found.");
-					return null;
-				}
+        public static IMyPlayer FindControllingPlayer(this IMyCubeGrid grid, bool write = true)
+        {
+            try
+            {
+                IMyPlayer player = null;
+                IMyGridTerminalSystem term = grid.GetTerminalSystem();
+                List<IMyShipController> shipControllers = term.GetBlocksOfType<IMyShipController>(collect: x => x.IsUnderControl);
+                if (shipControllers.Count == 0)
+                {
+                    shipControllers = term.GetBlocksOfType<IMyShipController>(x => x.GetBuiltBy() != 0);
+                    if (shipControllers.Count > 0)
+                    {
+                        IMyShipController mainController = shipControllers.FirstOrDefault(x => x.IsMainCockpit()) ?? shipControllers.First();
+                        long id = mainController.GetBuiltBy();
+                        player = MyAPIGateway.Players.GetPlayerById(id);
+                        if (write && player != null) grid.DebugWrite("Grid.FindControllingPlayer", $"Found cockpit built by player {player.DisplayName}.");
+                        return player;
+                    }
+                    if (write) grid.DebugWrite("Grid.FindControllingPlayer", "No builder player was found.");
+                    return null;
+                }
 
-				Player = MyAPIGateway.Players.GetPlayerById(ShipControllers.First().ControllerInfo.ControllingIdentityId);
-				if (Write && Player != null) Grid.DebugWrite("Grid.FindControllingPlayer", $"Found player in control: {Player.DisplayName}");
-				return Player;
-			}
-			catch (Exception Scrap)
-			{
-				Grid.LogError("Grid.FindControllingPlayer", Scrap);
-				return null;
-			}
-		}
+                player = MyAPIGateway.Players.GetPlayerById(shipControllers.First().ControllerInfo.ControllingIdentityId);
+                if (write && player != null) grid.DebugWrite("Grid.FindControllingPlayer", $"Found player in control: {player.DisplayName}");
+                return player;
+            }
+            catch (Exception scrap)
+            {
+                grid.LogError("Grid.FindControllingPlayer", scrap);
+                return null;
+            }
+        }
 
-		//public static bool HasCockpit(this IMyCubeGrid Grid)
-		//{
-		//	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		//	Grid.GetBlocks(blocks, x => x is IMyCockpit);
-		//	return blocks.Count > 0;
-		//}
+        //public static bool HasCockpit(this IMyCubeGrid Grid)
+        //{
+        //	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+        //	Grid.GetBlocks(blocks, x => x is IMyCockpit);
+        //	return blocks.Count > 0;
+        //}
 
-		//public static bool HasRemote(this IMyCubeGrid Grid)
-		//{
-		//	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		//	Grid.GetBlocks(blocks, x => x is IMyRemoteControl);
-		//	return blocks.Count > 0;
-		//}
+        //public static bool HasRemote(this IMyCubeGrid Grid)
+        //{
+        //	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+        //	Grid.GetBlocks(blocks, x => x is IMyRemoteControl);
+        //	return blocks.Count > 0;
+        //}
 
-		//public static bool HasShipController(this IMyCubeGrid Grid)
-		//{
-		//	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		//	Grid.GetBlocks(blocks, x => x is IMyShipController);
-		//	return blocks.Count > 0;
-		//}
+        //public static bool HasShipController(this IMyCubeGrid Grid)
+        //{
+        //	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+        //	Grid.GetBlocks(blocks, x => x is IMyShipController);
+        //	return blocks.Count > 0;
+        //}
 
-		public static IMyFaction GetOwnerFaction(this IMyCubeGrid Grid, bool RecalculateOwners = false)
-		{
-			try
-			{
-				if (RecalculateOwners)
-					(Grid as MyCubeGrid).RecalculateOwners();
+        public static IMyFaction GetOwnerFaction(this IMyCubeGrid grid, bool recalculateOwners = false)
+        {
+            try
+            {
+                if (recalculateOwners)
+                    (grid as MyCubeGrid).RecalculateOwners();
 
-				IMyFaction FactionFromBigowners = null;
-				IMyFaction Faction = null;
-				if (Grid.BigOwners.Count > 0 && Grid.BigOwners[0] != 0)
-				{
-					long OwnerID = Grid.BigOwners[0];
-					FactionFromBigowners = GeneralExtensions.FindOwnerFactionById(OwnerID);
-				}
-				else
-				{
-					Grid.LogError("Grid.GetOwnerFaction", new Exception("Cannot get owner faction via BigOwners.", new Exception("BigOwners is empty.")));
-				}
+                IMyFaction factionFromBigowners = null;
+                IMyFaction faction = null;
+                if (grid.BigOwners.Count > 0 && grid.BigOwners[0] != 0)
+                {
+                    long ownerId = grid.BigOwners[0];
+                    factionFromBigowners = GeneralExtensions.FindOwnerFactionById(ownerId);
+                }
+                else
+                {
+                    grid.LogError("Grid.GetOwnerFaction", new Exception("Cannot get owner faction via BigOwners.", new Exception("BigOwners is empty.")));
+                }
 
-				IMyGridTerminalSystem Term = Grid.GetTerminalSystem();
-				List<IMyTerminalBlock> AllTermBlocks = new List<IMyTerminalBlock>();
-				Term.GetBlocks(AllTermBlocks);
+                IMyGridTerminalSystem term = grid.GetTerminalSystem();
+                List<IMyTerminalBlock> allTermBlocks = new List<IMyTerminalBlock>();
+                term.GetBlocks(allTermBlocks);
 
-				if (AllTermBlocks.Empty())
-				{
-					Grid.DebugWrite("Grid.GetOwnerFaction", $"Terminal system is empty!");
-					return null;
-				}
+                if (allTermBlocks.Count == 0)
+                {
+                    grid.DebugWrite("Grid.GetOwnerFaction", $"Terminal system is empty!");
+                    return null;
+                }
 
-				IGrouping<string, IMyTerminalBlock> BiggestOwnerGroup = AllTermBlocks.GroupBy(x => x.GetOwnerFactionTag()).OrderByDescending(gp => gp.Count()).FirstOrDefault();
-				if (BiggestOwnerGroup != null)
-				{
-					string factionTag = BiggestOwnerGroup.Key;
-					Faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(factionTag);
-					if (Faction != null)
-						Grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {factionTag} via terminal system");
-					return Faction ?? FactionFromBigowners;
-				}
+                IGrouping<string, IMyTerminalBlock> biggestOwnerGroup = allTermBlocks.GroupBy(x => x.GetOwnerFactionTag()).OrderByDescending(gp => gp.Count()).FirstOrDefault();
+                if (biggestOwnerGroup != null)
+                {
+                    string factionTag = biggestOwnerGroup.Key;
+                    faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(factionTag);
+                    if (faction != null)
+                        grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {factionTag} via terminal system");
+                    return faction ?? factionFromBigowners;
+                }
 
-				Grid.DebugWrite("Grid.GetOwnerFaction", $"CANNOT GET FACTION TAGS FROM TERMINALSYSTEM!");
-				List<IMyShipController> Controllers = Grid.GetBlocks<IMyShipController>();
-				if (Controllers.Any())
-				{
-					List<IMyShipController> MainControllers;
+                grid.DebugWrite("Grid.GetOwnerFaction", $"CANNOT GET FACTION TAGS FROM TERMINAL SYSTEM!");
+                var controllers = grid.GetFatBlocks<IMyShipController>().ToList();// .GetBlocks<IMyShipController>();
+                //List<IMyShipController> controllers = grid.GetBlocks<IMyShipController>();
+                if (!controllers.Any())
+                {
+                    faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(allTermBlocks.First().GetOwnerFactionTag());
+                    if (faction != null)
+                    {
+                        grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {faction.Tag} via first terminal block");
+                        return faction ?? factionFromBigowners;
+                    }
 
-					if (Controllers.Any(x => x.IsMainCockpit(), out MainControllers))
-					{
-						Faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(MainControllers[0].GetOwnerFactionTag());
-						if (Faction != null)
-						{
-							Grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {Faction.Tag} via main cockpit");
-							return Faction ?? FactionFromBigowners;
-						}
-					} // Controls falls down if faction was not found by main cockpit
+                    grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
+                    return faction ?? factionFromBigowners;
+                }
 
-					Faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(Controllers[0].GetOwnerFactionTag());
-					if (Faction != null)
-					{
-						Grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {Faction.Tag} via cockpit");
-						return Faction ?? FactionFromBigowners;
-					}
+                List<IMyShipController> mainControllers;
 
-					Grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via cockpit!");
-					Faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(AllTermBlocks.First().GetOwnerFactionTag());
-					if (Faction != null)
-					{
-						Grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {Faction.Tag} via first terminal block");
-						return Faction ?? FactionFromBigowners;
-					}
+                if (controllers.Any(x => x.IsMainCockpit(), out mainControllers))
+                {
+                    faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(mainControllers[0].GetOwnerFactionTag());
+                    if (faction != null)
+                    {
+                        grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {faction.Tag} via main cockpit");
+                        return faction ?? factionFromBigowners;
+                    }
+                } // Controls falls down if faction was not found by main cockpit
 
-					Grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
-					return Faction ?? FactionFromBigowners;
-				}
+                faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(controllers[0].GetOwnerFactionTag());
+                if (faction != null)
+                {
+                    grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {faction.Tag} via cockpit");
+                    return faction ?? factionFromBigowners;
+                }
 
-				Faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(AllTermBlocks.First().GetOwnerFactionTag());
-				if (Faction != null)
-				{
-					Grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {Faction.Tag} via first terminal block");
-					return Faction ?? FactionFromBigowners;
-				}
+                grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via cockpit!");
+                faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(allTermBlocks.First().GetOwnerFactionTag());
+                if (faction != null)
+                {
+                    grid.DebugWrite("Grid.GetOwnerFaction", $"Found owner faction {faction.Tag} via first terminal block");
+                    return faction ?? factionFromBigowners;
+                }
 
-				Grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
-				return Faction ?? FactionFromBigowners;
-			}
-			catch (Exception Scrap)
-			{
-				Grid.LogError("Faction.GetOwnerFaction", Scrap);
-				return null;
-			}
-		}
+                grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
+                return faction ?? factionFromBigowners;
+            }
+            catch (Exception scrap)
+            {
+                grid.LogError("Faction.GetOwnerFaction", scrap);
+                return null;
+            }
+        }
 
-		public static List<T> GetBlocks<T>(this IMyCubeGrid Grid, Func<T, bool> Selector = null) where T : class, IMyEntity
-		{
-			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-			List<T> Blocks = new List<T>();
-			Grid.GetBlocks(blocks, x => x is T);
-			foreach (IMySlimBlock block in blocks)
-			{
-				T Block = block as T;
-				// Not the most efficient method, but GetBlocks only allows IMySlimBlock selector
-				if (Selector == null || Selector(Block))
-					Blocks.Add(Block);
-			}
-			return Blocks;
-		}
+        //public static List<T> GetBlocks<T>(this IMyCubeGrid grid, Func<T, bool> selector = null) where T : class, IMyEntity
+        //{
+        //    List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
+        //    List<T> blocks = new List<T>();
+        //    grid.GetBlocks(slimBlocks, x => x is T);
+        //    foreach (var slimBlock in blocks)
+        //    {
+        //        T block = slimBlock as T;
+        //        // Not the most efficient method, but GetBlocks only allows IMySlimBlock selector
+        //        if (selector == null || selector(block))
+        //            blocks.Add(block);
+        //    }
+        //    return blocks;
+        //}
 
-		public static List<IMySlimBlock> GetBlocks(this IMyCubeGrid Grid, Func<IMySlimBlock, bool> Selector = null, int BlockLimit = 0)
-		{
-			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-			int i = 0;
-			Func<IMySlimBlock, bool> Collector = Selector;
-			if (BlockLimit > 0)
-			{
-				Collector = (Block) =>
-				{
-					if (i >= BlockLimit) return false;
-					i++;
-					if (Selector != null) return Selector(Block);
-					return true;
-				};
-			}
+        //public static List<IMySlimBlock> GetBlocks(this IMyCubeGrid grid, Func<IMySlimBlock, bool> selector = null, int blockLimit = 0)
+        //{
+        //    List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+        //    int i = 0;
+        //    Func<IMySlimBlock, bool> collector = selector;
+        //    if (blockLimit > 0)
+        //    {
+        //        collector = (block) =>
+        //        {
+        //            if (i >= blockLimit) return false;
+        //            i++;
+        //            return selector == null || selector(block);
+        //        };
+        //    }
 
-			if (Collector == null)
-				Grid.GetBlocks(blocks);
-			else
-				Grid.GetBlocks(blocks, Collector);
-			return blocks;
-		}
+        //    if (collector == null)
+        //        grid.GetBlocks(blocks);
+        //    else
+        //        grid.GetBlocks(blocks, collector);
+        //    return blocks;
+        //}
 
-		/// <summary>
-		/// Remember, this is only for server-side.
-		/// </summary>
-		public static void ChangeOwnershipSmart(this IMyCubeGrid Grid, long newOwnerId, MyOwnershipShareModeEnum shareMode)
-		{
-			if (!MyAPIGateway.Session.IsServer) return;
-			try
-			{
-				List<IMyCubeGrid> subgrids = Grid.GetAllSubgrids();
-				Grid.ChangeGridOwnership(newOwnerId, shareMode);
-				foreach (IMyCubeGrid subgrid in subgrids)
-				{
-					try
-					{
-						subgrid.ChangeGridOwnership(newOwnerId, shareMode);
-						try
-						{
-							foreach (IMyProgrammableBlock pb in subgrid.GetTerminalSystem().GetBlocksOfType<IMyProgrammableBlock>())
-							{
-								try
-								{
-									//if (!string.IsNullOrEmpty(pb.ProgramData)) continue;
-									//InGameMessaging.ShowLocalNotification($"PB's recompiling... {subgrid.CustomName}");
-									pb.Recompile();
-								}
-								catch (Exception)
-								{
-									//InGameMessaging.ShowLocalNotification($"Recompiling this pb threw and error: {e.TargetSite} {e} ");
-									//	MyAPIGateway.Utilities.InvokeOnGameThread(() => { pb.Recompile(); });
-								}
+        /// <summary>
+        /// Remember, this is only for server-side.
+        /// </summary>
+        public static void ChangeOwnershipSmart(this IMyCubeGrid grid, long newOwnerId, MyOwnershipShareModeEnum shareMode)
+        {
+            if (!MyAPIGateway.Session.IsServer) return;
+            try
+            {
+                List<IMyCubeGrid> subgrids = grid.GetAllSubgrids();
+                grid.ChangeGridOwnership(newOwnerId, shareMode);
+                foreach (IMyCubeGrid subgrid in subgrids)
+                {
+                    try
+                    {
+                        subgrid.ChangeGridOwnership(newOwnerId, shareMode);
+                        try
+                        {
+                            foreach (IMyProgrammableBlock pb in subgrid.GetTerminalSystem().GetBlocksOfType<IMyProgrammableBlock>())
+                            {
+                                try
+                                {
+                                    //if (!string.IsNullOrEmpty(pb.ProgramData)) continue;
+                                    //InGameMessaging.ShowLocalNotification($"PB's recompiling... {subgrid.CustomName}");
+                                    pb.Recompile();
+                                }
+                                catch (Exception)
+                                {
+                                    //InGameMessaging.ShowLocalNotification($"Recompiling this pb threw and error: {e.TargetSite} {e} ");
+                                    //	MyAPIGateway.Utilities.InvokeOnGameThread(() => { pb.Recompile(); });
+                                }
 
-							}
-						}
-						catch (Exception)
-						{
-							//InGameMessaging.ShowLocalNotification($"PB's recompile threw: {e} ");
-						}
-					}
-					catch (Exception scrap)
-					{
-						Grid.LogError("ChangeOwnershipSmart.ChangeSubgridOwnership", scrap);
-					}
-				}
-			}
-			catch (Exception scrap)
-			{
-				Grid.LogError("ChangeOwnershipSmart", scrap);
-			}
-		}
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            //InGameMessaging.ShowLocalNotification($"PB's recompile threw: {e} ");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        grid.LogError("ChangeOwnershipSmart.ChangeSubgridOwnership", e);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                grid.LogError("ChangeOwnershipSmart", e);
+            }
+        }
 
-		//public static void DeleteSmart(this IMyCubeGrid Grid)
-		//{
-		//	if (!MyAPIGateway.Session.IsServer) return;
-		//	List<IMyCubeGrid> Subgrids = Grid.GetAllSubgrids();
-		//	foreach (IMyCubeGrid Subgrid in Subgrids)
-		//		Subgrid.Close();
-		//	Grid.Close();
-		//}
+        private static readonly List<IMyCubeGrid> ReusableGridCollection = new List<IMyCubeGrid>();
 
-		public static List<IMyCubeGrid> GetAllSubgrids(this IMyCubeGrid Grid)
-		{
-			try
-			{
-				return MyAPIGateway.GridGroups.GetGroup(Grid, GridLinkTypeEnum.Logical);
-			}
-			catch (Exception Scrap)
-			{
-				Grid.LogError("GetAllSubgrids", Scrap);
-				return new List<IMyCubeGrid>();
-			}
-		}
-	}
+        public static List<IMyCubeGrid> GetAllSubgrids(this IMyCubeGrid grid)
+        {
+            try
+            {
+                ReusableGridCollection.Clear();
+                MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, ReusableGridCollection);
+                //return MyAPIGateway.GridGroups.GetGroup(Grid, GridLinkTypeEnum.Logical);
+            }
+            catch (Exception e)
+            {
+                grid.LogError("GetAllSubgrids", e);
+                return new List<IMyCubeGrid>();
+            }
+            return new List<IMyCubeGrid>();
+        }
+    }
 }

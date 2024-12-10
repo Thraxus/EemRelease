@@ -67,9 +67,9 @@ namespace Eem.Thraxus.Helpers
 				//if(Constants.CLEANUP_DEBUG)
 				//	Log.Info("player list updated; view range updated: " + Math.Round(Math.Sqrt(RangeSq), 1));
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
-				AiSessionCore.GeneralLog.WriteToLog("CleanEem", $"Exception: {e}");
+				//AiSessionCore.GeneralLog.WriteToLog("CleanEem", $"Exception: {e}");
 			}
 		}
 

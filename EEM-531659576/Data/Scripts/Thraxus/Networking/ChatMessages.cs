@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Eem.Thraxus.Helpers;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 
@@ -13,7 +12,7 @@ namespace Eem.Thraxus.Networking
         private const string GetCivlStandingsPrefix = "getcivlstandings";
         private const string ShowDebugLogPrefix = "showdebuglog";
         private const string ShowProfilingLogPrefix = "showprofilinglog";
-        private const string ShowGeneralLogPrefix = "showgenerallog";
+        //private const string ShowGeneralLogPrefix = "showgenerallog";
         private const string SpawnTestPrefabPrefix = "spawntestprefab";
         private const string DespawnTestPrefabPrefix = "despawntestprefab";
         private const string ProfilePrefabsPrefix = "profileprefabs";
@@ -21,8 +20,7 @@ namespace Eem.Thraxus.Networking
         private static readonly Dictionary<string, Action<string>> ChatAction = new Dictionary<string, Action<string>>
         {
             {HelpPrefix, PrintHelpCommands}, {GetCivlStandingsPrefix, GetCivlStandings},
-            {ShowDebugLogPrefix, ShowDebugLog}, {ShowGeneralLogPrefix, ShowGeneralLog},
-            {ShowProfilingLogPrefix, ShowProfilingLog}
+            {ShowDebugLogPrefix, ShowDebugLog}, {ShowProfilingLogPrefix, ShowProfilingLog}
         };
 
         public static void HandleChatMessage(string message)
@@ -64,7 +62,6 @@ namespace Eem.Thraxus.Networking
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {GetCivlStandingsPrefix}' will show the standings between CIVL and all other lawful factions");
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {ShowDebugLogPrefix}' will show the last 20 lines of the Debug Log");
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {ShowProfilingLogPrefix}' will show the last 20 lines of the Profiling Log");
-            Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {ShowGeneralLogPrefix}' will show the last 20 lines of the General Log");
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {SpawnTestPrefabPrefix}' will spawn a test prefab 1k away from the player (not yet implemented)");
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {DespawnTestPrefabPrefix}' will despawn the test prefab (not yet implemented)");
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {ProfilePrefabsPrefix}' will profile all loaded prefabs - WARNING! This is not quick (not yet implemented)");
@@ -82,12 +79,12 @@ namespace Eem.Thraxus.Networking
             //else Messaging.ShowLocalNotification("Debug mode is not enabled");
         }
 
-        private static void ShowGeneralLog(string s)
-        {
-            if (Constants.EnableGeneralLog)
-                AiSessionCore.GeneralLog.GetTailMessages();
-            else Messaging.ShowLocalNotification("General logging is not enabled");
-        }
+        //private static void ShowGeneralLog(string s)
+        //{
+        //    if (Constants.EnableGeneralLog)
+        //        AiSessionCore.GeneralLog.GetTailMessages();
+        //    else Messaging.ShowLocalNotification("General logging is not enabled");
+        //}
 
         private static void ShowProfilingLog(string s)
         {

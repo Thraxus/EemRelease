@@ -7,7 +7,7 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Networking
 {
 	internal static class ChatHandler
 	{
-		internal const string ChatCommandPrefix = Settings.ChatCommandPrefix;
+		internal const string ChatCommandPrefix = References.ChatCommandPrefix;
 		private const string HelpPrefix = "help";
 
 		private static readonly Dictionary<string, Action<string>> ChatAction = new Dictionary<string, Action<string>>
@@ -50,7 +50,7 @@ namespace Eem.Thraxus.Common.Utilities.Tools.Networking
 		private static void PrintHelpCommands(string s)
 		{
 			Messaging.ShowLocalNotification($"'{ChatCommandPrefix} {HelpPrefix}' will show this message");
-			Messaging.ShowLocalNotification($"'SomeOtherPrefix This is an exmaple of a second message");
+			Messaging.ShowLocalNotification($"'SomeOtherPrefix This is an example of a second message");
 		}
 	}
 }

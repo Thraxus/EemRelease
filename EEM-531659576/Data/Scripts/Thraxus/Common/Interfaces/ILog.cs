@@ -1,10 +1,10 @@
-﻿using Eem.Thraxus.Common.Enums;
-using VRage.Game;
+﻿using System;
 
 namespace Eem.Thraxus.Common.Interfaces
 {
-	internal interface ILog
-	{
-		void WriteToLog(string caller, string message, LogType type, bool showOnHud = false, int duration = Settings.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green);
-	}
+    public interface ILog : IClose
+    {
+        event Action<string, string> OnWriteToLog;
+        void WriteGeneral(string caller, string message);
+    }
 }

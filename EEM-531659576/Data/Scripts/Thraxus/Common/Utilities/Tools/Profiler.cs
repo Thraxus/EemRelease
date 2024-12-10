@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using Eem.Thraxus.Common.Enums;
-using Eem.Thraxus.Common.Utilities.Tools.Logging;
 
 namespace Eem.Thraxus.Common.Utilities.Tools
 {
@@ -26,11 +24,16 @@ namespace Eem.Thraxus.Common.Utilities.Tools
 			_start = Stopwatch.GetTimestamp();
 		}
 
-		public void Dispose()
+		public override string ToString()
 		{
 			long end = Stopwatch.GetTimestamp();
 			TimeSpan timespan = new TimeSpan(end - _start);
-			StaticLog.WriteToLog(_name, $"{timespan.TotalMilliseconds:0.##########}ms", LogType.General);
+			return _name + $"{timespan.TotalMilliseconds:0.##########}ms";
+		}
+
+		public void Dispose()
+		{
+
 		}
 	}
 }

@@ -113,9 +113,8 @@ namespace Eem.Thraxus.Extensions
 				}
 				return true;
 			}
-			catch (Exception scrap)
+			catch (Exception)
 			{
-				AiSessionCore.LogError("Faction.IsNPC", scrap);
 				return false;
 			}
 		}

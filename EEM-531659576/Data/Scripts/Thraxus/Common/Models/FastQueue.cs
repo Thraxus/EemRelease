@@ -1,4 +1,5 @@
-﻿namespace Eem.Thraxus.Common.Models
+﻿
+namespace Eem.Thraxus.Common.Models
 {
 	public class FastQueue<T>
 	{

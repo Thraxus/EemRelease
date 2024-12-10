@@ -14,38 +14,42 @@ namespace Eem.Thraxus.Networking
 
 		public static void Register()
 		{
-			MyAPIGateway.Multiplayer.RegisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
-			MyAPIGateway.Utilities.MessageEntered += ChatMessageHandler;
+            //MyAPIGateway.Multiplayer.RegisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Multiplayer.RegisterSecureMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Utilities.MessageEntered += ChatMessageHandler;
 		}
 
 		public static void Unregister()
 		{
-			MyAPIGateway.Multiplayer.UnregisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
-			lock (_playerCache)
+            //MyAPIGateway.Multiplayer.UnregisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Multiplayer.UnregisterSecureMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            lock (_playerCache)
 			{
 				_playerCache = null;
 			}
 			MyAPIGateway.Utilities.MessageEntered -= ChatMessageHandler;
 		}
 
-		private static void MessageHandler(byte[] bytes)
+        private static void MessageHandler(ushort id, byte[] message, ulong recipient, bool reliable = true)
+        {
+            if (Constants.EemCoreNetworkId != id) return;
+            MessageHandler(message);
+        }
+
+        private static void MessageHandler(byte[] bytes)
 		{
-			MessageBase m = MyAPIGateway.Utilities.SerializeFromBinary<MessageBase>(bytes);
+			var m = MyAPIGateway.Utilities.SerializeFromBinary<MessageBase>(bytes);
 			if(Constants.IsServer)
 				m.HandleServer();
 			else
 				m.HandleClient();
 		}
 
-		// ReSharper disable once RedundantAssignment
 		private static void ChatMessageHandler(string message, ref bool sendToOthers)
 		{
 			if (!message.StartsWith(ChatMessages.EemChatCommandPrefix))
-			{
-				sendToOthers = true;
-				return;
-			}
-			sendToOthers = false;
+			{ return; }
+
 			ChatMessages.HandleChatMessage(message);
 		}
 
@@ -63,7 +67,7 @@ namespace Eem.Thraxus.Networking
 			if (!reliable && d.Length >= 1000)
 				throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
 			MyAPIGateway.Multiplayer.SendMessageToServer(Constants.EemCoreNetworkId, d, reliable);
-		}
+        }
 
 		public static void SendMessageToClients(MessageBase message, bool reliable = true, params ulong[] ignore)
 		{

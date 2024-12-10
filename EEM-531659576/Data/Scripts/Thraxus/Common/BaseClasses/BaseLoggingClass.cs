@@ -1,19 +1,40 @@
 ﻿using System;
-using Eem.Thraxus.Common.Enums;
 using Eem.Thraxus.Common.Interfaces;
-using VRage.Game;
 
 namespace Eem.Thraxus.Common.BaseClasses
 {
-	public abstract class BaseLoggingClass : BaseClosableClass, ILog
+	public abstract class BaseLoggingClass : ICommon
 	{
-		public event Action<string, string, LogType, bool, int, string> OnWriteToLog;
+		public event Action<string, string> OnWriteToLog;
+		public event Action<IClose> OnClose;
 
-		protected abstract string Id { get; }
+        private string _logPrefix;
+        protected void OverrideLogPrefix(string prefix)
+        {
+            _logPrefix = "[" + prefix + "] ";
+        }
 
-		public void WriteToLog(string caller, string message, LogType type, bool showOnHud = false, int duration = Settings.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
+        private void SetLogPrefix()
+        {
+            _logPrefix = "[" + GetType().Name + "] ";
+        }
+
+        public bool IsClosed { get; protected set; }
+
+		public virtual void Close()
 		{
-			OnWriteToLog?.Invoke($"{Id}: {caller}", message, type, showOnHud, duration, color);
+			if (IsClosed) return;
+			IsClosed = true;
+			OnClose?.Invoke(this);
 		}
-	}
-}
+
+		public virtual void Update(ulong tick) { }
+
+		public virtual void WriteGeneral(string caller, string message)
+		{
+			if(string.IsNullOrEmpty(_logPrefix))
+                SetLogPrefix();
+            OnWriteToLog?.Invoke($"{_logPrefix}{caller}", message);
+		}
+    }
+} 

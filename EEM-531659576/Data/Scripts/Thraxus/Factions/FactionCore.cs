@@ -1,127 +1,100 @@
-﻿using Eem.Thraxus.Factions.Models;
-using Eem.Thraxus.Utilities;
+﻿using Eem.Thraxus.Bots;
+using Eem.Thraxus.Common.BaseClasses;
+using Eem.Thraxus.Common.Extensions;
+using Eem.Thraxus.Factions.Models;
 using Eem.Thraxus.Helpers;
-using Sandbox.ModAPI;
 using VRage.Game.Components;
 
 namespace Eem.Thraxus.Factions
 {
-	[MySessionComponentDescriptor(MyUpdateOrder.NoUpdate)]
-	// ReSharper disable once ClassNeverInstantiated.Global
-	public class FactionCore : MySessionComponentBase
-	{
-		// Fields
+    [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
+    public class FactionCore : BaseLoggingClass
+    {
+        //protected override string CompName { get; } = "FactionCore";
+        //protected override CompType Type { get; } = CompType.Server;
+        //protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation;
+        //protected override bool SkipReporting { get; } = true;
 
-		private bool _registerEarly;
-		private bool _initialized;
+        private readonly BotDamageHandler _botDamageHandler;
 
-		//private static Log _debugLog;
-		private static Log _generalLog;
+        private ulong _tickTimer;
 
-		public RelationshipManager RelationshipManager { get; private set; }
+        public FactionCore(BotDamageHandler botDamageHandler)
+        {
+            _botDamageHandler = botDamageHandler;
+        }
 
-		public static FactionCore FactionCoreStaticInstance;
+        public RelationshipManager RelationshipManager { get; private set; }
 
-		/// <inheritdoc />
-		public override void LoadData()
-		{
-			base.LoadData();
-			FactionCoreStaticInstance = this;
-		}
-		
-		// Init Methods
+        //public static FactionCore FactionCoreStaticInstance;
 
-		/// <summary>
-		/// Runs before the game is ready, safe for some initializations, not safe for others
-		/// </summary>
-		public override void BeforeStart()
-		{
-			base.BeforeStart();
-			if (!Constants.IsServer) return;
-			if (!_registerEarly) RegisterEarly();
-		}
+        public void Init()
+        {
+            //FactionCoreStaticInstance = this;
+            RelationshipManager = new RelationshipManager();
+            RelationshipManager.OnWriteToLog += WriteGeneral;
+            RelationshipManager.Init();
+            _botDamageHandler.OnTriggerWar += TriggerWar;
+            WriteGeneral("FactionCore", $"Online!");
+        }
 
-		/// <summary>
-		/// Runs every tick before the simulation is updated
-		/// </summary>
-		public override void UpdateBeforeSimulation()
-		{
-			base.UpdateBeforeSimulation();
-			if (!Constants.IsServer) return;
-			if (!_initialized) Initialize();
-			TickTimer();
-		}
+        private void TriggerWar(long assaulted, long assaulter)
+        {
+            WriteGeneral("TriggerWar", $"Asshats! [{assaulted.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
+            RelationshipManager.WarDeclaration(assaulted, assaulter);
+        }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		private void RegisterEarly()
-		{
-			if (_registerEarly) return;
-			//if (Constants.DebugMode) _debugLog = new Log(Settings.Constants.DebugLogName);
-			_generalLog = new Log(Settings.Constants.GeneralLogName);
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => SetUpdateOrder(MyUpdateOrder.BeforeSimulation));
-			WriteToLog("FactionCore", $"RegisterEarly Complete... {UpdateOrder}", true);
-			_registerEarly = true;
-		}
+        public void Update()
+        {
+            TickTimer();
+        }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		private void Initialize()
-		{
-			RelationshipManager = new RelationshipManager();
-			MyAPIGateway.Utilities.InvokeOnGameThread(() => SetUpdateOrder(MyUpdateOrder.NoUpdate));
-			WriteToLog("FactionCore", $"Initialized... {UpdateOrder}", true);
-			_initialized = true;
-		}
+        private void TickTimer()
+        {
+            _tickTimer++;
+            if (_tickTimer % Constants.FactionNegativeRelationshipAssessment == 0)
+                RelationshipManager.CheckNegativeRelationships();
+            if (_tickTimer % Constants.FactionMendingRelationshipAssessment == 0)
+                RelationshipManager.CheckMendingRelationships();
+        }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		protected override void UnloadData()
-		{
-			base.UnloadData();
-			if (!Constants.IsServer) return;
-			RelationshipManager?.Close();
-			FactionCoreStaticInstance = null;
-			WriteToLog("FactionCore", $"I'm out!... {UpdateOrder}", true);
-			//_debugLog?.Close();
-			_generalLog?.Close();
-		}
-		
+        public override void Close()
+        {
+            RelationshipManager.OnWriteToLog -= WriteGeneral;
+            RelationshipManager?.Close();
+            //FactionCoreStaticInstance = null;
+            WriteGeneral("FactionCore", $"I'm out!");
+            base.Close();
+        }
 
-		// Core Logic Methods
+        //protected override void SuperEarlySetup()
+        //{
+        //    base.SuperEarlySetup();
+        //    FactionCoreStaticInstance = this;
+        //}
 
-		/// <summary>
-		/// Increments every server tick
-		/// </summary>
-		private ulong _tickTimer;
+        //protected override void EarlySetup()
+        //{
+        //    base.EarlySetup();
+        //    RelationshipManager = new RelationshipManager();
+        //    RelationshipManager.OnWriteToLog += WriteGeneral;
+        //    RelationshipManager.Init();
+        //    WriteGeneral("FactionCore", $"RegisterEarly Complete... {UpdateOrder}");
+        //}
 
-		/// <summary>
-		/// Processes certain things at set intervals
-		/// </summary>
-		private void TickTimer()
-		{
-			_tickTimer++;
-			if (_tickTimer % Constants.FactionNegativeRelationshipAssessment == 0)
-				RelationshipManager.CheckNegativeRelationships();
-			if (_tickTimer % Constants.FactionMendingRelationshipAssessment == 0)
-				RelationshipManager.CheckMendingRelationships();
-		}
+        //protected override void BeforeSimUpdate()
+        //{
+        //    base.BeforeSimUpdate();
+        //    TickTimer();
+        //}
 
-		// Non-Core logic below this point
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="caller"></param>
-		/// <param name="message"></param>
-		/// <param name="general"></param>
-		public static void WriteToLog(string caller, string message, bool general = false)
-		{
-			//_debugLog?.WriteToLog(caller, message);
-			if (general) _generalLog?.WriteToLog(caller, message);
-		}
-	}
+        //protected override void Unload()
+        //{
+        //    base.Unload();
+        //    RelationshipManager.OnWriteToLog -= WriteGeneral;
+        //    RelationshipManager?.Close();
+        //    FactionCoreStaticInstance = null;
+        //    WriteGeneral("FactionCore", $"I'm out!... {UpdateOrder}");
+        //}
+    }
 }
