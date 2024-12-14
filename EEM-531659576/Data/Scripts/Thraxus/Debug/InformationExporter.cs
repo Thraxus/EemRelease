@@ -24,12 +24,10 @@ namespace Eem.Thraxus.Debug
                 foreach (MySpawnGroupDefinition spawnGroupDefinition in MyDefinitionManager.Static.GetSpawnGroupDefinitions())
                 {
                     if (!spawnGroupDefinition.Public) continue;
-                    string spawnGroupInfo = $"{spawnGroupDefinition.IsCargoShip}\t{spawnGroupDefinition.IsEncounter}\t{spawnGroupDefinition.IsPirate}\t{spawnGroupDefinition.Prefabs.Count}\t{spawnGroupDefinition.Frequency}\t{spawnGroupDefinition.SpawnRadius}\t{spawnGroupDefinition.Context.IsBaseGame}\t{spawnGroupDefinition.Context.ModId}";
-                    foreach (MySpawnGroupDefinition.SpawnGroupPrefab prefab in spawnGroupDefinition.Prefabs)
-                    {
-                        WriteGeneral($"SpawnGroupLog", $"{spawnGroupDefinition.Id.SubtypeName}\t{spawnGroupInfo}\t{prefab.SubtypeId}\t{prefab.BeaconText}\t{prefab.Behaviour}\t{prefab.BehaviourActivationDistance}");
-                    }
+                    var spawnGroupInfo = $"{spawnGroupDefinition.IsCargoShip}\t{spawnGroupDefinition.IsEncounter}\t{spawnGroupDefinition.IsPirate}\t{spawnGroupDefinition.Prefabs.Count}\t{spawnGroupDefinition.Frequency}\t{spawnGroupDefinition.SpawnRadius}\t{spawnGroupDefinition.Context.IsBaseGame}\t{spawnGroupDefinition.Context.ModId}";
+                    foreach (MySpawnGroupDefinition.SpawnGroupPrefab prefab in spawnGroupDefinition.Prefabs) WriteGeneral("SpawnGroupLog", $"{spawnGroupDefinition.Id.SubtypeName}\t{spawnGroupInfo}\t{prefab.SubtypeId}\t{prefab.BeaconText}\t{prefab.Behaviour}\t{prefab.BehaviourActivationDistance}");
                 }
+
                 WriteGeneral("SpawnGroupLog", "Complete");
             });
         }
@@ -38,14 +36,14 @@ namespace Eem.Thraxus.Debug
         {
             MyAPIGateway.Parallel.Start(delegate
             {
-                List<string> eemRcSubtypes = new List<string>()
+                var eemRcSubtypes = new List<string>
                 {
                     "EEMPilotedFighterCockpit", "EEMPilotedFlightSeat", "EEMPilotedLargeBlockCockpitSeat", "EEMPilotedSmallBlockCockpit", "EEMPilotedPassengerSeat", "LargeBlockRemoteControl", "SmallBlockRemoteControl"
                 };
                 foreach (KeyValuePair<string, MyPrefabDefinition> prefabDefinition in MyDefinitionManager.Static.GetPrefabDefinitions())
                 {
                     if (!prefabDefinition.Value.Public) continue;
-                    List<EemPrefabConfig> eemPrefabConfigs = new List<EemPrefabConfig>();
+                    var eemPrefabConfigs = new List<EemPrefabConfig>();
                     foreach (MyObjectBuilder_CubeGrid cubeGrid in prefabDefinition.Value.CubeGrids)
                     {
                         if (cubeGrid?.CubeBlocks == null) continue;
@@ -70,17 +68,14 @@ namespace Eem.Thraxus.Debug
                             }
                         }
                     }
+
                     if (eemPrefabConfigs.Count > 0)
-                    {
                         foreach (EemPrefabConfig eemPrefabConfig in eemPrefabConfigs)
-                        {
-                            WriteGeneral($"ShipLog", $"{prefabDefinition.Key}\t{prefabDefinition.Value.Context.IsBaseGame}\t{prefabDefinition.Value.Context.ModId}\t{prefabDefinition.Value.CubeGrids[0].IsStatic}\t{prefabDefinition.Value.CubeGrids[0].IsRespawnGrid}\t{prefabDefinition.Value.CubeGrids[0].IsUnsupportedStation}\t{prefabDefinition.Value.CubeGrids[0].IsPowered}\t{prefabDefinition.Value.CubeGrids[0].GridSizeEnum}\t{eemPrefabConfig}");
-                        }
-                    }
-                    else WriteGeneral($"ShipLog", $"{prefabDefinition.Key}\t{prefabDefinition.Value.Context.IsBaseGame}\t{prefabDefinition.Value.Context.ModId}\t{prefabDefinition.Value.CubeGrids[0].IsStatic}\t{prefabDefinition.Value.CubeGrids[0].IsRespawnGrid}\t{prefabDefinition.Value.CubeGrids[0].IsUnsupportedStation}\t{prefabDefinition.Value.CubeGrids[0].IsPowered}\t{prefabDefinition.Value.CubeGrids[0].GridSizeEnum}");
+                            WriteGeneral("ShipLog", $"{prefabDefinition.Key}\t{prefabDefinition.Value.Context.IsBaseGame}\t{prefabDefinition.Value.Context.ModId}\t{prefabDefinition.Value.CubeGrids[0].IsStatic}\t{prefabDefinition.Value.CubeGrids[0].IsRespawnGrid}\t{prefabDefinition.Value.CubeGrids[0].IsUnsupportedStation}\t{prefabDefinition.Value.CubeGrids[0].IsPowered}\t{prefabDefinition.Value.CubeGrids[0].GridSizeEnum}\t{eemPrefabConfig}");
+                    else WriteGeneral("ShipLog", $"{prefabDefinition.Key}\t{prefabDefinition.Value.Context.IsBaseGame}\t{prefabDefinition.Value.Context.ModId}\t{prefabDefinition.Value.CubeGrids[0].IsStatic}\t{prefabDefinition.Value.CubeGrids[0].IsRespawnGrid}\t{prefabDefinition.Value.CubeGrids[0].IsUnsupportedStation}\t{prefabDefinition.Value.CubeGrids[0].IsPowered}\t{prefabDefinition.Value.CubeGrids[0].GridSizeEnum}");
                 }
+
                 WriteGeneral("ShipLog", "Complete");
-                
             });
         }
 
@@ -143,7 +138,6 @@ namespace Eem.Thraxus.Debug
                         case "playerpriority":
                             PlayerPriority = x[1];
                             break;
-                        default: break;
                     }
                 }
             }

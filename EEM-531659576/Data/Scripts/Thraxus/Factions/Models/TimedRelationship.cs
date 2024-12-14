@@ -4,45 +4,45 @@ using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Factions.Models
 {
-	public class TimedRelationship : IEquatable<TimedRelationship>
-	{
-		public IMyFaction NpcFaction { get; }
+    public class TimedRelationship : IEquatable<TimedRelationship>
+    {
+        public TimedRelationship(IMyFaction aiFaction, IMyFaction playerFaction, long cooldownTime)
+        {
+            NpcFaction = aiFaction;
+            PlayerFaction = playerFaction;
+            CooldownTime = cooldownTime;
+        }
 
-		public IMyFaction PlayerFaction { get; }
-		
-		public long CooldownTime { get; set; }
+        public IMyFaction NpcFaction { get; }
 
-		public TimedRelationship(IMyFaction aiFaction, IMyFaction playerFaction, long cooldownTime)
-		{
-			NpcFaction = aiFaction;
-			PlayerFaction = playerFaction;
-			CooldownTime = cooldownTime;
-		}
+        public IMyFaction PlayerFaction { get; }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return $"NpcFaction:\t{NpcFaction.FactionId}\t{NpcFaction.Tag}\tNpcFaction:\t{PlayerFaction.FactionId}\t{PlayerFaction.Tag}\tCooldownTime:\t{CooldownTime}";
-		}
+        public long CooldownTime { get; set; }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as TimedRelationship);
-		}
+        public bool Equals(TimedRelationship other)
+        {
+            return other != null &&
+                   EqualityComparer<IMyFaction>.Default.Equals(NpcFaction, other.NpcFaction) &&
+                   EqualityComparer<IMyFaction>.Default.Equals(PlayerFaction, other.PlayerFaction);
+        }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				return ((NpcFaction != null ? NpcFaction.GetHashCode() : 0) * 397) ^ (PlayerFaction != null ? PlayerFaction.GetHashCode() : 0);
-			}
-		}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"NpcFaction:\t{NpcFaction.FactionId}\t{NpcFaction.Tag}\tNpcFaction:\t{PlayerFaction.FactionId}\t{PlayerFaction.Tag}\tCooldownTime:\t{CooldownTime}";
+        }
 
-		public bool Equals(TimedRelationship other)
-		{
-			return other != null &&
-				   EqualityComparer<IMyFaction>.Default.Equals(NpcFaction, other.NpcFaction) &&
-				   EqualityComparer<IMyFaction>.Default.Equals(PlayerFaction, other.PlayerFaction);
-		}
-	}
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as TimedRelationship);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return ((NpcFaction != null ? NpcFaction.GetHashCode() : 0) * 397) ^ (PlayerFaction != null ? PlayerFaction.GetHashCode() : 0);
+            }
+        }
+    }
 }

@@ -35,7 +35,7 @@ namespace Eem.Thraxus.Factions
             RelationshipManager.OnWriteToLog += WriteGeneral;
             RelationshipManager.Init();
             _botDamageHandler.OnTriggerWar += TriggerWar;
-            WriteGeneral("FactionCore", $"Online!");
+            WriteGeneral("FactionCore", "Online!");
         }
 
         private void TriggerWar(long assaulted, long assaulter)
@@ -63,7 +63,7 @@ namespace Eem.Thraxus.Factions
             RelationshipManager.OnWriteToLog -= WriteGeneral;
             RelationshipManager?.Close();
             //FactionCoreStaticInstance = null;
-            WriteGeneral("FactionCore", $"I'm out!");
+            WriteGeneral("FactionCore", "I'm out!");
             base.Close();
         }
 

@@ -14,6 +14,7 @@ namespace Eem.Thraxus.Common.Generics
                 _actionQueue.Enqueue(() => Add(--delay, action));
                 return;
             }
+
             try
             {
                 action?.Invoke();
@@ -32,10 +33,7 @@ namespace Eem.Thraxus.Common.Generics
         private void ProcessQueue(int iterationMax)
         {
             int queueCount = _actionQueue.Count > iterationMax ? iterationMax : _actionQueue.Count;
-            while (queueCount-- > 0)
-            {
-                _actionQueue.Dequeue()?.Invoke();
-            }
+            while (queueCount-- > 0) _actionQueue.Dequeue()?.Invoke();
         }
 
         public void Reset()

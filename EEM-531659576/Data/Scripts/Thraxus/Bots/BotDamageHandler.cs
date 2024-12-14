@@ -11,10 +11,11 @@ namespace Eem.Thraxus.Bots
 {
     public class BotDamageHandler : BaseLoggingClass
     {
-        public event Action<long, long> OnTriggerWar;
-        private ActionQueue _actionQueue;
-
         private readonly MyConcurrentList<long> _currentlyUnderAssault = new MyConcurrentList<long>();
+
+        private readonly Dictionary<long, BotBase.OnDamageTaken> _damageHandlers = new Dictionary<long, BotBase.OnDamageTaken>();
+        private ActionQueue _actionQueue;
+        public event Action<long, long> OnTriggerWar;
 
 
         public virtual void TriggerWar(long assaulted, long assaulter)
@@ -30,8 +31,6 @@ namespace Eem.Thraxus.Bots
             MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler(0, GenericDamageHandler);
             MyAPIGateway.Session.DamageSystem.RegisterDestroyHandler(0, GenericDamageHandler);
         }
-        
-        private readonly Dictionary<long, BotBase.OnDamageTaken> _damageHandlers = new Dictionary<long, BotBase.OnDamageTaken>();
 
         public void AddDamageHandler(long gridId, BotBase.OnDamageTaken handler)
         {
@@ -85,7 +84,7 @@ namespace Eem.Thraxus.Bots
                 long gridId = damagedGrid.GetTopMostParent().EntityId;
 
                 if (_currentlyUnderAssault.Contains(gridId)) return;
-                
+
                 _currentlyUnderAssault.Add(gridId);
                 _actionQueue.Add(10, () => _currentlyUnderAssault.Remove(gridId));
 

@@ -1,8 +1,6 @@
-﻿
-namespace Eem.Thraxus.Common.BaseClasses
+﻿namespace Eem.Thraxus.Common.BaseClasses
 {
     internal abstract class BaseController : BaseLoggingClass
     {
-
     }
 }

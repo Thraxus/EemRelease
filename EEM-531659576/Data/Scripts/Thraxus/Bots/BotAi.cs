@@ -7,13 +7,7 @@ namespace Eem.Thraxus.Bots
 {
     public class BotAi : BaseLoggingClass
     {
-        private IMyRemoteControl Rc { get; set; }
-
-        public IMyCubeGrid Grid { get; private set; }
-
         private readonly BotDamageHandler _botDamageHandler;
-
-        private BotBase Ai { get; set; }
 
         public BotAi(MyCubeBlock remote, BotDamageHandler botDamageHandler)
         {
@@ -22,11 +16,21 @@ namespace Eem.Thraxus.Bots
             Grid = Rc?.CubeGrid.GetTopMostParent() as IMyCubeGrid;
         }
 
+        private IMyRemoteControl Rc { get; }
+
+        public IMyCubeGrid Grid { get; }
+
+        private BotBase Ai { get; set; }
+
         public void Init()
         {
             Ai = FabricateBot(Grid, Rc);
             Ai.OnWriteToLog += WriteGeneral;
-            Ai.OnClose += close => { Grid.Close(); Close(); };
+            Ai.OnClose += close =>
+            {
+                Grid.Close();
+                Close();
+            };
             Ai.Init(Rc);
         }
 
@@ -70,6 +74,7 @@ namespace Eem.Thraxus.Bots
                     WriteGeneral("FabricateBot", "Invalid bot type");
                     break;
             }
+
             return bot;
         }
     }

@@ -6,19 +6,25 @@ namespace Eem.Thraxus.Common.Generics
 {
     internal class ObjectPool<T> where T : IReset, new()
     {
-        private readonly ConcurrentStack<T> _objects = new ConcurrentStack<T>();
         private readonly Func<T> _objectGenerator;
+        private readonly ConcurrentStack<T> _objects = new ConcurrentStack<T>();
+        public long MaxNewObjects;
 
-        public ObjectPool() { }
+        public long TotalObjectsServed;
+
+        public ObjectPool()
+        {
+        }
 
         public ObjectPool(Func<T> objectGenerator)
         {
             _objectGenerator = objectGenerator;
         }
 
-        public int Count() => _objects.Count;
-        public long TotalObjectsServed;
-        public long MaxNewObjects;
+        public int Count()
+        {
+            return _objects.Count;
+        }
 
         public T Get()
         {
@@ -32,7 +38,7 @@ namespace Eem.Thraxus.Common.Generics
         public void Return(T item)
         {
             if (item == null) return;
-            if(!item.IsReset)
+            if (!item.IsReset)
                 item.Reset();
             _objects.Push(item);
         }
@@ -55,20 +61,20 @@ namespace Eem.Thraxus.Common.Generics
  *
  * GrindOperation op =  _grindOperations.Get();
  *
-		private void ClearGrindOperationsPool()
-		{
-			for (int i = _pooledGrindOperations.Count - 1; i >= 0; i--)
-			{
-				if (_pooledGrindOperations[i].Tick == TickCounter) continue;
-				GrindOperation op = _pooledGrindOperations[i];
-				_pooledGrindOperations.RemoveAtImmediately(i);
-				op.OnWriteToLog -= WriteToLog;
-				op.Reset();
-				_grindOperations.Return(op);
-			}
-			_pooledGrindOperations.ApplyRemovals();
-		}
+        private void ClearGrindOperationsPool()
+        {
+            for (int i = _pooledGrindOperations.Count - 1; i >= 0; i--)
+            {
+                if (_pooledGrindOperations[i].Tick == TickCounter) continue;
+                GrindOperation op = _pooledGrindOperations[i];
+                _pooledGrindOperations.RemoveAtImmediately(i);
+                op.OnWriteToLog -= WriteToLog;
+                op.Reset();
+                _grindOperations.Return(op);
+            }
+            _pooledGrindOperations.ApplyRemovals();
+        }
  *
  * Make sure to clean up the object before returning it to the pool, else you may carry over obsolete / incorrect info
- * 
+ *
  */

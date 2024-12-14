@@ -1,12 +1,11 @@
-﻿
-using Eem.Thraxus.Common.Utilities.FileHandlers;
+﻿using Eem.Thraxus.Common.Utilities.FileHandlers;
 
 namespace Eem.Thraxus.Common.BaseClasses
 {
     public abstract class BaseXmlUserSettings
     {
-        private readonly string _settingsFileName;
         private const string Extension = ".cfg";
+        private readonly string _settingsFileName;
 
         protected BaseXmlUserSettings(string modName)
         {

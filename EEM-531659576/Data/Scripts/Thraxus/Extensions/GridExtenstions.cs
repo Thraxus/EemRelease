@@ -12,8 +12,10 @@ namespace Eem.Thraxus.Extensions
 {
     public static class GridExtenstions
     {
+        private static readonly List<IMyCubeGrid> ReusableGridCollection = new List<IMyCubeGrid>();
+
         /// <summary>
-        /// Returns world speed cap, in m/s.
+        ///     Returns world speed cap, in m/s.
         /// </summary>
         public static float GetSpeedCap(this IMyShipController shipController)
         {
@@ -29,20 +31,19 @@ namespace Eem.Thraxus.Extensions
         }
 
         /// <summary>
-        /// Returns world speed cap ratio to default cap of 100 m/s.
+        ///     Returns world speed cap ratio to default cap of 100 m/s.
         /// </summary>
         //public static float GetSpeedCapRatioToDefault(this IMyShipController ShipController)
         //{
         //	return ShipController.GetSpeedCap() / 100;
         //}
-
         public static IMyPlayer FindControllingPlayer(this IMyCubeGrid grid, bool write = true)
         {
             try
             {
                 IMyPlayer player = null;
                 IMyGridTerminalSystem term = grid.GetTerminalSystem();
-                List<IMyShipController> shipControllers = term.GetBlocksOfType<IMyShipController>(collect: x => x.IsUnderControl);
+                List<IMyShipController> shipControllers = term.GetBlocksOfType<IMyShipController>(x => x.IsUnderControl);
                 if (shipControllers.Count == 0)
                 {
                     shipControllers = term.GetBlocksOfType<IMyShipController>(x => x.GetBuiltBy() != 0);
@@ -54,6 +55,7 @@ namespace Eem.Thraxus.Extensions
                         if (write && player != null) grid.DebugWrite("Grid.FindControllingPlayer", $"Found cockpit built by player {player.DisplayName}.");
                         return player;
                     }
+
                     if (write) grid.DebugWrite("Grid.FindControllingPlayer", "No builder player was found.");
                     return null;
                 }
@@ -110,12 +112,12 @@ namespace Eem.Thraxus.Extensions
                 }
 
                 IMyGridTerminalSystem term = grid.GetTerminalSystem();
-                List<IMyTerminalBlock> allTermBlocks = new List<IMyTerminalBlock>();
+                var allTermBlocks = new List<IMyTerminalBlock>();
                 term.GetBlocks(allTermBlocks);
 
                 if (allTermBlocks.Count == 0)
                 {
-                    grid.DebugWrite("Grid.GetOwnerFaction", $"Terminal system is empty!");
+                    grid.DebugWrite("Grid.GetOwnerFaction", "Terminal system is empty!");
                     return null;
                 }
 
@@ -129,8 +131,8 @@ namespace Eem.Thraxus.Extensions
                     return faction ?? factionFromBigowners;
                 }
 
-                grid.DebugWrite("Grid.GetOwnerFaction", $"CANNOT GET FACTION TAGS FROM TERMINAL SYSTEM!");
-                var controllers = grid.GetFatBlocks<IMyShipController>().ToList();// .GetBlocks<IMyShipController>();
+                grid.DebugWrite("Grid.GetOwnerFaction", "CANNOT GET FACTION TAGS FROM TERMINAL SYSTEM!");
+                List<IMyShipController> controllers = grid.GetFatBlocks<IMyShipController>().ToList(); // .GetBlocks<IMyShipController>();
                 //List<IMyShipController> controllers = grid.GetBlocks<IMyShipController>();
                 if (!controllers.Any())
                 {
@@ -141,7 +143,7 @@ namespace Eem.Thraxus.Extensions
                         return faction ?? factionFromBigowners;
                     }
 
-                    grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
+                    grid.DebugWrite("Grid.GetOwnerFaction", "Unable to owner faction via first terminal block!");
                     return faction ?? factionFromBigowners;
                 }
 
@@ -164,7 +166,7 @@ namespace Eem.Thraxus.Extensions
                     return faction ?? factionFromBigowners;
                 }
 
-                grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via cockpit!");
+                grid.DebugWrite("Grid.GetOwnerFaction", "Unable to owner faction via cockpit!");
                 faction = MyAPIGateway.Session.Factions.TryGetFactionByTag(allTermBlocks.First().GetOwnerFactionTag());
                 if (faction != null)
                 {
@@ -172,7 +174,7 @@ namespace Eem.Thraxus.Extensions
                     return faction ?? factionFromBigowners;
                 }
 
-                grid.DebugWrite("Grid.GetOwnerFaction", $"Unable to owner faction via first terminal block!");
+                grid.DebugWrite("Grid.GetOwnerFaction", "Unable to owner faction via first terminal block!");
                 return faction ?? factionFromBigowners;
             }
             catch (Exception scrap)
@@ -220,7 +222,7 @@ namespace Eem.Thraxus.Extensions
         //}
 
         /// <summary>
-        /// Remember, this is only for server-side.
+        ///     Remember, this is only for server-side.
         /// </summary>
         public static void ChangeOwnershipSmart(this IMyCubeGrid grid, long newOwnerId, MyOwnershipShareModeEnum shareMode)
         {
@@ -230,14 +232,12 @@ namespace Eem.Thraxus.Extensions
                 List<IMyCubeGrid> subgrids = grid.GetAllSubgrids();
                 grid.ChangeGridOwnership(newOwnerId, shareMode);
                 foreach (IMyCubeGrid subgrid in subgrids)
-                {
                     try
                     {
                         subgrid.ChangeGridOwnership(newOwnerId, shareMode);
                         try
                         {
                             foreach (IMyProgrammableBlock pb in subgrid.GetTerminalSystem().GetBlocksOfType<IMyProgrammableBlock>())
-                            {
                                 try
                                 {
                                     //if (!string.IsNullOrEmpty(pb.ProgramData)) continue;
@@ -249,8 +249,6 @@ namespace Eem.Thraxus.Extensions
                                     //InGameMessaging.ShowLocalNotification($"Recompiling this pb threw and error: {e.TargetSite} {e} ");
                                     //	MyAPIGateway.Utilities.InvokeOnGameThread(() => { pb.Recompile(); });
                                 }
-
-                            }
                         }
                         catch (Exception)
                         {
@@ -261,15 +259,12 @@ namespace Eem.Thraxus.Extensions
                     {
                         grid.LogError("ChangeOwnershipSmart.ChangeSubgridOwnership", e);
                     }
-                }
             }
             catch (Exception e)
             {
                 grid.LogError("ChangeOwnershipSmart", e);
             }
         }
-
-        private static readonly List<IMyCubeGrid> ReusableGridCollection = new List<IMyCubeGrid>();
 
         public static List<IMyCubeGrid> GetAllSubgrids(this IMyCubeGrid grid)
         {
@@ -284,6 +279,7 @@ namespace Eem.Thraxus.Extensions
                 grid.LogError("GetAllSubgrids", e);
                 return new List<IMyCubeGrid>();
             }
+
             return new List<IMyCubeGrid>();
         }
     }

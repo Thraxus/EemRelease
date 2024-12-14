@@ -17,35 +17,19 @@ namespace Eem.Thraxus.Bots
     public sealed class BotTypeFreighter : BotBase
     {
         public static readonly BotType BotType = BotType.Freighter;
+        private Vector3D _endpoint;
 
         private FreighterSettings _freighterSetup;
 
         private Vector3D _startPoint;
-        private Vector3D _endpoint;
 
-        private struct FreighterSettings
+        public BotTypeFreighter(IMyCubeGrid grid, BotDamageHandler botDamageHandler) : base(grid, botDamageHandler)
         {
-            public bool FleeOnlyWhenDamaged;
-            public float FleeTriggerDistance;
-            public float FleeSpeedRatio;
-            public float FleeSpeedCap;
-            public float CruiseSpeed;
-
-            public void Default()
-            {
-                if (FleeOnlyWhenDamaged == default(bool)) FleeOnlyWhenDamaged = false;
-                if (Math.Abs(FleeTriggerDistance - default(float)) < 1) FleeTriggerDistance = 1000;
-                if (Math.Abs(FleeSpeedRatio - default(float)) < 1) FleeSpeedRatio = 1.0f;
-                if (Math.Abs(FleeSpeedCap - default(float)) < 1) FleeSpeedCap = 300;
-            }
         }
 
         private bool IsFleeing { get; set; }
 
         private bool FleeTimersTriggered { get; set; }
-
-        public BotTypeFreighter(IMyCubeGrid grid, BotDamageHandler botDamageHandler) : base(grid, botDamageHandler)
-        { }
 
         public override bool Init(IMyRemoteControl rc = null)
         {
@@ -65,13 +49,9 @@ namespace Eem.Thraxus.Bots
             var speed = (float)Rc.GetShipSpeed();
             Vector3D velocity = Rc.GetShipVelocities().LinearVelocity;
             if (speed > 5)
-            {
-                _endpoint = GridPosition + (Vector3D.Normalize(velocity) * 30000);
-            }
+                _endpoint = GridPosition + Vector3D.Normalize(velocity) * 30000;
             else
-            {
-                _endpoint = GridPosition + (Rc.WorldMatrix.Forward * 30000);
-            }
+                _endpoint = GridPosition + Rc.WorldMatrix.Forward * 30000;
 
             if (Math.Abs(_freighterSetup.CruiseSpeed - default(float)) > 0)
                 (Rc as MyRemoteControl)?.SetAutoPilotSpeedLimit(_freighterSetup.CruiseSpeed);
@@ -99,10 +79,13 @@ namespace Eem.Thraxus.Bots
 
         public override void Main()
         {
-            if (IsFleeing) Flee();
+            if (IsFleeing)
+            {
+                Flee();
+            }
             else if (!_freighterSetup.FleeOnlyWhenDamaged)
             {
-                List<InGame.MyDetectedEntityInfo> enemiesAround = LookForEnemies(_freighterSetup.FleeTriggerDistance, considerNeutralsAsHostiles: true);
+                List<InGame.MyDetectedEntityInfo> enemiesAround = LookForEnemies(_freighterSetup.FleeTriggerDistance, true);
                 if (enemiesAround.Count <= 0) return;
                 IsFleeing = true;
                 Flee(enemiesAround);
@@ -146,7 +129,7 @@ namespace Eem.Thraxus.Bots
 
         private void JumpAway()
         {
-            List<IMyJumpDrive> jumpDrives = Term.GetBlocksOfType<IMyJumpDrive>(collect: x => x.IsWorking);
+            List<IMyJumpDrive> jumpDrives = Term.GetBlocksOfType<IMyJumpDrive>(x => x.IsWorking);
 
             if (jumpDrives.Count > 0) jumpDrives.First().Jump(false);
         }
@@ -156,13 +139,10 @@ namespace Eem.Thraxus.Bots
             if (FleeTimersTriggered) return;
 
             var fleeTimers = new List<IMyTimerBlock>();
-            
+
             Term.GetBlocksOfType(fleeTimers, x => x.IsFunctional && x.Enabled && (x.CustomName.Contains("Flee") || x.CustomData.Contains("Flee")));
-            
-            foreach (IMyTimerBlock timer in fleeTimers)
-            {
-                timer.Trigger();
-            }
+
+            foreach (IMyTimerBlock timer in fleeTimers) timer.Trigger();
 
             FleeTimersTriggered = true;
         }
@@ -192,6 +172,7 @@ namespace Eem.Thraxus.Bots
                             WriteGeneral("ParseSetup", "AI setup error: FleeOnlyWhenDamaged cannot be parsed");
                             return false;
                         }
+
                         break;
                     case "FleeTriggerDistance":
                         if (!float.TryParse(data[1], out _freighterSetup.FleeTriggerDistance))
@@ -199,6 +180,7 @@ namespace Eem.Thraxus.Bots
                             WriteGeneral("ParseSetup", "AI setup error: FleeTriggerDistance cannot be parsed");
                             return false;
                         }
+
                         break;
                     case "FleeSpeedRatio":
                         if (!float.TryParse(data[1], out _freighterSetup.FleeSpeedRatio))
@@ -206,6 +188,7 @@ namespace Eem.Thraxus.Bots
                             WriteGeneral("ParseSetup", "AI setup error: FleeSpeedRatio cannot be parsed");
                             return false;
                         }
+
                         break;
                     case "FleeSpeedCap":
                         if (!float.TryParse(data[1], out _freighterSetup.FleeSpeedCap))
@@ -213,6 +196,7 @@ namespace Eem.Thraxus.Bots
                             WriteGeneral("ParseSetup", "AI setup error: FleeSpeedCap cannot be parsed");
                             return false;
                         }
+
                         break;
                     case "CruiseSpeed":
                         if (!float.TryParse(data[1], out _freighterSetup.CruiseSpeed))
@@ -220,14 +204,33 @@ namespace Eem.Thraxus.Bots
                             WriteGeneral("ParseSetup", "AI setup error: CruiseSpeed cannot be parsed");
                             return false;
                         }
+
                         break;
                     default:
                         WriteGeneral("ParseSetup", $"AI setup error: Cannot parse '{dataLine}'");
                         return false;
                 }
             }
+
             _freighterSetup.Default();
             return true;
+        }
+
+        private struct FreighterSettings
+        {
+            public bool FleeOnlyWhenDamaged;
+            public float FleeTriggerDistance;
+            public float FleeSpeedRatio;
+            public float FleeSpeedCap;
+            public float CruiseSpeed;
+
+            public void Default()
+            {
+                if (FleeOnlyWhenDamaged == default(bool)) FleeOnlyWhenDamaged = false;
+                if (Math.Abs(FleeTriggerDistance - default(float)) < 1) FleeTriggerDistance = 1000;
+                if (Math.Abs(FleeSpeedRatio - default(float)) < 1) FleeSpeedRatio = 1.0f;
+                if (Math.Abs(FleeSpeedCap - default(float)) < 1) FleeSpeedCap = 300;
+            }
         }
     }
 }

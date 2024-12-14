@@ -1,5 +1,4 @@
-﻿
-namespace Eem.Thraxus.Common.Interfaces
+﻿namespace Eem.Thraxus.Common.Interfaces
 {
     internal interface IInit<in TA, in TB>
     {

@@ -1,5 +1,4 @@
-﻿
-namespace Eem.Thraxus.Common.Extensions
+﻿namespace Eem.Thraxus.Common.Extensions
 {
     public static class Bools
     {

@@ -3,24 +3,26 @@ using Sandbox.ModAPI;
 
 namespace Eem.Thraxus.Common
 {
-	public static class References
-	{   // These settings should be used by the mod directly, and not changeable by a user.  They are considered "reference only"
+    public static class References
+    {
+        // These settings should be used by the mod directly, and not changeable by a user.  They are considered "reference only"
 
-		public const string ChatCommandPrefix = "chatCommand";
-		//public const string ExceptionLogName = "Exception";
-		public const ushort NetworkId = 16759;
+        public const string ChatCommandPrefix = "chatCommand";
 
-		#region Reference Values
+        //public const string ExceptionLogName = "Exception";
+        public const ushort NetworkId = 16759;
 
-		public static bool IsServer => MyAPIGateway.Multiplayer.IsServer;
+        #region Reference Values
 
-		public const int DefaultLocalMessageDisplayTime = 5000;
-		public const int DefaultServerMessageDisplayTime = 10000;
-		public const int TicksPerSecond = 60;
-		public const int TicksPerMinute = TicksPerSecond * 60;
+        public static bool IsServer => MyAPIGateway.Multiplayer.IsServer;
 
-		public static Random Random { get; } = new Random();
+        public const int DefaultLocalMessageDisplayTime = 5000;
+        public const int DefaultServerMessageDisplayTime = 10000;
+        public const int TicksPerSecond = 60;
+        public const int TicksPerMinute = TicksPerSecond * 60;
 
-		#endregion
-	}
+        public static Random Random { get; } = new Random();
+
+        #endregion
+    }
 }

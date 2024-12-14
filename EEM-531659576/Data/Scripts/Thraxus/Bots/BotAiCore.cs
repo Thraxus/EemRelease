@@ -1,97 +1,18 @@
-﻿using Eem.Thraxus.Common.BaseClasses;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Eem.Thraxus.Common.BaseClasses;
+using Eem.Thraxus.Common.Extensions;
+using Eem.Thraxus.Common.Generics;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
-using System.Collections.Generic;
-using System.Linq;
-using Eem.Thraxus.Common.Extensions;
+using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
-using VRage.Game.ModAPI;
-using Eem.Thraxus.Common.Generics;
 
 namespace Eem.Thraxus.Bots
 {
     internal class BotAiCore : BaseLoggingClass
     {
-        public readonly ActionQueue ActionQueue;
-        private readonly BotDamageHandler _botDamageHandler;
-        private readonly List<BotAi> _botAis = new List<BotAi>();
-
-
-        public BotAiCore(ActionQueue actionQueue, BotDamageHandler botDamageHandler)
-        {
-            ActionQueue = actionQueue;
-            _botDamageHandler = botDamageHandler;
-        }
-
-        public void Init()
-        {
-            MyAPIGateway.Entities.OnEntityAdd += OnEntityAdd;
-            MyAPIGateway.Entities.OnEntityRemove += OnEntityRemoved;
-        }
-
-        public override void Close()
-        {
-            MyAPIGateway.Entities.OnEntityAdd -= OnEntityAdd;
-            MyAPIGateway.Entities.OnEntityRemove -= OnEntityRemoved;
-            base.Close();
-        }
-
-        public void Update10()
-        {
-            foreach (var botAi in _botAis)
-            {
-                botAi.Update10();
-            }
-        }
-
-        private void OnEntityAdd(IMyEntity myEntity)
-        {
-            if (myEntity.GetType() != typeof(MyCubeGrid)) return;
-            var grid = (MyCubeGrid)myEntity;
-            if (!grid.IsNpcSpawnedGrid) return;
-            if (grid.IsPreview || grid.IsGenerated || grid.Physics == null) return;
-
-            WriteGeneral("OnEntityAdd", $"Id: {grid.EntityId} | Name: {grid.DisplayName} | Size: {grid.GridSizeEnum} | Blocks: {grid.BlocksCount} | PCU: {grid.BlocksPCU} | Npc Spawned: {grid.IsNpcSpawnedGrid.ToSingleChar()}");
-            AttemptStationFix(myEntity);
-
-            IMyCubeGrid iMyGrid = grid;
-
-            IMyRemoteControl rc = iMyGrid.GetFatBlocks<IMyRemoteControl>().FirstOrDefault(x => x.CustomData.Contains("[EEM_AI]"));
-            
-            if (rc == null) return;
-            if (rc.CustomData.Contains("Type:None")) return;
-
-            // add ownership check maybe, or leave it and fuck a player for cheating in the non-buildable remote block, lol
-            WriteGeneral("OnEntityAdd", "New Bot AI Initializing...");
-            var newBot = new BotAi((MyCubeBlock)rc, _botDamageHandler);
-            newBot.OnWriteToLog += WriteGeneral;
-            newBot.OnClose += close =>
-            {
-                OnWriteToLog -= WriteGeneral;
-                _botAis.Remove(newBot);
-            };
-            newBot.Init();
-            _botAis.Add(newBot);
-            WriteGeneral("OnEntityAdd", "New Bot AI Initialized!");
-        }
-
-        private void OnEntityRemoved(IMyEntity myEntity)
-        {
-            if (myEntity.GetType() != typeof(MyCubeGrid)) return;
-            WriteGeneral("OnEntityRemoved", $"Id: {myEntity.EntityId} | Name: {myEntity.DisplayName}");
-        }
-
-        private void AttemptStationFix(IMyEntity entity)
-        {
-            var thisCubeGrid = (MyCubeGrid)entity;
-            if (!EemStations.Contains(thisCubeGrid.DisplayName)) return;
-            if (thisCubeGrid.Physics == null || thisCubeGrid.IsStatic) return;
-            thisCubeGrid.Physics.LinearVelocity = Vector3.Zero;
-            thisCubeGrid.Physics.AngularVelocity = Vector3.Zero;
-            thisCubeGrid.ConvertToStatic();
-        }
-
         private static readonly List<string> EemStations = new List<string>
         {
             "Amphion Diatom Waystation",
@@ -134,5 +55,82 @@ namespace Eem.Thraxus.Bots
             "XMC 521 Trade Center_Destroyed",
             "Mining Station Cirva"
         };
+
+        private readonly List<BotAi> _botAis = new List<BotAi>();
+        private readonly BotDamageHandler _botDamageHandler;
+        public readonly ActionQueue ActionQueue;
+
+
+        public BotAiCore(ActionQueue actionQueue, BotDamageHandler botDamageHandler)
+        {
+            ActionQueue = actionQueue;
+            _botDamageHandler = botDamageHandler;
+        }
+
+        public void Init()
+        {
+            MyAPIGateway.Entities.OnEntityAdd += OnEntityAdd;
+            MyAPIGateway.Entities.OnEntityRemove += OnEntityRemoved;
+        }
+
+        public override void Close()
+        {
+            MyAPIGateway.Entities.OnEntityAdd -= OnEntityAdd;
+            MyAPIGateway.Entities.OnEntityRemove -= OnEntityRemoved;
+            base.Close();
+        }
+
+        public void Update10()
+        {
+            foreach (BotAi botAi in _botAis) botAi.Update10();
+        }
+
+        private void OnEntityAdd(IMyEntity myEntity)
+        {
+            if (myEntity.GetType() != typeof(MyCubeGrid)) return;
+            var grid = (MyCubeGrid)myEntity;
+            if (!grid.IsNpcSpawnedGrid) return;
+            if (grid.IsPreview || grid.IsGenerated || grid.Physics == null) return;
+
+            WriteGeneral("OnEntityAdd", $"Id: {grid.EntityId} | Name: {grid.DisplayName} | Size: {grid.GridSizeEnum} | Blocks: {grid.BlocksCount} | PCU: {grid.BlocksPCU} | Npc Spawned: {grid.IsNpcSpawnedGrid.ToSingleChar()}");
+            AttemptStationFix(myEntity);
+
+            IMyCubeGrid iMyGrid = grid;
+
+            IMyRemoteControl rc = iMyGrid.GetFatBlocks<IMyRemoteControl>().FirstOrDefault(x => x.CustomData.Contains("[EEM_AI]"));
+
+            if (rc == null) return;
+            if (rc.CustomData.Contains("Type:None")) return;
+
+            // add ownership check maybe, or leave it and fuck a player for cheating in the non-buildable remote block, lol
+            WriteGeneral("OnEntityAdd", "New Bot AI Initializing...");
+            var newBot = new BotAi((MyCubeBlock)rc, _botDamageHandler);
+            newBot.OnWriteToLog += WriteGeneral;
+            newBot.OnClose += close =>
+            {
+                WriteGeneral("BotClose", "Closing Bot");
+                OnWriteToLog -= WriteGeneral;
+                _botAis.Remove(newBot);
+            };
+            newBot.Init();
+            _botAis.Add(newBot);
+            WriteGeneral("OnEntityAdd", "New Bot AI Initialized!");
+        }
+
+        private void OnEntityRemoved(IMyEntity myEntity)
+        {
+            if (myEntity.GetType() != typeof(MyCubeGrid)) return;
+            WriteGeneral("OnEntityRemoved", $"Id: {myEntity.EntityId} | Name: {myEntity.DisplayName}");
+        }
+
+        private void AttemptStationFix(IMyEntity entity)
+        {
+            var thisCubeGrid = (MyCubeGrid)entity;
+            if (!EemStations.Contains(thisCubeGrid.DisplayName)) return;
+            if (thisCubeGrid.Physics == null || thisCubeGrid.IsStatic) return;
+            thisCubeGrid.Physics.LinearVelocity = Vector3.Zero;
+            thisCubeGrid.Physics.AngularVelocity = Vector3.Zero;
+            thisCubeGrid.ConvertToStatic();
+        }
     }
 }

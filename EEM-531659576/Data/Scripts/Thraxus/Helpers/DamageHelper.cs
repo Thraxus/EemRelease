@@ -12,17 +12,18 @@ namespace Eem.Thraxus.Helpers
 {
     public static class DamageHelper
     {
+        private static readonly List<IMySlimBlock> Slims = new List<IMySlimBlock>();
+
         /// <summary>
-        /// Determines if damage was done by player.
-        /// <para/>
-        /// If it's necessary to determine who did the damage, use overload.
+        ///     Determines if damage was done by player.
+        ///     <para />
+        ///     If it's necessary to determine who did the damage, use overload.
         /// </summary>
         //public static bool IsDoneByPlayer(this MyDamageInformation damage)
         //{
         //	IMyPlayer trash;
         //	return damage.IsDoneByPlayer(out trash);
         //}
-
         private static bool IsDamagedByPlayerWarhead(IMyWarhead warhead, out IMyPlayer damager)
         {
             damager = null;
@@ -34,12 +35,10 @@ namespace Eem.Thraxus.Helpers
                     //AiSessionCore.DebugWrite("Damage.IsDoneByPlayer", "Attempting to find damager by neutral warhead.");
                     return damager != null;
                 }
-                else
-                {
-                    damager = MyAPIGateway.Players.GetPlayerById(warhead.OwnerId);
-                    //AiSessionCore.DebugWrite("Damage.IsDoneByPlayer", "Attempting to find damager by warhead owner.");
-                    return damager != null;
-                }
+
+                damager = MyAPIGateway.Players.GetPlayerById(warhead.OwnerId);
+                //AiSessionCore.DebugWrite("Damage.IsDoneByPlayer", "Attempting to find damager by warhead owner.");
+                return damager != null;
             }
             catch (Exception)
             {
@@ -80,8 +79,6 @@ namespace Eem.Thraxus.Helpers
             }
         }
 
-        private static readonly List<IMySlimBlock> Slims = new List<IMySlimBlock>();
-
         private static bool IsDamagedByPlayerInNeutralGrid(IMyCubeGrid grid, out IMyPlayer damager)
         {
             damager = null;
@@ -96,7 +93,7 @@ namespace Eem.Thraxus.Helpers
                     //List<IMySlimBlock> slims = new List<IMySlimBlock>();
                     //grid.GetBlocks(slims, x => x.BuiltBy != 0);
 
-                    var cubeBlocks = grid.GetFatBlocks<IMyTerminalBlock>().Where(x => !x.IsBuiltByNobody()).ToList();
+                    List<IMyTerminalBlock> cubeBlocks = grid.GetFatBlocks<IMyTerminalBlock>().Where(x => !x.IsBuiltByNobody()).ToList();
                     if (cubeBlocks.Count != 0)
                     {
                         long thatCunningAsshat = cubeBlocks[0].SlimBlock.BuiltBy;
@@ -107,14 +104,11 @@ namespace Eem.Thraxus.Helpers
                     Slims.Clear();
                     grid.GetBlocks(Slims, x => x.BuiltBy != 0);
                     if (Slims.Count == 0) return false; // We give up on this one
-                    
+
                     try
                     {
                         damager = MyAPIGateway.Players.GetPlayerById(Slims.First().GetBuiltBy());
-                        if (damager != null)
-                        {
-                            grid.DebugWrite("Damage.IsDoneByPlayer.FindBuilderBySlimBlocks", $"Found damaging player from slim block. Meanie is {damager.DisplayName}");
-                        }
+                        if (damager != null) grid.DebugWrite("Damage.IsDoneByPlayer.FindBuilderBySlimBlocks", $"Found damaging player from slim block. Meanie is {damager.DisplayName}");
                         return damager != null;
                     }
                     catch (Exception)
@@ -122,7 +116,6 @@ namespace Eem.Thraxus.Helpers
                         //AiSessionCore.LogError("Damage.IsDoneByPlayer", new Exception("Check grid via SlimBlocks BuiltBy crashed.", scrap));
                         return false;
                     }
-                    
                 }
                 catch (Exception)
                 {
@@ -146,7 +139,6 @@ namespace Eem.Thraxus.Helpers
                 if (biggestOwner == 0) return false;
                 damager = MyAPIGateway.Players.GetPlayerById(biggestOwner);
                 return !damager?.IsBot ?? false;
-
             }
             catch (Exception)
             {
@@ -157,7 +149,7 @@ namespace Eem.Thraxus.Helpers
 
 
         /// <summary>
-        /// Determines if damage was done by player.
+        ///     Determines if damage was done by player.
         /// </summary>
         /// <param name="damage"></param>
         /// <param name="damager">Provides player who did the damage. Null if damager object is not a player.</param>
@@ -178,18 +170,15 @@ namespace Eem.Thraxus.Helpers
                 attackerEntity = attackerEntity.GetTopMostParent();
 
                 if (attackerEntity == null)
-                {
                     //AiSessionCore.DebugLog?.WriteToLog("IsDoneByPlayer", $"attackerEntity was NULL");
                     //AiSessionCore.DebugWrite("Damage.IsDoneByPlayer", "Cannot acquire the attacker's topmost entity", antiSpam: false);
                     return false;
-                }
 
                 if (!(attackerEntity is IMyCubeGrid)) return false;
-                IMyCubeGrid grid = attackerEntity as IMyCubeGrid;
+                var grid = attackerEntity as IMyCubeGrid;
                 if (grid.IsPirate()) return false;
                 //grid.GetOwnerFaction()
                 return grid.IsOwnedByNobody() ? IsDamagedByPlayerInNeutralGrid(grid, out damager) : IsDamagedByPlayerGrid(grid, out damager);
-
             }
             catch (Exception)
             {

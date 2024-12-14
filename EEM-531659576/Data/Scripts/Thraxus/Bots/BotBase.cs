@@ -23,9 +23,34 @@ namespace Eem.Thraxus.Bots
 {
     public abstract class BotBase : BaseLoggingClass
     {
-        public IMyCubeGrid Grid { get; protected set; }
+        public delegate void HOnBlockPlaced(IMySlimBlock block);
+
+        public delegate void OnDamageTaken(IMySlimBlock damagedBlock, MyDamageInformation damage);
+
+        private readonly BotDamageHandler _botDamageHandler;
 
         protected readonly IMyGridTerminalSystem Term;
+
+        private IMyFaction _ownerFaction;
+
+        protected bool BotOperable;
+
+        protected bool Closed;
+
+        protected List<IMyThrust> SpeedModdedThrusters = new List<IMyThrust>();
+
+        //protected event Action Alert;
+
+        protected BotBase(IMyCubeGrid grid, BotDamageHandler botDamageHandler)
+        {
+            if (grid == null) return;
+            Grid = grid;
+            _botDamageHandler = botDamageHandler;
+            Term = grid.GetTerminalSystem();
+            Antennae = new List<IMyRadioAntenna>();
+        }
+
+        public IMyCubeGrid Grid { get; protected set; }
 
         public Vector3D GridPosition => Grid.GetPosition();
 
@@ -34,25 +59,16 @@ namespace Eem.Thraxus.Bots
         public float GridSpeed => (float)GridVelocity.Length();
 
         protected float GridRadius => (float)Grid.WorldVolume.Radius;
-        
-        public IMyRemoteControl Rc { get; protected set; }
 
-        private IMyFaction _ownerFaction;
+        public IMyRemoteControl Rc { get; protected set; }
 
         protected string DroneNameProvider => $"Drone_{Rc.EntityId}";
 
-        private readonly BotDamageHandler _botDamageHandler;
-
         protected bool HasModdedThrusters => SpeedModdedThrusters.Count > 0;
-
-        protected List<IMyThrust> SpeedModdedThrusters = new List<IMyThrust>();
 
         public string DroneName
         {
-            get
-            {
-                return Rc.Name;
-            }
+            get { return Rc.Name; }
             protected set
             {
                 IMyEntity entity = Rc;
@@ -77,10 +93,6 @@ namespace Eem.Thraxus.Bots
             }
         }
 
-        protected bool BotOperable;
-
-        protected bool Closed;
-
         //public virtual bool Operable
         //{
         //	get
@@ -99,24 +111,9 @@ namespace Eem.Thraxus.Bots
 
         public List<IMyRadioAntenna> Antennae { get; protected set; }
 
-        public delegate void OnDamageTaken(IMySlimBlock damagedBlock, MyDamageInformation damage);
-
         protected event OnDamageTaken OnDamaged;
 
-        public delegate void HOnBlockPlaced(IMySlimBlock block);
-
         protected event HOnBlockPlaced OnBlockPlaced;
-
-        //protected event Action Alert;
-
-        protected BotBase(IMyCubeGrid grid, BotDamageHandler botDamageHandler)
-        {
-            if (grid == null) return;
-            Grid = grid;
-            _botDamageHandler = botDamageHandler;
-            Term = grid.GetTerminalSystem();
-            Antennae = new List<IMyRadioAntenna>();
-        }
 
         private void TriggerWar(long assaulted, long assaulter)
         {
@@ -129,7 +126,7 @@ namespace Eem.Thraxus.Bots
             try
             {
                 string customData = rc.CustomData.Trim().Replace("\r\n", "\n");
-                List<string> myCustomData = new List<string>(customData.Split('\n'));
+                var myCustomData = new List<string>(customData.Split('\n'));
 
                 if (customData.IsNullEmptyOrWhiteSpace()) return BotType.None;
                 if (myCustomData.Count < 2)
@@ -137,6 +134,7 @@ namespace Eem.Thraxus.Bots
                     if (Constants.AllowThrowingErrors) throw new Exception("CustomData is invalid", new Exception("CustomData consists of less than two lines"));
                     return BotType.Invalid;
                 }
+
                 if (myCustomData[0].Trim() != "[EEM_AI]")
                 {
                     if (Constants.AllowThrowingErrors) throw new Exception("CustomData is invalid", new Exception($"AI tag invalid: '{myCustomData[0]}'"));
@@ -150,7 +148,7 @@ namespace Eem.Thraxus.Bots
                     return BotType.Invalid;
                 }
 
-                BotType botType = BotType.Invalid;
+                var botType = BotType.Invalid;
 
                 // ReSharper disable once SwitchStatementMissingSomeCases
                 switch (bottype[1].Trim())
@@ -181,11 +179,11 @@ namespace Eem.Thraxus.Bots
         public virtual bool Init(IMyRemoteControl rc = null)
         {
             WriteGeneral("Init", "Bot Booting...");
-            Rc = rc ?? Term.GetBlocksOfType<IMyRemoteControl>(collect: x => x.IsFunctional).FirstOrDefault();
+            Rc = rc ?? Term.GetBlocksOfType<IMyRemoteControl>(x => x.IsFunctional).FirstOrDefault();
             if (rc == null) return false;
             DroneName = DroneNameProvider;
 
-            Antennae = Term.GetBlocksOfType<IMyRadioAntenna>(collect: x => x.IsFunctional);
+            Antennae = Term.GetBlocksOfType<IMyRadioAntenna>(x => x.IsFunctional);
 
             bool hasSetup = ParseSetup();
             if (!hasSetup) return false;
@@ -269,7 +267,6 @@ namespace Eem.Thraxus.Bots
                 //AiSessionCore.DebugLog?.WriteToLog("ReactOnDamage", $"damager.IsNull:\t{damager == null}");
                 //AiSessionCore.DebugLog?.WriteToLog("ReactOnDamage", $"damager.GetFaction()\t{damager?.GetFaction()}");
                 //AiSessionCore.DebugLog?.WriteToLog("ReactOnDamage", $"damager.GetFactionIsNull()\t{damager?.GetFaction() == null}");
-
             }
             catch (Exception scrap)
             {
@@ -315,7 +312,6 @@ namespace Eem.Thraxus.Bots
             }
         }
 
-        
 
         //protected virtual void RegisterHostileAction(IMyPlayer player, TimeSpan truceDelay)
         //{
@@ -397,7 +393,7 @@ namespace Eem.Thraxus.Bots
         {
             var radarData = new List<MyDetectedEntityInfo>();
             var lookaroundSphere = new BoundingSphereD(GridPosition, radius);
-            
+
             List<IMyEntity> entitiesAround = MyAPIGateway.Entities.GetTopMostEntitiesInSphere(ref lookaroundSphere);
             entitiesAround.RemoveAll(x => x == Grid || GridPosition.DistanceTo(x.GetPosition()) < GridRadius * 1.5);
 
@@ -427,13 +423,11 @@ namespace Eem.Thraxus.Bots
 
         protected List<MyDetectedEntityInfo> LookForEnemies(float radius, bool considerNeutralsAsHostiles = false, Func<MyDetectedEntityInfo, bool> filter = null)
         {
-            return !considerNeutralsAsHostiles ?
-                LookAround(radius, x => x.IsHostile() && (filter == null || filter(x))) :
-                LookAround(radius, x => x.IsNonFriendly() && (filter == null || filter(x)));
+            return !considerNeutralsAsHostiles ? LookAround(radius, x => x.IsHostile() && (filter == null || filter(x))) : LookAround(radius, x => x.IsNonFriendly() && (filter == null || filter(x)));
         }
 
         /// <summary>
-        /// Returns distance from the grid to an object.
+        ///     Returns distance from the grid to an object.
         /// </summary>
         protected float Distance(MyDetectedEntityInfo target)
         {
@@ -441,7 +435,7 @@ namespace Eem.Thraxus.Bots
         }
 
         /// <summary>
-        /// Returns distance from the grid to an object.
+        ///     Returns distance from the grid to an object.
         /// </summary>
         //protected float Distance(IMyEntity target)
         //{
@@ -452,7 +446,6 @@ namespace Eem.Thraxus.Bots
         //{
         //	return target.Velocity - GridVelocity;
         //}
-
         protected float RelSpeed(MyDetectedEntityInfo target)
         {
             return (float)(target.Velocity - GridVelocity).Length();
@@ -488,12 +481,11 @@ namespace Eem.Thraxus.Bots
         //	return blocks;
         //}
 
-        
 
         protected void ApplyThrustMultiplier(float thrustMultiplier)
         {
             DeMultiplyThrusters();
-            foreach (IMyThrust thruster in Term.GetBlocksOfType<IMyThrust>(collect: x => x.IsOwnedByNpc(allowNobody: false, checkBuilder: true)))
+            foreach (IMyThrust thruster in Term.GetBlocksOfType<IMyThrust>(x => x.IsOwnedByNpc(false, true)))
             {
                 thruster.ThrustMultiplier = thrustMultiplier;
                 thruster.OwnershipChanged += Thruster_OnOwnerChanged;
@@ -505,9 +497,8 @@ namespace Eem.Thraxus.Bots
         {
             if (!HasModdedThrusters) return;
             foreach (IMyThrust thruster in SpeedModdedThrusters)
-            {
-                if (Math.Abs(thruster.ThrustMultiplier - 1) > 0) thruster.ThrustMultiplier = 1;
-            }
+                if (Math.Abs(thruster.ThrustMultiplier - 1) > 0)
+                    thruster.ThrustMultiplier = 1;
             SpeedModdedThrusters.Clear();
         }
 

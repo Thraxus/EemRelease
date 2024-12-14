@@ -1,6 +1,6 @@
-﻿
-namespace Eem.Thraxus.Common.Interfaces
+﻿namespace Eem.Thraxus.Common.Interfaces
 {
-	public interface ICommon : ILog, IUpdate
-    { }
+    public interface ICommon : ILog, IUpdate
+    {
+    }
 }

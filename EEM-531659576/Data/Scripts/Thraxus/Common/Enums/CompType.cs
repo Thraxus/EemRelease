@@ -1,10 +1,9 @@
-﻿
-namespace Eem.Thraxus.Common.Enums
+﻿namespace Eem.Thraxus.Common.Enums
 {
-	public enum CompType
-	{
-		Both,
-		Client,
-		Server
-	}
+    public enum CompType
+    {
+        Both,
+        Client,
+        Server
+    }
 }

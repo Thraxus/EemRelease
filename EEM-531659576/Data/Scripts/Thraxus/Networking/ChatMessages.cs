@@ -5,13 +5,15 @@ using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Networking
 {
-	public static class ChatMessages
-	{
+    public static class ChatMessages
+    {
         internal const string EemChatCommandPrefix = "/eemdev";
         private const string HelpPrefix = "help";
         private const string GetCivlStandingsPrefix = "getcivlstandings";
         private const string ShowDebugLogPrefix = "showdebuglog";
+
         private const string ShowProfilingLogPrefix = "showprofilinglog";
+
         //private const string ShowGeneralLogPrefix = "showgenerallog";
         private const string SpawnTestPrefabPrefix = "spawntestprefab";
         private const string DespawnTestPrefabPrefix = "despawntestprefab";
@@ -19,13 +21,12 @@ namespace Eem.Thraxus.Networking
 
         private static readonly Dictionary<string, Action<string>> ChatAction = new Dictionary<string, Action<string>>
         {
-            {HelpPrefix, PrintHelpCommands}, {GetCivlStandingsPrefix, GetCivlStandings},
-            {ShowDebugLogPrefix, ShowDebugLog}, {ShowProfilingLogPrefix, ShowProfilingLog}
+            { HelpPrefix, PrintHelpCommands }, { GetCivlStandingsPrefix, GetCivlStandings },
+            { ShowDebugLogPrefix, ShowDebugLog }, { ShowProfilingLogPrefix, ShowProfilingLog }
         };
 
         public static void HandleChatMessage(string message)
         {
-
             IMyPlayer localPlayer = MyAPIGateway.Session.Player;
 
             if (localPlayer.PromoteLevel < MyPromoteLevel.Admin)
@@ -54,8 +55,8 @@ namespace Eem.Thraxus.Networking
         }
 
         /// <summary>
-        /// Prints a list of available commands
-        /// </summary>  
+        ///     Prints a list of available commands
+        /// </summary>
         private static void PrintHelpCommands(string s)
         {
             Messaging.ShowLocalNotification($"'{EemChatCommandPrefix} {HelpPrefix}' will show this message");
@@ -69,7 +70,6 @@ namespace Eem.Thraxus.Networking
 
         private static void GetCivlStandings(string s)
         {
-
         }
 
         private static void ShowDebugLog(string s)

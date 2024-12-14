@@ -1,8 +1,7 @@
-﻿
-namespace Eem.Thraxus.Common.Utilities.Statics
+﻿namespace Eem.Thraxus.Common.Utilities.Statics
 {
-	public static class VectorManipulations
-	{   // Most of these are from Whiplash; brilliant dude: https://github.com/Whiplash141?tab=repositories
-
-	}
+    public static class VectorManipulations
+    {
+        // Most of these are from Whiplash; brilliant dude: https://github.com/Whiplash141?tab=repositories
+    }
 }

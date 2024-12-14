@@ -1,7 +1,6 @@
 ﻿namespace Eem.Thraxus.Common.Utilities.Tools.Networking.Messages
 {
-	class ExampleMessage
-	{
-
-	}
+    internal class ExampleMessage
+    {
+    }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Eem.Thraxus.Common.Interfaces
+﻿namespace Eem.Thraxus.Common.Interfaces
 {
     public interface IUpdate
     {
