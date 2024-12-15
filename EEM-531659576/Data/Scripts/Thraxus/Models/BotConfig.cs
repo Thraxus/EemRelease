@@ -60,7 +60,7 @@ namespace Eem.Thraxus.Models
             return botType;
         }
 
-        private T GetValue<T>(string str) where T : struct, IConvertible
+        private T GetValue<T>(string str) where T : struct
         {
             try
             {

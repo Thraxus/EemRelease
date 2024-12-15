@@ -23,12 +23,12 @@ namespace Eem.Thraxus.Entities.Bots
 
         private DateTime? _alertTriggerTime;
 
-        public BotTypeStation(IMyCubeGrid grid, BotConfig botConfig, BotDamageHandler botDamageHandler) 
-            : base(grid, botConfig, botDamageHandler) { }
+        public BotTypeStation(IMyCubeGrid grid, BotConfig botConfig)
+            : base(grid, botConfig) { }
 
         private bool WasDamaged => _alertTriggerTime != null;
 
-        public override bool Init(IMyRemoteControl rc = null)
+        public override bool Init(IMyRemoteControl rc)
         {
             if (!base.Init(rc)) return false;
             WriteGeneral("Init", "Bot Station Booting...");
@@ -48,7 +48,7 @@ namespace Eem.Thraxus.Entities.Bots
         private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
         {
             if (block == null) return;
-            if (!block.IsDestroyed && damage.IsThruster()) return;
+            //if (!block.IsDestroyed && damage.IsThruster()) return;
             IMyPlayer damager;
             ReactOnDamage(damage, out damager);
             if (damager != null) OnAlert();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
@@ -28,7 +29,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         public delegate void OnDamageTaken(IMySlimBlock damagedBlock, MyDamageInformation damage);
 
-        private readonly BotDamageHandler _botDamageHandler;
+        //private readonly BotDamageHandler _botDamageHandler;
 
         protected readonly IMyGridTerminalSystem Term;
 
@@ -44,11 +45,11 @@ namespace Eem.Thraxus.Entities.Bots
 
         //protected event Action Alert;
 
-        protected BotBase(IMyCubeGrid grid, BotConfig botConfig, BotDamageHandler botDamageHandler)
+        protected BotBase(IMyCubeGrid grid, BotConfig botConfig)
         {
             if (grid == null) return;
             Grid = grid;
-            _botDamageHandler = botDamageHandler;
+            //_botDamageHandler = botDamageHandler;
             Term = grid.GetTerminalSystem();
             Antennae = new List<IMyRadioAntenna>();
             BotConfig = botConfig;
@@ -70,16 +71,18 @@ namespace Eem.Thraxus.Entities.Bots
 
         protected bool HasModdedThrusters => SpeedModdedThrusters.Count > 0;
 
-        public string DroneName
-        {
-            get { return Rc.Name; }
-            protected set
-            {
-                IMyEntity entity = Rc;
-                entity.Name = value;
-                MyAPIGateway.Entities.SetEntityName(entity);
-            }
-        }
+        protected string DroneName;
+
+        //public string DroneName
+        //{
+        //    get { return Rc.Name; }
+        //    protected set
+        //    {
+        //        IMyEntity entity = Rc;
+        //        entity.Name = value;
+        //        MyAPIGateway.Entities.SetEntityName(entity);
+        //    }
+        //}
 
         protected bool GridOperable
         {
@@ -122,7 +125,7 @@ namespace Eem.Thraxus.Entities.Bots
         private void TriggerWar(long assaulted, long assaulter)
         {
             WriteGeneral("TriggerWar", $"Asshats! [{assaulted.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
-            _botDamageHandler.TriggerWar(assaulted, assaulter);
+            //_botDamageHandler.TriggerWar(assaulted, assaulter);
         }
 
         //public BotType ReadBotType(IMyRemoteControl rc)
@@ -179,11 +182,11 @@ namespace Eem.Thraxus.Entities.Bots
         //    }
         //}
 
-        public virtual bool Init(IMyRemoteControl rc = null)
+        public virtual bool Init(IMyRemoteControl rc)
         {
-            //Rc = rc ?? Term.GetBlocksOfType<IMyRemoteControl>(x => x.IsFunctional).FirstOrDefault();
+            Rc = rc ?? Term.GetBlocksOfType<IMyRemoteControl>(x => x.IsFunctional).FirstOrDefault();
             if (rc == null) return false;
-            DroneName = DroneNameProvider;
+            DroneName = $"Drone_{Grid.EntityId.ToEntityIdFormat()}";
 
             WriteGeneral("Init", $"Bot Base Booting... [{DroneName}]");
 
@@ -193,7 +196,7 @@ namespace Eem.Thraxus.Entities.Bots
             //bool hasSetup = ParseSetup();
             //if (!hasSetup) return false;
 
-            _botDamageHandler.AddDamageHandler(Grid, (block, damage) => { OnDamaged?.Invoke(block, damage); });
+            //_botDamageHandler.AddDamageHandler(Grid, (block, damage) => { OnDamaged?.Invoke(block, damage); });
 
             Grid.OnBlockAdded += block => { OnBlockPlaced?.Invoke(block); };
 
@@ -217,43 +220,43 @@ namespace Eem.Thraxus.Entities.Bots
             damager = null;
             try
             {
-                //AiSessionCore.DebugLog?.WriteToLog("ReactOnDamage", $"damage.AttackerId:\t{damage.AttackerId}");
+                ////AiSessionCore.DebugLog?.WriteToLog("ReactOnDamage", $"damage.AttackerId:\t{damage.AttackerId}");
 
-                // Inconsequential damage sources, ignore them
-                if (damage.IsDeformation || damage.IsMeteor() || damage.IsThruster())
-                    return;
+                //// Inconsequential damage sources, ignore them
+                //if (damage.IsDeformation || damage.IsMeteor() || damage.IsThruster())
+                //    return;
 
-                //if (damage.IsDoneByPlayer(out damager) && damager != null)
-                //	if (damager.GetFaction() == null) return;
+                ////if (damage.IsDoneByPlayer(out damager) && damager != null)
+                ////	if (damager.GetFaction() == null) return;
 
-                if (damage.IsDoneByPlayer(out damager))
-                {
-                    if (damager.GetFaction() == null) return;
-                    DeclareWar(damager.GetFaction());
-                    return;
-                }
+                //if (damage.IsDoneByPlayer(out damager))
+                //{
+                //    if (damager.GetFaction() == null) return;
+                //    DeclareWar(damager.GetFaction());
+                //    return;
+                //}
 
-                // Issue here is damager == null at this point.  Damager is IMyPlayer
-                // Since damager == null, DeclareWar fails.  
-                // Need to check for damager == null here, if so, get pilot and declare war on them if they are in a faction
+                //// Issue here is damager == null at this point.  Damager is IMyPlayer
+                //// Since damager == null, DeclareWar fails.  
+                //// Need to check for damager == null here, if so, get pilot and declare war on them if they are in a faction
 
-                var possibleAttackingPlayers = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(possibleAttackingPlayers,
-                    player =>
-                        player.Controller.ControlledEntity.Entity != null &&
-                        !player.IsBot &&
-                        player.Character != null &&
-                        player.Controller.ControlledEntity.Entity is IMyShipController);
-                foreach (IMyPlayer possibleAttackingPlayer in possibleAttackingPlayers)
-                {
-                    if (((IMyShipController)possibleAttackingPlayer.Controller.ControlledEntity.Entity).SlimBlock.CubeGrid !=
-                        MyAPIGateway.Entities.GetEntityById(damage.AttackerId)) continue;
-                    damager = possibleAttackingPlayer;
-                    IMyFaction attackingFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(possibleAttackingPlayer.IdentityId);
-                    if (attackingFaction == null)
-                        continue;
-                    DeclareWar(attackingFaction);
-                }
+                //var possibleAttackingPlayers = new List<IMyPlayer>();
+                //MyAPIGateway.Players.GetPlayers(possibleAttackingPlayers,
+                //    player =>
+                //        player.Controller.ControlledEntity.Entity != null &&
+                //        !player.IsBot &&
+                //        player.Character != null &&
+                //        player.Controller.ControlledEntity.Entity is IMyShipController);
+                //foreach (IMyPlayer possibleAttackingPlayer in possibleAttackingPlayers)
+                //{
+                //    if (((IMyShipController)possibleAttackingPlayer.Controller.ControlledEntity.Entity).SlimBlock.CubeGrid !=
+                //        MyAPIGateway.Entities.GetEntityById(damage.AttackerId)) continue;
+                //    damager = possibleAttackingPlayer;
+                //    IMyFaction attackingFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(possibleAttackingPlayer.IdentityId);
+                //    if (attackingFaction == null)
+                //        continue;
+                //    DeclareWar(attackingFaction);
+                //}
 
                 //HashSet<IMyEntity> possibleAttackingPlayers2 = new HashSet<IMyEntity>();
                 //MyAPIGateway.Entities.GetEntities(possibleAttackingPlayers2, entity => entity is IMyShipController);
@@ -529,7 +532,7 @@ namespace Eem.Thraxus.Entities.Bots
         {
             Closed = true;
             if (HasModdedThrusters) DeMultiplyThrusters();
-            _botDamageHandler.RemoveDamageHandler(Grid);
+            //_botDamageHandler.RemoveDamageHandler(Grid);
             Close();
         }
     }

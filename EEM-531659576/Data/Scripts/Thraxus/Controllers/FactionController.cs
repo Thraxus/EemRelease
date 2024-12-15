@@ -33,7 +33,7 @@ namespace Eem.Thraxus.Controllers
             RelationshipManager = new RelationshipManager();
             RelationshipManager.OnWriteToLog += WriteGeneral;
             RelationshipManager.Init();
-            _botDamageHandler.OnTriggerWar += TriggerWar;
+            //_botDamageHandler.OnTriggerWar += TriggerWar;
             WriteGeneral("FactionCore", "Online!");
         }
 

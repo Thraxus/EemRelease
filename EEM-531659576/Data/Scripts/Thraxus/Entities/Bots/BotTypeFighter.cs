@@ -26,14 +26,17 @@ namespace Eem.Thraxus.Entities.Bots
 
         private FighterSettings _fighterSetup;
 
-        public BotTypeFighter(IMyCubeGrid grid, BotConfig botConfig, BotDamageHandler botDamageHandler)
-            : base(grid, botConfig, botDamageHandler) { }
+        //public BotTypeFighter(IMyCubeGrid grid, BotConfig botConfig, BotDamageHandler botDamageHandler)
+        //    : base(grid, botConfig, botDamageHandler) { }
+
+        public BotTypeFighter(IMyCubeGrid grid, BotConfig botConfig)
+            : base(grid, botConfig) { }
 
         //private bool Damaged { get; set; }
 
         public bool KeenAiLoaded { get; private set; }
 
-        public override bool Init(IMyRemoteControl rc = null)
+        public override bool Init(IMyRemoteControl rc)
         {
             if (!base.Init(rc)) return false;
             WriteGeneral("Init", "Bot Fighter Booting...");

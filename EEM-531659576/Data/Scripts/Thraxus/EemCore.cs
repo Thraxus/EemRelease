@@ -82,7 +82,7 @@ namespace Eem.Thraxus
         {
             base.LateSetup();
             //_botDamageHandler.OnWriteToLog += WriteGeneral;
-            _botDamageHandler.Init(_actionQueues);
+            //_botDamageHandler.Init(_actionQueues);
             //_factionCore.OnWriteToLog += WriteGeneral;
             //_factionCore.Init();
             //if (DisableAi) return;

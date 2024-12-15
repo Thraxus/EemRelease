@@ -2,10 +2,8 @@
 using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Models;
-using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
-using static VRage.Game.MyObjectBuilder_ControllerSchemaDefinition;
 
 namespace Eem.Thraxus.Entities.Bots
 {
@@ -32,6 +30,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         public void Init()
         {
+            WriteGeneral("Init", "Fabricating New Bot...");
             Ai = FabricateBot(Grid, Rc);
 
             if (Ai == null)
@@ -41,7 +40,8 @@ namespace Eem.Thraxus.Entities.Bots
             }
 
             BotId = Rc.EntityId;
-            
+            WriteGeneral("Init", $"Bot Id: [{BotId.ToEntityIdFormat()}]");
+
             Ai.OnWriteToLog += WriteGeneral;
             Ai.OnClose += close =>
             {
@@ -49,6 +49,7 @@ namespace Eem.Thraxus.Entities.Bots
                 Grid.Close();
                 Close();
             };
+            WriteGeneral("Init", $"Initializing Ai for: [{BotId.ToEntityIdFormat()}]");
             Ai.Init(Rc);
         }
 
@@ -70,15 +71,16 @@ namespace Eem.Thraxus.Entities.Bots
             {
                 case BotType.Fighter:
                     WriteGeneral("FabricateBot", "New Bot: Fighter");
-                    bot = new BotTypeFighter(grid, _botConfig, _botDamageHandler);
+                    //bot = new BotTypeFighter(grid, _botConfig, _botDamageHandler);
+                    bot = new BotTypeFighter(grid, _botConfig);
                     break;
                 case BotType.Freighter:
                     WriteGeneral("FabricateBot", "New Bot: Freighter");
-                    bot = new BotTypeFreighter(grid, _botConfig, _botDamageHandler);
+                    bot = new BotTypeFreighter(grid, _botConfig);
                     break;
                 case BotType.Station:
                     WriteGeneral("FabricateBot", "New Bot: Station");
-                    bot = new BotTypeStation(grid, _botConfig, _botDamageHandler);
+                    bot = new BotTypeStation(grid, _botConfig);
                     break;
                 case BotType.None:
                 case BotType.Invalid:

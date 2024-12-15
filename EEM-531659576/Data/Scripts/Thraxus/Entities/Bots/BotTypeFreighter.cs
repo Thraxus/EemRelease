@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Models;
@@ -25,20 +26,21 @@ namespace Eem.Thraxus.Entities.Bots
 
         private Vector3D _startPoint;
 
-        public BotTypeFreighter(IMyCubeGrid grid, BotConfig botConfig, BotDamageHandler botDamageHandler)
-            : base(grid, botConfig, botDamageHandler) { }
+        public BotTypeFreighter(IMyCubeGrid grid, BotConfig botConfig)
+            : base(grid, botConfig) { }
 
         private bool IsFleeing { get; set; }
 
         private bool FleeTimersTriggered { get; set; }
 
-        public override bool Init(IMyRemoteControl rc = null)
+        public override bool Init(IMyRemoteControl rc)
         {
             if (!base.Init(rc)) return false;
+            if (Rc == null) return false;
             WriteGeneral("Init", "Bot Freighter Booting...");
             OnDamaged += DamageHandler;
             //OnBlockPlaced += BlockPlacedHandler;
-            _startPoint = GridPosition;
+            //_startPoint = GridPosition;
             SetFlightPath();
 
             return true;
@@ -46,9 +48,16 @@ namespace Eem.Thraxus.Entities.Bots
 
         private void SetFlightPath()
         {
+            WriteGeneral("SetFlightPath", $"GP: {GridPosition}");
+            WriteGeneral("SetFlightPath", $"SP: {(float)Rc.GetShipSpeed()}");
+            WriteGeneral("SetFlightPath", $"SV: [{Rc.DampenersOverride.ToSingleChar()}] {Rc.GetShipVelocities().LinearVelocity}");
+            
             _startPoint = GridPosition;
+            
             var speed = (float)Rc.GetShipSpeed();
+            
             Vector3D velocity = Rc.GetShipVelocities().LinearVelocity;
+            
             if (speed > 5)
                 _endpoint = GridPosition + Vector3D.Normalize(velocity) * 30000;
             else

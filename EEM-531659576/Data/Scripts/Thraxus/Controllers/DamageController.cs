@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Generics;
@@ -9,7 +8,6 @@ using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Weapons;
 using VRage.Collections;
-using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 
@@ -36,6 +34,8 @@ namespace Eem.Thraxus.Controllers
             return damageEvent;
         }
 
+        // Events
+        public static event Action<long, long, long> TriggerAlert;
 
         private ActionQueues _actionQueues;
         private readonly ConcurrentCachingHashSet<DamageEvent> _damageEventList = new ConcurrentCachingHashSet<DamageEvent>();
@@ -56,7 +56,7 @@ namespace Eem.Thraxus.Controllers
             if (DamageAlreadyInQueue(damageEvent)) return;
             _damageEventList.Add(damageEvent);
             _damageEventList.ApplyAdditions();
-            _actionQueues.BeforeSimActionQueue.Add(0, () => ProcessDamageQueue(damageEvent));
+            _actionQueues.AfterSimActionQueue.Add(0, () => ProcessDamageQueue(damageEvent));
             WriteGeneral("AddToDamageQueue", $"{damageEvent}");
         }
 
@@ -65,6 +65,7 @@ namespace Eem.Thraxus.Controllers
             TriggerAlert?.Invoke(damageEvent.ShipId, damageEvent.BlockId, damageEvent.PlayerId);
             _damageEventList.Remove(damageEvent);
             _damageEventList.ApplyRemovals();
+            ReturnDamageEvent(damageEvent);
         }
 
         private bool DamageAlreadyInQueue(DamageEvent damage)
@@ -76,35 +77,47 @@ namespace Eem.Thraxus.Controllers
 
         private void BeforeDamageHandler(object target, ref MyDamageInformation info)
         {
-            //WriteToLog("BeforeDamageHandler", $"{info.AttackerId} | {info.Amount} | {info.Type}", LogType.General);
-            if (info.IsDeformation) return;
-            IMySlimBlock block = target as IMySlimBlock;
+            if (info.AttackerId == 0) return;
+            if (target == null) return;
+            //if (info.IsDeformation) return;
+            if (target is IMyFloatingObject) return;
+
+            IMyEntity attackerEntity = MyAPIGateway.Entities.GetEntityById(info.AttackerId);
+            if (attackerEntity == null || attackerEntity is IMyMeteor || attackerEntity is IMyThrust)
+            { return; }
+
+            var block = target as IMySlimBlock;
             if (block == null) return;
             long blockId = 0;
             IMyCubeBlock fatBlock = block.FatBlock;
             if (fatBlock != null) blockId = fatBlock.EntityId;
-            ProcessPreDamageReporting(new DamageEvent(block.CubeGrid.EntityId, blockId, info.AttackerId, TickCounter), info);
-        }
-
-        private void ProcessPreDamageReporting(DamageEvent damage, MyDamageInformation info)
-        {
-            if (_preDamageEvents.Contains(damage)) return;
-            _preDamageEvents.Add(damage);
-            _preDamageEvents.ApplyAdditions();
-            IdentifyDamageDealer(damage.ShipId, damage.BlockId, info);
-        }
-
-        private void CleanPreDamageEvents()
-        {
-            foreach (DamageEvent damageEvent in _preDamageEvents)
+            
+            MyDamageInformation localDamageInformation = info;
+            _actionQueues.BeforeSimActionQueue.Add(1, () =>
             {
-                if (damageEvent.Tick + 1 < TickCounter)
-                {
-                    _preDamageEvents.Remove(damageEvent);
-                }
-            }
-            _preDamageEvents.ApplyRemovals();
+                IdentifyDamageDealer(block.CubeGrid.EntityId, blockId, localDamageInformation);
+            });
         }
+
+        //private void ProcessPreDamageReporting(DamageEvent damage, MyDamageInformation info)
+        //{
+        //    if (_preDamageEventList.Contains(damage)) return;
+        //    _preDamageEventList.Add(damage);
+        //    _preDamageEventList.ApplyAdditions();
+        //    IdentifyDamageDealer(damage.ShipId, damage.BlockId, info);
+        //}
+
+        //private void CleanPreDamageEvents()
+        //{
+        //    foreach (DamageEvent damageEvent in _preDamageEventList)
+        //    {
+        //        if (damageEvent.Tick + 1 < TickCounter)
+        //        {
+        //            _preDamageEventList.Remove(damageEvent);
+        //        }
+        //    }
+        //    _preDamageEventList.ApplyRemovals();
+        //}
 
         // Supporting Methods
         private void IdentifyDamageDealer(long damagedEntity, long damagedBlock, MyDamageInformation damageInfo)
@@ -172,18 +185,18 @@ namespace Eem.Thraxus.Controllers
                 return;
             }
 
-            IMyThrust myThruster = attacker as IMyThrust;
-            if (myThruster != null)
-            {
+            //IMyThrust myThruster = attacker as IMyThrust;
+            //if (myThruster != null)
+            //{
 
-                long damagedTopMost = MyAPIGateway.Entities.GetEntityById(damagedEntity).GetTopMostParent().EntityId;
-                if (!BotMarshal.ActiveShipRegistry.Contains(damagedTopMost)) return;
-                if (!_thrusterDamageTrackers.TryAdd(damagedTopMost, new ThrusterDamageTracker(attacker.EntityId, damageInfo.Amount)))
-                    _thrusterDamageTrackers[damagedTopMost].DamageTaken += damageInfo.Amount;
-                if (!_thrusterDamageTrackers[damagedTopMost].ThresholdReached) return;
-                IdentifyOffendingIdentityFromEntity(damagedEntity, damagedBlock, attacker);
-                return;
-            }
+            //    long damagedTopMost = MyAPIGateway.Entities.GetEntityById(damagedEntity).GetTopMostParent().EntityId;
+            //    if (!BotMarshal.ActiveShipRegistry.Contains(damagedTopMost)) return;
+            //    if (!_thrusterDamageTrackers.TryAdd(damagedTopMost, new ThrusterDamageTracker(attacker.EntityId, damageInfo.Amount)))
+            //        _thrusterDamageTrackers[damagedTopMost].DamageTaken += damageInfo.Amount;
+            //    if (!_thrusterDamageTrackers[damagedTopMost].ThresholdReached) return;
+            //    IdentifyOffendingIdentityFromEntity(damagedEntity, damagedBlock, attacker);
+            //    return;
+            //}
 
             WriteGeneral("FindTheAsshole", $"Asshole not identified!!!  It was a: {attacker.GetType()}");
         }
@@ -194,31 +207,31 @@ namespace Eem.Thraxus.Controllers
             {
                 IMyCubeGrid myCubeGrid = offendingEntity?.GetTopMostParent() as IMyCubeGrid;
                 if (myCubeGrid == null) return;
-                if (myCubeGrid.BigOwners.Count == 0)
-                {   // This should only trigger when a player is being a cheeky fucker
-                    IMyPlayer myPlayer;
-                    long tmpId;
-                    if (BotMarshal.PlayerShipControllerHistory.TryGetValue(myCubeGrid.EntityId, out tmpId))
-                    {
-                        myPlayer = MyAPIGateway.Players.GetPlayerById(tmpId);
-                        if (myPlayer != null && !myPlayer.IsBot)
-                        {
-                            AddToDamageQueue(damagedEntity, damagedBlock, myPlayer.IdentityId);
-                            return;
-                        }
-                    }
+                //if (myCubeGrid.BigOwners.Count == 0)
+                //{   // This should only trigger when a player is being a cheeky fucker
+                //    IMyPlayer myPlayer;
+                //    long tmpId;
+                //    if (BotMarshal.PlayerShipControllerHistory.TryGetValue(myCubeGrid.EntityId, out tmpId))
+                //    {
+                //        myPlayer = MyAPIGateway.Players.GetPlayerById(tmpId);
+                //        if (myPlayer != null && !myPlayer.IsBot)
+                //        {
+                //            AddToDamageQueue(damagedEntity, damagedBlock, myPlayer.IdentityId);
+                //            return;
+                //        }
+                //    }
 
-                    var detectEntitiesInSphere = (List<MyEntity>)Statics.DetectTopMostEntitiesInSphere(myCubeGrid.GetPosition(), BotSettings.UnownedGridDetectionRange);
-                    foreach (MyEntity myDetectedEntity in detectEntitiesInSphere)
-                    {
-                        myPlayer = MyAPIGateway.Players.GetPlayerById(BotMarshal.PlayerShipControllerHistory[myDetectedEntity.EntityId]);
-                        if (myPlayer == null || myPlayer.IsBot) continue;
-                        AddToDamageQueue(damagedEntity, damagedBlock, myPlayer.IdentityId);
-                    }
-                    return;
-                }
+                //    var detectEntitiesInSphere = (List<MyEntity>)Statics.DetectTopMostEntitiesInSphere(myCubeGrid.GetPosition(), BotSettings.UnownedGridDetectionRange);
+                //    foreach (MyEntity myDetectedEntity in detectEntitiesInSphere)
+                //    {
+                //        myPlayer = MyAPIGateway.Players.GetPlayerById(BotMarshal.PlayerShipControllerHistory[myDetectedEntity.EntityId]);
+                //        if (myPlayer == null || myPlayer.IsBot) continue;
+                //        AddToDamageQueue(damagedEntity, damagedBlock, myPlayer.IdentityId);
+                //    }
+                //    return;
+                //}
 
-                IMyIdentity myIdentity = Statics.GetIdentityById(myCubeGrid.BigOwners.FirstOrDefault());
+                IMyIdentity myIdentity = myCubeGrid.BigOwners.FirstOrDefault().GetIdentityById();
                 if (myIdentity != null)
                 {
                     AddToDamageQueue(damagedEntity, damagedBlock, myIdentity.IdentityId);
