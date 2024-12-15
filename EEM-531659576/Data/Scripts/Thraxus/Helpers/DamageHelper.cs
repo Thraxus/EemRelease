@@ -108,7 +108,7 @@ namespace Eem.Thraxus.Helpers
                     try
                     {
                         damager = MyAPIGateway.Players.GetPlayerById(Slims.First().GetBuiltBy());
-                        if (damager != null) grid.DebugWrite("Damage.IsDoneByPlayer.FindBuilderBySlimBlocks", $"Found damaging player from slim block. Meanie is {damager.DisplayName}");
+                        //if (damager != null) grid.DebugWrite("Damage.IsDoneByPlayer.FindBuilderBySlimBlocks", $"Found damaging player from slim block. Meanie is {damager.DisplayName}");
                         return damager != null;
                     }
                     catch (Exception)
@@ -168,16 +168,17 @@ namespace Eem.Thraxus.Helpers
                 if (attackerEntity is IMyGunBaseUser) return IsDamagedByPlayer(attackerEntity as IMyGunBaseUser, out damager);
 
                 attackerEntity = attackerEntity.GetTopMostParent();
-
-                if (attackerEntity == null)
-                    //AiSessionCore.DebugLog?.WriteToLog("IsDoneByPlayer", $"attackerEntity was NULL");
-                    //AiSessionCore.DebugWrite("Damage.IsDoneByPlayer", "Cannot acquire the attacker's topmost entity", antiSpam: false);
+                var grid = attackerEntity.GetTopMostParent() as IMyCubeGrid;
+                if (grid == null || grid.IsPirate())
+                {
                     return false;
+                }
 
-                if (!(attackerEntity is IMyCubeGrid)) return false;
-                var grid = attackerEntity as IMyCubeGrid;
-                if (grid.IsPirate()) return false;
+                //if (!(attackerEntity is IMyCubeGrid)) return false;
+                //var grid = attackerEntity as IMyCubeGrid;
+                //if (grid.IsPirate()) return false;
                 //grid.GetOwnerFaction()
+
                 return grid.IsOwnedByNobody() ? IsDamagedByPlayerInNeutralGrid(grid, out damager) : IsDamagedByPlayerGrid(grid, out damager);
             }
             catch (Exception)

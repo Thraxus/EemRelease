@@ -1,4 +1,4 @@
-﻿using Eem.Thraxus.Factions.Networking;
+﻿using Eem.Thraxus.Entities.Factions.Networking;
 using ProtoBuf;
 using Sandbox.ModAPI;
 

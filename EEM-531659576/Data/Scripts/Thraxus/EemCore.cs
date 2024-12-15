@@ -1,8 +1,8 @@
-﻿using Eem.Thraxus.Bots;
-using Eem.Thraxus.Common.BaseClasses;
+﻿using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Enums;
-using Eem.Thraxus.Common.Generics;
-using Eem.Thraxus.Factions;
+using Eem.Thraxus.Controllers;
+using Eem.Thraxus.Entities.Bots;
+using Eem.Thraxus.Models;
 using Eem.Thraxus.Networking;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
@@ -49,16 +49,17 @@ namespace Eem.Thraxus
 
         public static bool DisableAi = false;
 
-        private readonly ActionQueue _genericActionQueue = new ActionQueue();
+        private readonly ActionQueues _actionQueues = new ActionQueues();
 
-        private BotAiCore _botAiCore;
+        private BotController _botAiCore;
 
         private BotDamageHandler _botDamageHandler;
 
-        private FactionCore _factionCore;
+        private FactionController _factionCore;
         protected override string CompName { get; } = "EemCore";
         protected override CompType Type { get; } = CompType.Server;
         protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation;
+        protected override bool IncludeStaticLog { get; } = true;
         protected override bool SkipReporting { get; } = true;
 
         protected override void SuperEarlySetup()
@@ -66,13 +67,13 @@ namespace Eem.Thraxus
             base.SuperEarlySetup();
             Messaging.Register();
             _botDamageHandler = new BotDamageHandler();
-            _factionCore = new FactionCore(_botDamageHandler);
+            _factionCore = new FactionController(_botDamageHandler);
             _botDamageHandler.OnWriteToLog += WriteGeneral;
             //_botDamageHandler.Init();
             _factionCore.OnWriteToLog += WriteGeneral;
             _factionCore.Init();
             if (DisableAi) return;
-            _botAiCore = new BotAiCore(_genericActionQueue, _botDamageHandler);
+            _botAiCore = new BotController(_actionQueues, _botDamageHandler);
             _botAiCore.OnWriteToLog += WriteGeneral;
             _botAiCore.Init();
         }
@@ -81,7 +82,7 @@ namespace Eem.Thraxus
         {
             base.LateSetup();
             //_botDamageHandler.OnWriteToLog += WriteGeneral;
-            _botDamageHandler.Init(_genericActionQueue);
+            _botDamageHandler.Init(_actionQueues);
             //_factionCore.OnWriteToLog += WriteGeneral;
             //_factionCore.Init();
             //if (DisableAi) return;
@@ -93,13 +94,19 @@ namespace Eem.Thraxus
         {
             base.BeforeSimUpdate();
             _factionCore.Update();
-            _genericActionQueue.Execute();
+            _actionQueues.BeforeSimActionQueue.Execute();
+        }
+
+        protected override void AfterSimUpdate()
+        {
+            base.AfterSimUpdate();
+            _actionQueues.AfterSimActionQueue.Execute();
         }
 
         protected override void BeforeSimUpdate10Ticks()
         {
             base.BeforeSimUpdate10Ticks();
-            WriteGeneral("BeforeSimUpdate10Ticks", "Updating...");
+            //WriteGeneral("BeforeSimUpdate10Ticks", "Updating...");
             _botAiCore.Update10();
         }
 

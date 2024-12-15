@@ -13,6 +13,8 @@ namespace Eem.Thraxus.Common.BaseClasses
         private bool _earlySetupComplete;
 
         private Log _generalLog;
+        private static Log _staticLog;
+
         private bool _lateSetupComplete;
 
         private bool _superEarlySetupComplete;
@@ -23,6 +25,8 @@ namespace Eem.Thraxus.Common.BaseClasses
         protected abstract CompType Type { get; }
 
         protected abstract MyUpdateOrder Schedule { get; }
+
+        protected abstract bool IncludeStaticLog { get; }
 
         protected abstract bool SkipReporting { get; }
 
@@ -53,34 +57,34 @@ namespace Eem.Thraxus.Common.BaseClasses
                 MyAPIGateway.Utilities.InvokeOnGameThread(() => SetUpdateOrder(MyUpdateOrder.NoUpdate)); // sets the proper update schedule to the desired schedule
                 return;
             }
-
-            ;
+            
             base.LoadData();
             if (!_superEarlySetupComplete) SuperEarlySetup();
         }
 
-        /// <summary>
-        ///     Always return base.GetObjectBuilder(); after your code!
-        ///     Do all saving here, make sure to return the OB when done;
-        /// </summary>
-        /// <returns> Object builder for the session component </returns>
-        public override MyObjectBuilder_SessionComponent GetObjectBuilder()
-        {
-            return base.GetObjectBuilder();
-        }
+        // <summary>
+        //     Always return base.GetObjectBuilder(); after your code!
+        //     Do all saving here, make sure to return the OB when done;
+        // </summary>
+        // <returns> Object builder for the session component </returns>
+        //public override MyObjectBuilder_SessionComponent GetObjectBuilder()
+        //{
+        //    return base.GetObjectBuilder();
+        //}
 
-        /// <summary>
-        ///     This save happens after the game save, so it has limited uses really
-        /// </summary>
-        public override void SaveData()
-        {
-            base.SaveData();
-        }
+        // <summary>
+        //     This save happens after the game save, so it has limited uses really
+        // </summary>
+        //public override void SaveData()
+        //{
+        //    base.SaveData();
+        //}
 
         protected virtual void SuperEarlySetup()
         {
             _superEarlySetupComplete = true;
             _generalLog = new Log(CompName);
+            if (IncludeStaticLog) _staticLog = new Log($"[Static]{CompName}");
             WriteGeneral("SuperEarlySetup", $"Waking up.  Is Server: {References.IsServer}");
         }
 
@@ -227,6 +231,7 @@ namespace Eem.Thraxus.Common.BaseClasses
             if (BlockUpdates()) return;
             WriteGeneral("Unload", "Retired.");
             _generalLog?.Close();
+            _staticLog?.Close();
         }
 
         /// <summary>
@@ -266,6 +271,11 @@ namespace Eem.Thraxus.Common.BaseClasses
         public void WriteGeneral(string caller = "", string message = "")
         {
             _generalLog?.WriteGeneral($"{CompName}: {caller}", message);
+        }
+
+        public static void WriteStatic(string caller = "", string message = "")
+        {
+            _staticLog?.WriteGeneral($"{caller}", message);
         }
     }
 }
