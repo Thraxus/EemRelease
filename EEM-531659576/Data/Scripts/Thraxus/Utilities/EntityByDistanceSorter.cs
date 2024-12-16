@@ -4,7 +4,7 @@ using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
 
-namespace Eem.Thraxus.Extensions
+namespace Eem.Thraxus.Utilities
 {
     public class EntityByDistanceSorter : IComparer<IMyEntity>, IComparer<IMySlimBlock>, IComparer<MyDetectedEntityInfo>
     {

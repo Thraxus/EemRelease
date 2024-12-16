@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Eem.Thraxus.Common;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Entities.Factions.Settings;
 using Eem.Thraxus.Entities.Factions.Utilities;
@@ -396,6 +397,7 @@ namespace Eem.Thraxus.Entities.Factions.Models
         private void SetupFactionRelations()
         {
             foreach (KeyValuePair<long, IMyFaction> faction in MyAPIGateway.Session.Factions.Factions)
+            {
                 try
                 {
                     if (faction.Value == null) continue;
@@ -443,16 +445,18 @@ namespace Eem.Thraxus.Entities.Factions.Models
                 }
                 catch (Exception e)
                 {
-                    ExceptionWriter("SetupFactionDictionaries", $"Exception caught - e: {e}\tfaction.Key:\t{faction.Key}\tfaction.Value: {faction.Value}\tfaction.Tag:\t{faction.Value?.Tag}");
+                    WriteGeneral("SetupFactionDictionaries", $"Exception caught - e: {e}\tfaction.Key:\t{faction.Key}\tfaction.Value: {faction.Value}\tfaction.Tag:\t{faction.Value?.Tag}");
                 }
+            }
 
             SetupPlayerRelations();
             SetupNpcRelations();
             SetupPirateRelations();
             SetupAutoRelations();
             SetupFactionDeletionProtection();
-            DumpEverythingToTheLog(true);
+            //DumpEverythingToTheLog();
             _setupComplete = true;
+            WriteGeneral("SetupFactionDictionaries", $"[{MyAPIGateway.Session.Factions.Factions.Count}] Faction dictionaries populated!");
         }
 
         public static bool ValidPlayer(long identityId)
@@ -1233,14 +1237,15 @@ namespace Eem.Thraxus.Entities.Factions.Models
                 AddFactionMember(npcFaction.Value);
         }
 
-        private static void AddFactionMember(IMyFaction npcFaction)
+        private void AddFactionMember(IMyFaction npcFaction)
         {
+            if (!_npcFactionDictionary.ContainsKey(npcFaction.FactionId)) return;
             if (ValidPlayer(npcFaction.FounderId)) return;
             if (npcFaction.Members.Count < 2)
                 MyAPIGateway.Session.Factions.AddNewNPCToFaction(
                     npcFaction.FactionId,
-                    $"[{npcFaction.Tag}] {NpcFirstNames[Random.Next(0, NpcFirstNames.Count - 1)]}" +
-                    $" {NpcLastNames[Random.Next(0, NpcLastNames.Count - 1)]}");
+                    $"[{npcFaction.Tag}] {NpcFirstNames[References.Random.Next(0, NpcFirstNames.Count - 1)]}" +
+                    $" {NpcLastNames[References.Random.Next(0, NpcLastNames.Count - 1)]}");
         }
 
         private void SetupAutoRelations()
@@ -1272,7 +1277,8 @@ namespace Eem.Thraxus.Entities.Factions.Models
 
         private void ValidateFactionJoin(long fromId, long playerId)
         {
-            if (_nonEemNpcFactionDictionary.ContainsKey(fromId)) return;
+            if (!_npcFactionDictionary.ContainsKey(fromId)) return;
+            //if (_nonEemNpcFactionDictionary.ContainsKey(fromId)) return;
             if (!ValidPlayer(playerId)) return;
             if (ValidPlayer(fromId.GetFactionById().FounderId)) return;
             if (fromId.GetFactionById().Tag == "FSTC") return;
@@ -1302,7 +1308,7 @@ namespace Eem.Thraxus.Entities.Factions.Models
             return Players;
         }
 
-        public static Random Random { get; } = new Random();
+        //public static Random Random { get; } = new Random();
 
         public static List<string> NpcFirstNames { get; } = new List<string>
         {

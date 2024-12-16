@@ -22,13 +22,12 @@ namespace Eem.Thraxus.Controllers
             BotController.OnWriteToLog += WriteGeneral;
             DamageController.OnWriteToLog += WriteGeneral;
             FactionController.OnWriteToLog += WriteGeneral;
-
-            FactionController.Init();
             BotController.Init();
         }
 
         public void LateInit()
         {
+            FactionController.Init();
             DamageController.Init();
         }
 

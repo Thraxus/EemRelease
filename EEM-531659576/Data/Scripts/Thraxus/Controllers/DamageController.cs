@@ -177,7 +177,12 @@ namespace Eem.Thraxus.Controllers
             {
                 var ownerId = ((MyCubeGrid)block.CubeGrid.GetTopMostParent()).BigOwners.Count > 0 ? block.CubeGrid.BigOwners[0] : 0;
                 //WriteGeneral("FindTheAsshole", $"Asshole was part of CubeGrid owned by [{ownerId.ToEntityIdFormat()}]");
-                AddToDamageQueue(damagedEntity, damagedBlock, ownerId);
+                if(ownerId > 0)
+                {
+                    AddToDamageQueue(damagedEntity, damagedBlock, ownerId);
+                    return;
+                }
+                WriteGeneral("FindTheAsshole", $"Asshole was an unowned [{attacker.GetType()}] !!!");
                 return;
             }
 

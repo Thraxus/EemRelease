@@ -701,10 +701,9 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\OnScreenDisplay\QuestScreen.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Profiler.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Debug\InformationExporter.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\EntityByDistanceSorter.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\EntityByDistanceSorter.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\GeneralExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\GridExtensions.cs" />
-    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\NumberExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\TerminalExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\VectorExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Controllers\FactionController.cs" />

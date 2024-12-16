@@ -18,10 +18,10 @@ namespace Eem.Thraxus.Extensions
         ///     <para />
         ///     Enjoy allocating.
         /// </summary>
-        public static List<T> GetBlocksOfType<T>(this IMyGridTerminalSystem Term, Func<T, bool> collect = null) where T : class, IMyTerminalBlock
+        public static List<T> GetBlocksOfType<T>(this IMyGridTerminalSystem term, Func<T, bool> collect = null) where T : class, IMyTerminalBlock
         {
             var termBlocks = new List<T>();
-            Term.GetBlocksOfType(termBlocks, collect);
+            term.GetBlocksOfType(termBlocks, collect);
             return termBlocks;
         }
 

@@ -22,7 +22,6 @@ namespace Eem.Thraxus.Common.Reporting
             sb.AppendLine();
 
             sb.AppendFormat("{0, -4}[FactionId][Tag][IsEveryoneNpc] Display Name\n", " ");
-            sb.AppendLine();
             sb.AppendFormat("{0, -6}[MemberId][PlayerId] Display Name\n", " ");
             sb.AppendLine();
 
