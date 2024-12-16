@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Eem.Thraxus.Common.BaseClasses;
+using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Common.Generics;
 using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Models;
@@ -13,9 +14,11 @@ using VRage.ModAPI;
 
 namespace Eem.Thraxus.Controllers
 {
-    internal class DamageController : BaseLoggingClass
+    public class DamageController : BaseLoggingClass
     {
+        private readonly CoordinationController _coordinationController;
         private readonly ObjectPool<DamageEvent> _damageEventObjectPool = new ObjectPool<DamageEvent>();
+        public readonly MyConcurrentDictionary<long, Action> AlertReporting = new MyConcurrentDictionary<long, Action>();
 
         private DamageEvent GetDamageEvent(long shipId, long blockId, long playerId)
         {
@@ -28,21 +31,26 @@ namespace Eem.Thraxus.Controllers
             return damageEvent;
         }
 
-        private DamageEvent ReturnDamageEvent(DamageEvent damageEvent)
+        private void ReturnDamageEvent(DamageEvent damageEvent)
         {
-            WriteGeneral(nameof(ReturnDamageEvent), $"Returning DamageEvent...");
-            return damageEvent;
+            WriteGeneral(nameof(ReturnDamageEvent), $"Returning DamageEvent...[{_damageEventObjectPool}]");
+            _damageEventObjectPool.Return(damageEvent);
         }
 
         // Events
-        public static event Action<long, long, long> TriggerAlert;
+        //public static event Action<long, long, long> TriggerAlert;
 
-        private ActionQueues _actionQueues;
+        private readonly ActionQueues _actionQueues;
         private readonly ConcurrentCachingHashSet<DamageEvent> _damageEventList = new ConcurrentCachingHashSet<DamageEvent>();
 
-        public void Init(ActionQueues actionQueues)
+        public DamageController(CoordinationController coordinationController)
         {
-            _actionQueues = actionQueues;
+            _coordinationController = coordinationController;
+            _actionQueues = coordinationController.ActionQueues;
+        }
+
+        public void Init()
+        {
             MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(1, BeforeDamageHandler);
         }
         
@@ -62,7 +70,20 @@ namespace Eem.Thraxus.Controllers
 
         private void ProcessDamageQueue(DamageEvent damageEvent)
         {
-            TriggerAlert?.Invoke(damageEvent.ShipId, damageEvent.BlockId, damageEvent.PlayerId);
+            //TriggerAlert?.Invoke(damageEvent.ShipId, damageEvent.BlockId, damageEvent.PlayerId);
+
+            Action alertAction;
+            AlertReporting.TryGetValue(damageEvent.ShipId, out alertAction);
+            alertAction?.Invoke();
+            _coordinationController.FactionController.TriggerWar(damageEvent.ShipId, damageEvent.PlayerId);
+
+            WriteGeneral(nameof(ProcessDamageQueue), $"Damage Report: [{AlertReporting.ContainsKey(damageEvent.ShipId).ToSingleChar()}] {damageEvent}");
+            foreach (var ar in AlertReporting)
+            {
+                WriteGeneral(nameof(ProcessDamageQueue), $"Alert Dictionary: [{ar.Key.ToEntityIdFormat()}]");
+            }
+
+            //AlertReporting.ContainsKey(damageEvent.ShipId);
             _damageEventList.Remove(damageEvent);
             _damageEventList.ApplyRemovals();
             ReturnDamageEvent(damageEvent);
@@ -151,39 +172,44 @@ namespace Eem.Thraxus.Controllers
                 return;
             }
 
-            if (attacker is IMyLargeTurretBase)
+            var block = attacker as IMyCubeBlock;
+            if (block != null)
             {
-                IdentifyOffendingIdentityFromEntity(damagedEntity, damagedBlock, attacker);
+                var ownerId = ((MyCubeGrid)block.CubeGrid.GetTopMostParent()).BigOwners.Count > 0 ? block.CubeGrid.BigOwners[0] : 0;
+                //WriteGeneral("FindTheAsshole", $"Asshole was part of CubeGrid owned by [{ownerId.ToEntityIdFormat()}]");
+                AddToDamageQueue(damagedEntity, damagedBlock, ownerId);
                 return;
             }
 
-            IMyCharacter myCharacter = attacker as IMyCharacter;
+            var myCharacter = attacker as IMyCharacter;
             if (myCharacter != null)
             {
                 AddToDamageQueue(damagedEntity, damagedBlock, myCharacter.EntityId);
                 return;
             }
 
-            IMyAutomaticRifleGun myAutomaticRifle = attacker as IMyAutomaticRifleGun;
+            var myAutomaticRifle = attacker as IMyAutomaticRifleGun;
             if (myAutomaticRifle != null)
             {
                 AddToDamageQueue(damagedEntity, damagedBlock, myAutomaticRifle.OwnerIdentityId);
                 return;
             }
 
-            IMyAngleGrinder myAngleGrinder = attacker as IMyAngleGrinder;
+            var myAngleGrinder = attacker as IMyAngleGrinder;
             if (myAngleGrinder != null)
             {
                 AddToDamageQueue(damagedEntity, damagedBlock, myAngleGrinder.OwnerIdentityId);
                 return;
             }
 
-            IMyHandDrill myHandDrill = attacker as IMyHandDrill;
+            var myHandDrill = attacker as IMyHandDrill;
             if (myHandDrill != null)
             {
                 AddToDamageQueue(damagedEntity, damagedBlock, myHandDrill.OwnerIdentityId);
                 return;
             }
+
+            
 
             //IMyThrust myThruster = attacker as IMyThrust;
             //if (myThruster != null)

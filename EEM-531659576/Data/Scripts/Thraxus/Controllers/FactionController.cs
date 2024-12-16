@@ -2,30 +2,31 @@
 using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Entities.Bots;
 using Eem.Thraxus.Entities.Factions.Models;
+using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
+using Sandbox.Game.Entities;
+using Sandbox.ModAPI;
 
 namespace Eem.Thraxus.Controllers
 {
     //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
     public class FactionController : BaseLoggingClass
     {
+        private readonly CoordinationController _coordinationController;
+
         //protected override string CompName { get; } = "FactionCore";
         //protected override CompType Type { get; } = CompType.Server;
         //protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation;
         //protected override bool SkipReporting { get; } = true;
-
-        private readonly BotDamageHandler _botDamageHandler;
-
+        
         private ulong _tickTimer;
 
-        public FactionController(BotDamageHandler botDamageHandler)
+        public FactionController(CoordinationController coordinationController)
         {
-            _botDamageHandler = botDamageHandler;
+            _coordinationController = coordinationController;
         }
 
         public RelationshipManager RelationshipManager { get; private set; }
-
-        //public static FactionCore FactionCoreStaticInstance;
 
         public void Init()
         {
@@ -37,10 +38,17 @@ namespace Eem.Thraxus.Controllers
             WriteGeneral("FactionCore", "Online!");
         }
 
-        private void TriggerWar(long assaulted, long assaulter)
+        public void TriggerWar(long assaulted, long assaulter)
         {
-            WriteGeneral("TriggerWar", $"Asshats! [{assaulted.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
-            RelationshipManager.WarDeclaration(assaulted, assaulter);
+            var right = MyAPIGateway.Session.Factions.TryGetPlayerFaction(assaulter);
+            var left = (MyAPIGateway.Entities.GetEntityById(assaulted).GetTopMostParent() as MyCubeGrid).GetOwnerFaction();
+            
+            if (left == null || right == null || left == right)
+            {
+                return;
+            }
+            WriteGeneral("TriggerWar", $"Asshats! [{left?.Tag ?? "NA"}] [{assaulted.ToEntityIdFormat()}] [{right?.Tag ?? "NA"}] [{assaulter.ToEntityIdFormat()}]");
+            RelationshipManager.WarDeclaration(left, right);
         }
 
         public void Update()
@@ -52,9 +60,9 @@ namespace Eem.Thraxus.Controllers
         {
             _tickTimer++;
             if (_tickTimer % Constants.FactionNegativeRelationshipAssessment == 0)
-                RelationshipManager.CheckNegativeRelationships();
+                RelationshipManager?.CheckNegativeRelationships();
             if (_tickTimer % Constants.FactionMendingRelationshipAssessment == 0)
-                RelationshipManager.CheckMendingRelationships();
+                RelationshipManager?.CheckMendingRelationships();
         }
 
         public override void Close()

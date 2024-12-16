@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
+using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
@@ -19,51 +20,75 @@ namespace Eem.Thraxus.Entities.Bots
 
         public static readonly BotType BotType = BotType.Station;
 
-        private readonly Timer _calmDownTimer = new Timer();
+        //private readonly Timer _calmDownTimer = new Timer();
 
-        private DateTime? _alertTriggerTime;
+        //private DateTime? _alertTriggerTime;
 
         public BotTypeStation(IMyCubeGrid grid, BotConfig botConfig)
             : base(grid, botConfig) { }
 
-        private bool WasDamaged => _alertTriggerTime != null;
+        //private bool WasDamaged => _alertTriggerTime != null;
 
         public override bool Init(IMyRemoteControl rc)
         {
             if (!base.Init(rc)) return false;
             WriteGeneral("Init", "Bot Station Booting...");
-            OnDamaged += DamageHandler;
+            //OnDamaged += DamageHandler;
             //OnBlockPlaced += BlockPlacedHandler;
 
-            _calmDownTimer.AutoReset = false;
-            _calmDownTimer.Elapsed += (trash1, trash2) =>
-            {
-                _calmDownTimer.Stop();
-                CalmDown();
-            };
+            //_calmDownTimer.AutoReset = false;
+            //_calmDownTimer.Elapsed += (trash1, trash2) =>
+            //{
+            //    _calmDownTimer.Stop();
+            //    CalmDown();
+            //};
 
             return true;
         }
 
-        private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
+        private int _calmDown = 0;
+
+        private void EvaluateCalmDownTimer()
         {
-            if (block == null) return;
-            //if (!block.IsDestroyed && damage.IsThruster()) return;
-            IMyPlayer damager;
-            ReactOnDamage(damage, out damager);
-            if (damager != null) OnAlert();
+            _calmDown -= 10;
+            if (_calmDown > 0) return;
+            CalmDown();
         }
+
+        private bool _onAlert;
+
+        public override void TriggerAlert()
+        {
+            if (_onAlert)
+            {
+                _calmDown = 1000; // make this higher!
+                return;
+            }
+            //WriteGeneral(nameof(TriggerAlert), $"Alert Triggered! [{assaulted.ToEntityIdFormat()}] [{blockId.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
+            OnAlert();
+        }
+
+        //private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
+        //{
+        //    if (block == null) return;
+        //    //if (!block.IsDestroyed && damage.IsThruster()) return;
+        //    IMyPlayer damager;
+        //    ReactOnDamage(damage, out damager);
+        //    if (damager != null) OnAlert();
+        //}
 
         private void OnAlert()
         {
             try
             {
+                _onAlert = true;
                 WriteGeneral("OnAlert", "Alert activated.");
-                if (!WasDamaged) Default_SwitchTurretsAndRunTimers(true);
-                _alertTriggerTime = DateTime.Now;
-                _calmDownTimer.Stop();
-                _calmDownTimer.Interval = 100000;
-                _calmDownTimer.Start();
+                Default_SwitchTurretsAndRunTimers(true);
+                //if (!WasDamaged) Default_SwitchTurretsAndRunTimers(true);
+                //_alertTriggerTime = DateTime.Now;
+                //_calmDownTimer.Stop();
+                //_calmDownTimer.Interval = 100000;
+                //_calmDownTimer.Start();
             }
             catch (Exception scrap)
             {
@@ -78,6 +103,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         public override void Main()
         {
+            EvaluateCalmDownTimer();
             //if (WasDamaged && DateTime.Now - _alertTriggerTime > CalmdownTime) CalmDown();
         }
 
@@ -85,9 +111,10 @@ namespace Eem.Thraxus.Entities.Bots
         {
             try
             {
-                WriteGeneral("CalmDown", "Calmdown activated");
-                _alertTriggerTime = null;
+                WriteGeneral("CalmDown", "Calm Down activated");
+                //_alertTriggerTime = null;
                 Default_SwitchTurretsAndRunTimers(false);
+                _onAlert = false;
             }
             catch (Exception scrap)
             {

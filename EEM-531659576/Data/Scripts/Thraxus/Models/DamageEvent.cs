@@ -1,26 +1,22 @@
-﻿using System;
-using Eem.Thraxus.Common.Interfaces;
+﻿using Eem.Thraxus.Common.Interfaces;
 
 namespace Eem.Thraxus.Models
 {
-    public class DamageEvent : IResetWithEvent<DamageEvent>
+    public class DamageEvent : IReset
     {
         public long ShipId;
         public long BlockId;
         public long PlayerId;
-        //public long Tick;
 
         public void Init(long shipId, long blockId, long playerId)
         {
             ShipId = shipId;
             BlockId = blockId;
             PlayerId = playerId;
-            //Tick = tick;
         }
 
         public override string ToString()
         {
-            //return $"{ShipId} | {BlockId} | {PlayerId} | {Tick}";
             return $"{ShipId} | {BlockId} | {PlayerId}";
         }
 
@@ -31,9 +27,6 @@ namespace Eem.Thraxus.Models
             ShipId = 0;
             BlockId = 0;
             PlayerId = 0;
-            //Tick = 0;
         }
-
-        public event Action<DamageEvent> OnReset;
     }
 }

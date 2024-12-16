@@ -6,6 +6,7 @@ using Eem.Thraxus.Models;
 using Eem.Thraxus.Networking;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
+using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus
 {
@@ -46,41 +47,48 @@ namespace Eem.Thraxus
 
         EEMUnstableDev has a ton of code for the new bots I was working on.  Might need to leverage that if I can't get the old system to work how I want.
         */
+        
+        //private readonly ActionQueues _actionQueues = new ActionQueues();
 
-        public static bool DisableAi = false;
+        //private BotController _botAiCore;
 
-        private readonly ActionQueues _actionQueues = new ActionQueues();
+        //private BotDamageHandler _botDamageHandler;
 
-        private BotController _botAiCore;
+        //private DamageController _damageController;
 
-        private BotDamageHandler _botDamageHandler;
+        //private FactionController _factionController;
 
-        private FactionController _factionCore;
+        private CoordinationController _coordinationController;
+
         protected override string CompName { get; } = "EemCore";
         protected override CompType Type { get; } = CompType.Server;
         protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation;
         protected override bool IncludeStaticLog { get; } = true;
-        protected override bool SkipReporting { get; } = true;
+        protected override bool SkipReporting { get; } = false;
 
         protected override void SuperEarlySetup()
         {
             base.SuperEarlySetup();
             Messaging.Register();
-            _botDamageHandler = new BotDamageHandler();
-            _factionCore = new FactionController(_botDamageHandler);
-            _botDamageHandler.OnWriteToLog += WriteGeneral;
+            _coordinationController = new CoordinationController();
+            _coordinationController.OnWriteToLog += WriteGeneral;
+            _coordinationController.EarlyInit();
+            //_botDamageHandler = new BotDamageHandler();
+            //_factionController = new FactionController(_botDamageHandler);
+            //_botDamageHandler.OnWriteToLog += WriteGeneral;
             //_botDamageHandler.Init();
-            _factionCore.OnWriteToLog += WriteGeneral;
-            _factionCore.Init();
-            if (DisableAi) return;
-            _botAiCore = new BotController(_actionQueues, _botDamageHandler);
-            _botAiCore.OnWriteToLog += WriteGeneral;
-            _botAiCore.Init();
+            //_factionController.OnWriteToLog += WriteGeneral;
+            //_factionController.Init();
+            //if (DisableAi) return;
+            //_botAiCore = new BotController(_actionQueues, _botDamageHandler);
+            //_botAiCore.OnWriteToLog += WriteGeneral;
+            //_botAiCore.Init();
         }
 
         protected override void LateSetup()
         {
             base.LateSetup();
+            _coordinationController.LateInit();
             //_botDamageHandler.OnWriteToLog += WriteGeneral;
             //_botDamageHandler.Init(_actionQueues);
             //_factionCore.OnWriteToLog += WriteGeneral;
@@ -93,21 +101,24 @@ namespace Eem.Thraxus
         protected override void BeforeSimUpdate()
         {
             base.BeforeSimUpdate();
-            _factionCore.Update();
-            _actionQueues.BeforeSimActionQueue.Execute();
+            _coordinationController.BeforeSimUpdate();
+            //_factionController.Update();
+            //_actionQueues.BeforeSimActionQueue.Execute();
         }
 
         protected override void AfterSimUpdate()
         {
             base.AfterSimUpdate();
-            _actionQueues.AfterSimActionQueue.Execute();
+            _coordinationController.AfterSimUpdate();
+            //_actionQueues.AfterSimActionQueue.Execute();
         }
 
         protected override void BeforeSimUpdate10Ticks()
         {
             base.BeforeSimUpdate10Ticks();
             //WriteGeneral("BeforeSimUpdate10Ticks", "Updating...");
-            _botAiCore.Update10();
+            //_botAiCore.Update10();
+            _coordinationController.BeforeSimUpdate10();
         }
 
         public override void LoadData()
@@ -124,14 +135,15 @@ namespace Eem.Thraxus
 
         protected override void Unload()
         {
-            base.Unload();
             Messaging.Unregister();
-            _botDamageHandler.OnWriteToLog -= WriteGeneral;
-            _botDamageHandler.Close();
-            _factionCore.OnWriteToLog -= WriteGeneral;
-            _factionCore.Close();
-            _botAiCore.OnWriteToLog -= WriteGeneral;
-            _botAiCore.Close();
+            _coordinationController.OnWriteToLog -= WriteGeneral;
+            //_botDamageHandler.OnWriteToLog -= WriteGeneral;
+            //_botDamageHandler.Close();
+            //_factionController.OnWriteToLog -= WriteGeneral;
+            //_factionController.Close();
+            //_botAiCore.OnWriteToLog -= WriteGeneral;
+            //_botAiCore.Close();
+            base.Unload();
         }
     }
 }

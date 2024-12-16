@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
-using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
@@ -17,7 +16,6 @@ using VRageMath;
 using IMyGridTerminalSystem = Sandbox.ModAPI.IMyGridTerminalSystem;
 using IMyRadioAntenna = Sandbox.ModAPI.IMyRadioAntenna;
 using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
-using IMyShipController = Sandbox.ModAPI.IMyShipController;
 using IMyTerminalBlock = Sandbox.ModAPI.IMyTerminalBlock;
 using IMyThrust = Sandbox.ModAPI.IMyThrust;
 
@@ -28,6 +26,8 @@ namespace Eem.Thraxus.Entities.Bots
         public delegate void HOnBlockPlaced(IMySlimBlock block);
 
         public delegate void OnDamageTaken(IMySlimBlock damagedBlock, MyDamageInformation damage);
+
+        public abstract void TriggerAlert();
 
         //private readonly BotDamageHandler _botDamageHandler;
 
@@ -42,6 +42,12 @@ namespace Eem.Thraxus.Entities.Bots
         protected List<IMyThrust> SpeedModdedThrusters = new List<IMyThrust>();
 
         protected readonly BotConfig BotConfig;
+        
+        public List<IMyRadioAntenna> Antennae { get; protected set; }
+
+        //protected event OnDamageTaken OnDamaged;
+
+        protected event HOnBlockPlaced OnBlockPlaced;
 
         //protected event Action Alert;
 
@@ -71,18 +77,18 @@ namespace Eem.Thraxus.Entities.Bots
 
         protected bool HasModdedThrusters => SpeedModdedThrusters.Count > 0;
 
-        protected string DroneName;
+        //protected string DroneName;
 
-        //public string DroneName
-        //{
-        //    get { return Rc.Name; }
-        //    protected set
-        //    {
-        //        IMyEntity entity = Rc;
-        //        entity.Name = value;
-        //        MyAPIGateway.Entities.SetEntityName(entity);
-        //    }
-        //}
+        public string DroneName
+        {
+            get { return Rc.Name; }
+            protected set
+            {
+                IMyEntity entity = Rc;
+                entity.Name = value;
+                MyAPIGateway.Entities.SetEntityName(entity);
+            }
+        }
 
         protected bool GridOperable
         {
@@ -116,11 +122,6 @@ namespace Eem.Thraxus.Entities.Bots
         //	}
         //}
 
-        public List<IMyRadioAntenna> Antennae { get; protected set; }
-
-        protected event OnDamageTaken OnDamaged;
-
-        protected event HOnBlockPlaced OnBlockPlaced;
 
         private void TriggerWar(long assaulted, long assaulter)
         {
@@ -409,7 +410,7 @@ namespace Eem.Thraxus.Entities.Bots
             if (_ownerFaction != null)
             {
                 ownerId = _ownerFaction.FounderId;
-                WriteGeneral("LookAround", "Found owner via faction owner");
+                //WriteGeneral("LookAround", "Found owner via faction owner");
             }
             else
             {

@@ -38,7 +38,7 @@ namespace Eem.Thraxus.Entities.Bots
             if (!base.Init(rc)) return false;
             if (Rc == null) return false;
             WriteGeneral("Init", "Bot Freighter Booting...");
-            OnDamaged += DamageHandler;
+            //OnDamaged += DamageHandler;
             //OnBlockPlaced += BlockPlacedHandler;
             //_startPoint = GridPosition;
             SetFlightPath();
@@ -66,38 +66,50 @@ namespace Eem.Thraxus.Entities.Bots
             (Rc as MyRemoteControl)?.SetAutoPilotSpeedLimit(_freighterSetup.CruiseSpeed);
             (Rc as MyRemoteControl)?.SetCollisionAvoidance(true);
         }
-
-        private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
+        
+        public override void TriggerAlert()
         {
-            try
+            if (IsFleeing)
             {
-                IMyPlayer damager;
-                ReactOnDamage(damage, out damager);
-                if (damager == null) return;
-                IsFleeing = true;
-                Flee();
+                return;
             }
-            catch (Exception scrap)
-            {
-                WriteGeneral("DamageHandler", scrap.Message);
-            }
+            //WriteGeneral(nameof(TriggerAlert), $"Alert Triggered! [{assaulted.ToEntityIdFormat()}] [{blockId.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
+            IsFleeing = true;
+            Flee();
         }
+
+        //private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
+        //{
+        //    try
+        //    {
+        //        IMyPlayer damager;
+        //        ReactOnDamage(damage, out damager);
+        //        if (damager == null) return;
+        //        IsFleeing = true;
+        //        Flee();
+        //    }
+        //    catch (Exception scrap)
+        //    {
+        //        WriteGeneral("DamageHandler", scrap.Message);
+        //    }
+        //}
 
         public override void Main()
         {
             if (IsFleeing)
             {
                 Flee();
+                return;
             }
-            else if (!_freighterSetup.FleeOnlyWhenDamaged)
+            
+            if (!_freighterSetup.FleeOnlyWhenDamaged)
             {
                 List<InGame.MyDetectedEntityInfo> enemiesAround = LookForEnemies(_freighterSetup.FleeTriggerDistance, true);
                 if (enemiesAround.Count <= 0) return;
                 IsFleeing = true;
                 Flee(enemiesAround);
+                return;
             }
-
-            if (!IsFleeing) return;
 
             if (GridPosition.DistanceTo(_endpoint) < 100) Shutdown();
         }

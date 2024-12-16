@@ -641,8 +641,10 @@
     <None Include="EEM-531659576\VoxelMaps\wi_reno.vx2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Controllers\CoordinationController.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Enums\FactionType.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Enums\GridPresetType.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\EnumExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Models\ActionQueues.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Controllers\BotController.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Models\DamageEvent.cs" />

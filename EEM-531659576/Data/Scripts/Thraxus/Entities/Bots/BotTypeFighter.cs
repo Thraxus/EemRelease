@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
@@ -42,7 +43,7 @@ namespace Eem.Thraxus.Entities.Bots
             WriteGeneral("Init", "Bot Fighter Booting...");
             //Update |= MyEntityUpdateEnum.EACH_10TH_FRAME | MyEntityUpdateEnum.EACH_100TH_FRAME;
 
-            if (_fighterSetup.CallHelpOnDamage) OnDamaged += DamageHandler;
+            //if (_fighterSetup.CallHelpOnDamage) OnDamaged += DamageHandler;
 
             if (rc != null)
             {
@@ -74,23 +75,54 @@ namespace Eem.Thraxus.Entities.Bots
             WriteGeneral("LoadKeenAI", "AI Loaded!");
         }
 
-        private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
-        {
-            IMyPlayer damager;
-            ReactOnDamage(damage, out damager);
+        private bool _onAlert;
 
+        public override void TriggerAlert()
+        {
+            if (_onAlert)
+            {
+                return;
+            }
+
+            _onAlert = true;
+
+            //WriteGeneral(nameof(TriggerAlert), $"Alert Triggered! [{assaulted.ToEntityIdFormat()}] [{blockId.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
             if (_fighterSetup.DelayedAiEnable) LoadKeenAi();
 
-            foreach (IMyTimerBlock timer in Term.GetBlocksOfType<IMyTimerBlock>(x => x.IsFunctional && x.Enabled
-                                                                                                    && x.CustomName.Contains("Damage")))
+            foreach (IMyTimerBlock timer in 
+                     Term.GetBlocksOfType<IMyTimerBlock>(x => 
+                         x.IsFunctional && 
+                         x.Enabled && 
+                         x.CustomName.Contains("Damage")))
                 timer.Trigger();
 
             if (!_fighterSetup.CallHelpOnDamage) return;
 
-            foreach (IMyTimerBlock timer in Term.GetBlocksOfType<IMyTimerBlock>(x => x.IsFunctional && x.Enabled
-                                                                                                    && x.CustomName.Contains("Security")))
+            foreach (IMyTimerBlock timer in 
+                     Term.GetBlocksOfType<IMyTimerBlock>(x => 
+                         x.IsFunctional && 
+                         x.Enabled && 
+                         x.CustomName.Contains("Security")))
                 timer.Trigger();
         }
+
+        //private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
+        //{
+        //    IMyPlayer damager;
+        //    ReactOnDamage(damage, out damager);
+
+        //    if (_fighterSetup.DelayedAiEnable) LoadKeenAi();
+
+        //    foreach (IMyTimerBlock timer in Term.GetBlocksOfType<IMyTimerBlock>(x => x.IsFunctional && x.Enabled
+        //                                                                                            && x.CustomName.Contains("Damage")))
+        //        timer.Trigger();
+
+        //    if (!_fighterSetup.CallHelpOnDamage) return;
+
+        //    foreach (IMyTimerBlock timer in Term.GetBlocksOfType<IMyTimerBlock>(x => x.IsFunctional && x.Enabled
+        //                                                                                            && x.CustomName.Contains("Security")))
+        //        timer.Trigger();
+        //}
 
         public override void Main()
         {
@@ -101,11 +133,25 @@ namespace Eem.Thraxus.Entities.Bots
             }
 
             List<InGame.MyDetectedEntityInfo> enemiesInProximity = LookForEnemies(_fighterSetup.SeekDistance);
-            WriteGeneral("Main", $"Found [{enemiesInProximity.Count:D2}] Enemies!");
+            //WriteGeneral("Main", $"Found [{enemiesInProximity.Count:D2}] Enemies!");
 
             MyVisualScriptLogicProvider.DroneTargetLoseCurrent(Rc.Name);
             if (enemiesInProximity.Count > 0)
                 MyVisualScriptLogicProvider.DroneSetTarget(Rc.Name, GetTopPriorityTarget(enemiesInProximity).GetEntity() as MyEntity);
+        }
+
+        private void DelayedAI_Main()
+        {
+            if (!_fighterSetup.DelayedAiEnable || KeenAiLoaded || !(_fighterSetup.AiActivationDistance > 0)) return;
+
+            List<InGame.MyDetectedEntityInfo> enemiesInProximity = LookForEnemies(_fighterSetup.AiActivationDistance);
+            if (enemiesInProximity == null)
+            {
+                WriteGeneral("DelayedAI_Main()", "WEIRD: EnemiesInProximity == null");
+                return;
+            }
+
+            if (enemiesInProximity.Count > 0) LoadKeenAi();
         }
 
         private InGame.MyDetectedEntityInfo GetTopPriorityTarget(List<InGame.MyDetectedEntityInfo> targets)
@@ -149,20 +195,6 @@ namespace Eem.Thraxus.Entities.Bots
 
             if (enemy.Type == InGame.MyDetectedEntityType.LargeGrid) dangerIndex *= 2.5f;
             return dangerIndex;
-        }
-
-        private void DelayedAI_Main()
-        {
-            if (!_fighterSetup.DelayedAiEnable || KeenAiLoaded || !(_fighterSetup.AiActivationDistance > 0)) return;
-
-            List<InGame.MyDetectedEntityInfo> enemiesInProximity = LookForEnemies(_fighterSetup.AiActivationDistance);
-            if (enemiesInProximity == null)
-            {
-                WriteGeneral("DelayedAI_Main()", "WEIRD: EnemiesInProximity == null");
-                return;
-            }
-
-            if (enemiesInProximity.Count > 0) LoadKeenAi();
         }
 
         protected override void ParseSetup()

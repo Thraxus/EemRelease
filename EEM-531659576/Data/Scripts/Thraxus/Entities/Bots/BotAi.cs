@@ -1,5 +1,6 @@
 ﻿using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
+using Eem.Thraxus.Controllers;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Models;
 using Sandbox.ModAPI;
@@ -9,15 +10,15 @@ namespace Eem.Thraxus.Entities.Bots
 {
     public class BotAi : BaseLoggingClass
     {
-        private readonly BotDamageHandler _botDamageHandler;
         private readonly BotConfig _botConfig;
+        private readonly CoordinationController _coordinationController;
 
-        public BotAi(IMyRemoteControl remote, BotConfig botConfig,  BotDamageHandler botDamageHandler)
+        public BotAi(IMyRemoteControl remote, BotConfig botConfig, CoordinationController coordinationController)
         {
-            _botDamageHandler = botDamageHandler;
             Rc = remote;
             Grid = Rc.CubeGrid.GetTopMostParent() as IMyCubeGrid;
             _botConfig = botConfig;
+            _coordinationController = coordinationController;
         }
 
         private IMyRemoteControl Rc { get; }
@@ -43,11 +44,12 @@ namespace Eem.Thraxus.Entities.Bots
             WriteGeneral("Init", $"Bot Id: [{BotId.ToEntityIdFormat()}]");
 
             Ai.OnWriteToLog += WriteGeneral;
+            _coordinationController.DamageController.AlertReporting.Add(Rc.GetTopMostParent().EntityId, Ai.TriggerAlert);
             Ai.OnClose += close =>
             {
+                _coordinationController.DamageController.AlertReporting.Remove(Rc.GetTopMostParent().EntityId);
                 WriteGeneral("Signing Off", $"[{BotId.ToEntityIdFormat()}]");
                 Grid.Close();
-                Close();
             };
             WriteGeneral("Init", $"Initializing Ai for: [{BotId.ToEntityIdFormat()}]");
             Ai.Init(Rc);
@@ -60,6 +62,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         public override void Close()
         {
+            Ai.Close();
             Ai.OnWriteToLog -= WriteGeneral;
             base.Close();
         }

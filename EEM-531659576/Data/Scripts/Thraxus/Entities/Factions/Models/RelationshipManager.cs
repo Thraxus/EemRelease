@@ -781,6 +781,17 @@ namespace Eem.Thraxus.Entities.Factions.Models
             }
         }
 
+        public void WarDeclaration(IMyFaction npcFaction, IMyFaction playerFaction)
+        {
+            WarDeclaration(npcFaction.FactionId, playerFaction.FactionId);
+        }
+
+        public void WarDeclaration(IMyFaction npcFaction, long playerId)
+        {
+            // TODO
+            // Implement.  Required for when a player does not have a faction.
+        }
+
         public void WarDeclaration(long npcFactionId, long playerFactionId)
         {
             // Used by BotBase to declare war until I have the time to redo bots/ai
@@ -1047,35 +1058,35 @@ namespace Eem.Thraxus.Entities.Factions.Models
 
         private void DumpTimedNegativeFactionRelationships(bool general = false)
         {
-            if (!Helpers.Constants.DebugMode && !general) return;
-            try
-            {
-                WriteGeneral("DumpTimedNegativeFactionRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}");
-                const string callerName = "DumpTimedNegativeFactionRelationships";
-                List<TimedRelationship> tempTimedRelationship = TimedNegativeRelationships;
-                foreach (TimedRelationship negativeRelationship in tempTimedRelationship)
-                    WriteGeneral(callerName, $"negativeRelationship:\t{negativeRelationship}");
-            }
-            catch (Exception e)
-            {
-                ExceptionWriter("DumpTimedNegativeFactionRelationships", $"Exception!\t{e}");
-            }
+            //if (!Helpers.Constants.DebugMode && !general) return;
+            //try
+            //{
+            //    WriteGeneral("DumpTimedNegativeFactionRelationships", $"TimedNegativeRelationships.Count:\t{TimedNegativeRelationships.Count}");
+            //    const string callerName = "DumpTimedNegativeFactionRelationships";
+            //    List<TimedRelationship> tempTimedRelationship = TimedNegativeRelationships;
+            //    foreach (TimedRelationship negativeRelationship in tempTimedRelationship)
+            //        WriteGeneral(callerName, $"negativeRelationship:\t{negativeRelationship}");
+            //}
+            //catch (Exception e)
+            //{
+            //    ExceptionWriter("DumpTimedNegativeFactionRelationships", $"Exception!\t{e}");
+            //}
         }
 
         private void DumpMendingRelationshipsRelationships(bool general = false)
         {
-            if (!Helpers.Constants.DebugMode && !general) return;
-            try
-            {
-                const string callerName = "DumpMendingRelationshipsRelationships";
-                List<PendingRelation> tempMendingRelations = MendingRelationships;
-                foreach (PendingRelation mendingRelationship in tempMendingRelations)
-                    WriteGeneral(callerName, $"mendingRelationship:\t{mendingRelationship}");
-            }
-            catch (Exception e)
-            {
-                ExceptionWriter("DumpMendingRelationshipsRelationships", $"Exception!\t{e}");
-            }
+            //if (!Helpers.Constants.DebugMode && !general) return;
+            //try
+            //{
+            //    const string callerName = "DumpMendingRelationshipsRelationships";
+            //    List<PendingRelation> tempMendingRelations = MendingRelationships;
+            //    foreach (PendingRelation mendingRelationship in tempMendingRelations)
+            //        WriteGeneral(callerName, $"mendingRelationship:\t{mendingRelationship}");
+            //}
+            //catch (Exception e)
+            //{
+            //    ExceptionWriter("DumpMendingRelationshipsRelationships", $"Exception!\t{e}");
+            //}
         }
 
         private void ExceptionWriter(string caller, string message)
