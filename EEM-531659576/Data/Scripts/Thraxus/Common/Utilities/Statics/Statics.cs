@@ -63,6 +63,24 @@ namespace Eem.Thraxus.Common.Utilities.Statics
             return pruneList;
         }
 
+        private static readonly List<IMyPlayer> OnlinePlayers = new List<IMyPlayer>();
+
+        public static bool IsPlayerNearby(MyCubeGrid grid, double radius = 2000)
+        {
+            OnlinePlayers.Clear();
+            var boundingSphereD = new BoundingSphereD(grid.PositionComp.GetPosition(), radius);
+            MyAPIGateway.Multiplayer.Players.GetPlayers(OnlinePlayers);
+
+            foreach (IMyPlayer onlinePlayer in OnlinePlayers)
+            {
+                if (boundingSphereD.Contains(onlinePlayer.GetPosition()) == ContainmentType.Contains)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // This is broken as fuck
         public static IEnumerable<MyEntity> DetectPlayersInSphere(Vector3D detectionCenter, double range, bool reportOrigin = false)
         {
@@ -78,19 +96,7 @@ namespace Eem.Thraxus.Common.Utilities.Statics
             return pruneList;
         }
 
-        public static IMyPlayer GetPlayerById(this IMyPlayerCollection players, long playerId)
-        {
-            var myPlayers = new List<IMyPlayer>();
-            MyAPIGateway.Players.GetPlayers(myPlayers, x => x.IdentityId == playerId);
-            return myPlayers.FirstOrDefault();
-        }
-
-        public static IMyIdentity GetIdentityById(this long playerId)
-        {
-            var identityList = new List<IMyIdentity>();
-            MyAPIGateway.Players.GetAllIdentites(identityList);
-            return identityList.FirstOrDefault(x => x.IdentityId == playerId);
-        }
+        
 
         //public static void CreateFakeSmallExplosion(Vector3D position)
         //{
@@ -228,11 +234,13 @@ namespace Eem.Thraxus.Common.Utilities.Statics
             return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(otherGridOwner, npcFaction.FactionId) >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
         }
 
-        public static FactionRelationship GetRelationBetweenGridAndCharacter(IMyCubeGrid npcGrid, IMyCharacter character)
+        public static FactionRelationship GetRelationBetweenGridAndCharacterUsingEntity(IMyCubeGrid npcGrid, IMyEntity character)
         {
+            var player = character.GetPlayerFromEntity();
+            if (player == null) return FactionRelationship.Friends; // this should never happen
             long npcGridOwner = npcGrid.BigOwners.FirstOrDefault();
             IMyFaction npcFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(npcGridOwner);
-            return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(character.EntityId, npcFaction.FactionId) >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
+            return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(player.IdentityId, npcFaction.FactionId) >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
         }
 
         //Relative velocity proportional navigation

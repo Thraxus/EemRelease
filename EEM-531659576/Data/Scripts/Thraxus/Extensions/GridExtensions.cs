@@ -36,6 +36,11 @@ namespace Eem.Thraxus.Extensions
             return MyAPIGateway.Session.Factions.TryGetPlayerFaction(ownerId);
         }
 
+        public static IMyFaction GetOwnerFaction(this IMyCubeBlock block)
+        {
+            return block.CubeGrid.BigOwners.Count == 0 ? null : block.CubeGrid.GetOwnerFaction();
+        }
+
         // <summary>
         //     Returns world speed cap ratio to default cap of 100 m/s.
         // </summary>
@@ -271,7 +276,7 @@ namespace Eem.Thraxus.Extensions
         //        grid.LogError("ChangeOwnershipSmart", e);
         //    }
         //}
-         
+
         //public static List<IMyCubeGrid> GetAllSubgrids(this IMyCubeGrid grid)
         //{
         //    try

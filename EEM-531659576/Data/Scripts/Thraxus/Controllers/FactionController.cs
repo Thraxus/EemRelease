@@ -1,9 +1,9 @@
 ﻿using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
-using Eem.Thraxus.Entities.Bots;
 using Eem.Thraxus.Entities.Factions.Models;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
+using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 
@@ -38,15 +38,22 @@ namespace Eem.Thraxus.Controllers
             WriteGeneral("FactionCore", "Online!");
         }
 
+
+        public void TriggerWar(DamageEvent damageEvent)
+        {
+            TriggerWar(damageEvent.ShipId, damageEvent.PlayerId);
+        }
+
         public void TriggerWar(long assaulted, long assaulter)
         {
-            var right = MyAPIGateway.Session.Factions.TryGetPlayerFaction(assaulter);
             var left = (MyAPIGateway.Entities.GetEntityById(assaulted).GetTopMostParent() as MyCubeGrid).GetOwnerFaction();
-            
+            var right = MyAPIGateway.Session.Factions.TryGetPlayerFaction(assaulter);
+
             if (left == null || right == null || left == right)
             {
                 return;
             }
+
             WriteGeneral("TriggerWar", $"Asshats! [{left?.Tag ?? "NA"}] [{assaulted.ToEntityIdFormat()}] [{right?.Tag ?? "NA"}] [{assaulter.ToEntityIdFormat()}]");
             RelationshipManager.WarDeclaration(left, right);
         }

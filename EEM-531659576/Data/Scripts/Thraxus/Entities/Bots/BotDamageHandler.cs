@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Eem.Thraxus.Common.BaseClasses;
-using Eem.Thraxus.Common.Extensions;
-using Eem.Thraxus.Models;
-using Sandbox.ModAPI;
-using VRage.Collections;
-using VRage.Game.ModAPI;
-using VRage.ModAPI;
+﻿using Eem.Thraxus.Common.BaseClasses;
 
 namespace Eem.Thraxus.Entities.Bots
 {

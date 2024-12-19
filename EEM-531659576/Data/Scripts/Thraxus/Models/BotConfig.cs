@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Eem.Thraxus.Enums;
 
 namespace Eem.Thraxus.Models
@@ -7,7 +8,7 @@ namespace Eem.Thraxus.Models
     {
         public readonly BotType BotType;
         public readonly FactionType Faction;
-        public readonly GridPresetType Preset;
+        public readonly GridPresetType PresetEnum;
 
         public readonly bool AmbushMode;
         public readonly bool DelayedAi;
@@ -23,19 +24,32 @@ namespace Eem.Thraxus.Models
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"Prefab Config:\t{Faction}\t{BotType}\t{Preset}\t" +
-                   $"{DelayedAi}\t{SeekDistance}\t" +
+            return $"Prefab Config:\t{Faction}\t{BotType}\t{PresetEnum}\t" +
+                   $"{PresetString}\t{DelayedAi}\t{SeekDistance}\t" +
                    $"{AmbushMode}\t{ActivationDistance}\t{FleeOnlyWhenDamaged}\t" +
                    $"{FleeTriggerDistance}\t{FleeSpeedCap}";
         }
 
         public string ToStringVerbose()
         {
-            return $"Prefab Config - |Faction: {Faction} |Type: {BotType} |Preset: {Preset} " +
-                   $"|DelayedAi: {DelayedAi} " +
-                   $"|SeekDistance: {SeekDistance} |AmbushMode: {AmbushMode} |ActivationDistance: {ActivationDistance} " +
-                   $"|FleeOnlyWhenDamaged: {FleeOnlyWhenDamaged} |FleeTriggerDistance: {FleeTriggerDistance} " +
-                   $"|FleeSpeedCap: {FleeSpeedCap}";
+            var sb = new StringBuilder();
+
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("__________________________________________________");
+            sb.AppendFormat("{0, -4}BotType: {1}\n", " ", BotType);
+            sb.AppendFormat("{0, -4}Faction: {1}\n", " ", Faction);
+            sb.AppendFormat("{0, -4}GridPresetType: {1}\n", " ", PresetEnum);
+            sb.AppendFormat("{0, -4}Ambush Mode: {1}\n", " ", AmbushMode);
+            sb.AppendFormat("{0, -4}Delayed AI: {1}\n", " ", DelayedAi);
+            sb.AppendFormat("{0, -4}Activation Distance: {1}\n", " ", ActivationDistance);
+            sb.AppendFormat("{0, -4}Flee Speed Cap: {1}\n", " ", FleeSpeedCap);
+            sb.AppendFormat("{0, -4}Flee Trigger Distance: {1}\n", " ", FleeTriggerDistance);
+            sb.AppendFormat("{0, -4}Flee Only When Damaged: {1}\n", " ", FleeOnlyWhenDamaged);
+            sb.AppendFormat("{0, -4}Seek Distance: {1}\n", " ", SeekDistance);
+            sb.AppendFormat("{0, -4}Preset String: {1}\n", " ", PresetString);
+            
+            return sb.ToString();
         }
 
         private BotType GetBotType(string type)
@@ -88,7 +102,7 @@ namespace Eem.Thraxus.Models
 
         private FactionType GetFationType(string str)
         {
-            var type = FactionType.Other;
+            var type = FactionType.SPRT;
             switch (str.ToLower())
             {
                 case "amph":
@@ -194,7 +208,7 @@ namespace Eem.Thraxus.Models
                         BotType = GetBotType(x[1]);
                         break;
                     case "preset":
-                        Preset = GetGridPresetType(x[1]);
+                        PresetEnum = GetGridPresetType(x[1]);
                         PresetString = x[1];
                         break;
                     case "seekdistance":

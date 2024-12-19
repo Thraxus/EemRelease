@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Timers;
-using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
@@ -103,6 +101,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         public override void Main()
         {
+            base.Main();
             EvaluateCalmDownTimer();
             //if (WasDamaged && DateTime.Now - _alertTriggerTime > CalmdownTime) CalmDown();
         }
@@ -138,29 +137,42 @@ namespace Eem.Thraxus.Entities.Bots
             //}
             try
             {
-                List<IMyTimerBlock> alertTimers = Term.GetBlocksOfType<IMyTimerBlock>
-                (x => (x.IsWorking && x.CustomName.Contains(securityState ? SecurityOnTimerPrefix : SecurityOffTimerPrefix))
-                      || x.CustomData.Contains(securityState ? SecurityOnTimerPrefix : SecurityOffTimerPrefix));
+                foreach (IMyTimerBlock timer in Timers)
+                {
+                    if (!timer.IsWorking ||
+                        !timer.CustomName.Contains(securityState ? SecurityOnTimerPrefix : SecurityOffTimerPrefix)) continue;
+                    
+                    timer.Trigger();
+                }
 
-                foreach (IMyTimerBlock timer in alertTimers) timer.Trigger();
+                foreach (IMyRadioAntenna antenna in Antennae)
+                {
+                    if (!antenna.IsWorking || !antenna.CustomData.Contains("Security:CallForHelp")) continue;
+                    antenna.Enabled = securityState;
+                }
+                //List<IMyTimerBlock> alertTimers = Term.GetBlocksOfType<IMyTimerBlock>
+                //(x => (x.IsWorking && x.CustomName.Contains(securityState ? SecurityOnTimerPrefix : SecurityOffTimerPrefix))
+                //      || x.CustomData.Contains(securityState ? SecurityOnTimerPrefix : SecurityOffTimerPrefix));
+
+                //foreach (IMyTimerBlock timer in alertTimers) timer.Trigger();
             }
             catch (Exception scrap)
             {
                 WriteGeneral("TriggerTimers", scrap.Message);
             }
 
-            try
-            {
-                List<IMyRadioAntenna> callerAntennae = Term.GetBlocksOfType<IMyRadioAntenna>
-                    (x => x.IsWorking && x.CustomData.Contains("Security:CallForHelp"));
-                foreach (IMyRadioAntenna antenna in callerAntennae) antenna.Enabled = securityState;
-            }
-            catch (Exception scrap)
-            {
-                WriteGeneral("EnableAntennae", scrap.Message);
-            }
+            //try
+            //{
+            //    List<IMyRadioAntenna> callerAntennae = Term.GetBlocksOfType<IMyRadioAntenna>
+            //        (x => x.IsWorking && x.CustomData.Contains("Security:CallForHelp"));
+            //    foreach (IMyRadioAntenna antenna in callerAntennae) antenna.Enabled = securityState;
+            //}
+            //catch (Exception scrap)
+            //{
+            //    WriteGeneral("EnableAntennae", scrap.Message);
+            //}
 
-            if (Constants.DebugMode) MyAPIGateway.Utilities.ShowMessage($"{Grid.DisplayName}", $"{(securityState ? "Security Alert!" : "Security calmdown")}");
+            //if (Constants.DebugMode) MyAPIGateway.Utilities.ShowMessage($"{Grid.DisplayName}", $"{(securityState ? "Security Alert!" : "Security calmdown")}");
         }
     }
 

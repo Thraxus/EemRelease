@@ -1,12 +1,9 @@
 ﻿using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Enums;
 using Eem.Thraxus.Controllers;
-using Eem.Thraxus.Entities.Bots;
-using Eem.Thraxus.Models;
 using Eem.Thraxus.Networking;
 using Sandbox.ModAPI;
 using VRage.Game.Components;
-using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus
 {
@@ -62,7 +59,7 @@ namespace Eem.Thraxus
 
         protected override string CompName { get; } = "EemCore";
         protected override CompType Type { get; } = CompType.Server;
-        protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation;
+        protected override MyUpdateOrder Schedule { get; } = MyUpdateOrder.BeforeSimulation | MyUpdateOrder.AfterSimulation;
         protected override bool IncludeStaticLog { get; } = true;
         protected override bool SkipReporting { get; } = false;
 

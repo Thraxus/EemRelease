@@ -487,28 +487,28 @@ namespace Eem.Thraxus.Entities.Factions.Models
         private void SetupPlayerRelations()
         {
             foreach (KeyValuePair<long, IMyFaction> playerFaction in _playerFactionDictionary)
-            foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
-                AutoPeace(playerFaction.Key, lawfulFaction.Key);
+                foreach (KeyValuePair<long, IMyFaction> lawfulFaction in _lawfulFactionDictionary)
+                    AutoPeace(playerFaction.Key, lawfulFaction.Key);
         }
 
         private void SetupNpcRelations()
         {
             foreach (KeyValuePair<long, IMyFaction> leftPair in _lawfulFactionDictionary)
-            foreach (KeyValuePair<long, IMyFaction> rightPair in _lawfulFactionDictionary)
-            {
-                if (leftPair.Key == rightPair.Key || !MyAPIGateway.Session.Factions.AreFactionsEnemies(leftPair.Key, rightPair.Key)) continue;
-                AutoPeace(leftPair.Key, rightPair.Key);
-            }
+                foreach (KeyValuePair<long, IMyFaction> rightPair in _lawfulFactionDictionary)
+                {
+                    if (leftPair.Key == rightPair.Key || !MyAPIGateway.Session.Factions.AreFactionsEnemies(leftPair.Key, rightPair.Key)) continue;
+                    AutoPeace(leftPair.Key, rightPair.Key);
+                }
         }
 
         private void SetupPirateRelations()
         {
             foreach (KeyValuePair<long, IMyFaction> faction in MyAPIGateway.Session.Factions.Factions)
-            foreach (KeyValuePair<long, IMyFaction> pirate in _pirateFactionDictionary)
-            {
-                if (faction.Key == pirate.Key) continue;
-                DeclareWar(faction.Key, pirate.Key);
-            }
+                foreach (KeyValuePair<long, IMyFaction> pirate in _pirateFactionDictionary)
+                {
+                    if (faction.Key == pirate.Key) continue;
+                    DeclareWar(faction.Key, pirate.Key);
+                }
         }
 
         //private void SetupAutoRelations()
@@ -716,7 +716,7 @@ namespace Eem.Thraxus.Entities.Factions.Models
 
         private void ProcessWarQueue()
         {
-            WriteGeneral("ProcessWarQueue", "Start");
+            //WriteGeneral("ProcessWarQueue", "Start");
 
             try
             {
@@ -803,6 +803,11 @@ namespace Eem.Thraxus.Entities.Factions.Models
             //MyAPIGateway.Parallel.Start(delegate
             //{ 
             //WriteGeneral("WarDeclaration", $"npcFaction:\t{npcFactionId}\tplayerFaction:\t{playerFactionId}");
+            if (_npcFactionDictionary.ContainsKey(playerFactionId))
+            {
+                // Don't want EEM factions declaring war on one another
+                return;
+            }
             WarQueue.Enqueue(new PendingRelation(npcFactionId, playerFactionId));
             ProcessWarQueue();
             //});
@@ -1169,10 +1174,16 @@ namespace Eem.Thraxus.Entities.Factions.Models
             try
             {
                 //WriteGeneral($"SetRepPlayers", $"npcFactionMemberCount: {npcFaction.Members.Count}");
-                foreach (KeyValuePair<long, MyFactionMember> npcFactionMember in npcFaction.Members) MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(npcFactionMember.Value.PlayerId, playerFactionId, value);
+                foreach (KeyValuePair<long, MyFactionMember> npcFactionMember in npcFaction.Members)
+                {
+                    MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(npcFactionMember.Value.PlayerId, playerFactionId, value);
+                }
                 //WriteGeneral($"SetRepPlayers", $"npcFactionMemberId: {npcFactionMember.Value.PlayerId} | {_identityDictionary[npcFactionMember.Value.PlayerId]}");
                 //WriteGeneral($"SetRepPlayers", $"playerFactionMemberCount: {playerFaction.Members.Count}");
-                foreach (KeyValuePair<long, MyFactionMember> playerFactionMember in playerFaction.Members) MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(playerFactionMember.Value.PlayerId, npcFactionId, value);
+                foreach (KeyValuePair<long, MyFactionMember> playerFactionMember in playerFaction.Members)
+                {
+                    MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(playerFactionMember.Value.PlayerId, npcFactionId, value);
+                }
                 //WriteGeneral($"SetRepPlayers", $"playerFactionMemberId: {playerFactionMember.Value.PlayerId} | {_identityDictionary[playerFactionMember.Value.PlayerId]}");
                 //DebugRep("SetRepPlayers-Post", npcFactionId, playerFactionId, hostile);
             }

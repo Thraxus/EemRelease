@@ -72,6 +72,9 @@ namespace Eem.Thraxus.Controllers
             
             newBot.Init();
             _botAis.Add(newBot);
+
+            WriteGeneral("Init", $"Config for {rc.CubeGrid.DisplayName} {config.ToStringVerbose()}");
+
             WriteGeneral("OnEntityAdd", "New Bot AI Initialized!");
         }
 

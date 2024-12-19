@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
-using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
+using VRageMath;
 using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
 using IMySmallGatlingGun = Sandbox.ModAPI.IMySmallGatlingGun;
 using IMySmallMissileLauncher = Sandbox.ModAPI.IMySmallMissileLauncher;
@@ -40,16 +40,14 @@ namespace Eem.Thraxus.Entities.Bots
         public override bool Init(IMyRemoteControl rc)
         {
             if (!base.Init(rc)) return false;
-            WriteGeneral("Init", "Bot Fighter Booting...");
+            if (rc == null) return false;
+            WriteGeneral("Init", $"Bot Fighter Booting... [{rc.GetTopMostParent().DisplayName}]");
             //Update |= MyEntityUpdateEnum.EACH_10TH_FRAME | MyEntityUpdateEnum.EACH_100TH_FRAME;
 
             //if (_fighterSetup.CallHelpOnDamage) OnDamaged += DamageHandler;
 
-            if (rc != null)
-            {
-                rc.Name = DroneNameProvider;
-                MyAPIGateway.Entities.SetEntityName(rc);
-            }
+            rc.Name = DroneNameProvider;
+            //MyAPIGateway.Entities.SetEntityName(rc);
 
             if (!_fighterSetup.DelayedAiEnable) LoadKeenAi();
             return true;
@@ -57,7 +55,8 @@ namespace Eem.Thraxus.Entities.Bots
 
         public void LoadKeenAi()
         {
-            WriteGeneral("LoadKeenAI", "Loading AI...");
+            //WriteGeneral("LoadKeenAI", $"Loading AI... [{BotConfig.SeekDistance}]");
+            //WriteGeneral("LoadKeenAI", $"Configuration... [{BotConfig.ToStringVerbose()}]");
             try
             {
                 if (KeenAiLoaded) return;
@@ -85,25 +84,26 @@ namespace Eem.Thraxus.Entities.Bots
             }
 
             _onAlert = true;
+            WriteGeneral(nameof(TriggerAlert), "Triggering Alert!");
+
 
             //WriteGeneral(nameof(TriggerAlert), $"Alert Triggered! [{assaulted.ToEntityIdFormat()}] [{blockId.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
             if (_fighterSetup.DelayedAiEnable) LoadKeenAi();
 
-            foreach (IMyTimerBlock timer in 
-                     Term.GetBlocksOfType<IMyTimerBlock>(x => 
-                         x.IsFunctional && 
-                         x.Enabled && 
-                         x.CustomName.Contains("Damage")))
+            foreach (IMyTimerBlock timer in Timers)
+            {
+                if (!timer.IsFunctional || !timer.Enabled || !(timer.CustomName.Contains("Damage") || (timer.CustomName.Contains("Security") && _fighterSetup.CallHelpOnDamage))) continue;
                 timer.Trigger();
+            }
 
-            if (!_fighterSetup.CallHelpOnDamage) return;
+            //if (!_fighterSetup.CallHelpOnDamage) return;
 
-            foreach (IMyTimerBlock timer in 
-                     Term.GetBlocksOfType<IMyTimerBlock>(x => 
-                         x.IsFunctional && 
-                         x.Enabled && 
-                         x.CustomName.Contains("Security")))
-                timer.Trigger();
+            //foreach (IMyTimerBlock timer in 
+            //         Term.GetBlocksOfType<IMyTimerBlock>(x => 
+            //             x.IsFunctional && 
+            //             x.Enabled && 
+            //             x.CustomName.Contains("Security")))
+            //    timer.Trigger();
         }
 
         //private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
@@ -124,78 +124,157 @@ namespace Eem.Thraxus.Entities.Bots
         //        timer.Trigger();
         //}
 
+        private HashSet<MyEntity> _targets = new HashSet<MyEntity>();
+
         public override void Main()
         {
+            base.Main();
             if (_fighterSetup.DelayedAiEnable && !KeenAiLoaded)
             {
                 DelayedAI_Main();
                 return;
             }
-
-            List<InGame.MyDetectedEntityInfo> enemiesInProximity = LookForEnemies(_fighterSetup.SeekDistance);
-            //WriteGeneral("Main", $"Found [{enemiesInProximity.Count:D2}] Enemies!");
-
-            MyVisualScriptLogicProvider.DroneTargetLoseCurrent(Rc.Name);
-            if (enemiesInProximity.Count > 0)
-                MyVisualScriptLogicProvider.DroneSetTarget(Rc.Name, GetTopPriorityTarget(enemiesInProximity).GetEntity() as MyEntity);
+            FindAFucker(_fighterSetup.SeekDistance);
         }
 
         private void DelayedAI_Main()
         {
             if (!_fighterSetup.DelayedAiEnable || KeenAiLoaded || !(_fighterSetup.AiActivationDistance > 0)) return;
+            FindAFucker(_fighterSetup.AiActivationDistance);
+        }
 
-            List<InGame.MyDetectedEntityInfo> enemiesInProximity = LookForEnemies(_fighterSetup.AiActivationDistance);
-            if (enemiesInProximity == null)
+        private void FindAFucker(float distance)
+        {
+            _targets.Clear();
+            _targets = FindTargets(distance);
+
+            if (_targets.Count == 0) return;
+
+            if (_targets.Count > 1)
             {
-                WriteGeneral("DelayedAI_Main()", "WEIRD: EnemiesInProximity == null");
+                FightAFucker(GetMostDangerous(GetEnemiesSortedByRange(_targets)));
                 return;
             }
 
-            if (enemiesInProximity.Count > 0) LoadKeenAi();
+            FightAFucker(_targets.First());
         }
 
-        private InGame.MyDetectedEntityInfo GetTopPriorityTarget(List<InGame.MyDetectedEntityInfo> targets)
+        private int _counter;
+
+        private Vector3D _oldWaypoint;
+
+        private void FightAFucker(MyEntity fucker)
         {
-            if (targets == null || targets.Count == 0) return new InGame.MyDetectedEntityInfo();
-            if (targets.Count == 1) return targets.First();
+            if (_oldWaypoint == default(Vector3D))
+            {
+                _oldWaypoint = Rc.Position;
+            }
 
-            List<InGame.MyDetectedEntityInfo> mostDangerous;
+            MyVisualScriptLogicProvider.DroneTargetLoseCurrent(Rc.Name);
+            MyVisualScriptLogicProvider.DroneSetTarget(Rc.Name, fucker);
+            MyVisualScriptLogicProvider.DroneSetSpeedLimit(Rc.Name, Rc.GetSpeedCap());
+            Rc.SetCollisionAvoidance(false);
+            Rc.FlightMode = InGame.FlightMode.OneWay;
+            //Rc.SpeedLimit = Rc.GetSpeedCap();
+            Rc.DebugDraw();
+            Rc.SpeedLimit = 1000;
+            //Statics.AddGpsLocation($"{Rc.CubeGrid.DisplayName} -- {++_counter:D2}", Rc.CurrentWaypoint.Coords);
+            if (Rc.CurrentWaypoint.Coords == _oldWaypoint) return;
 
-            if (targets.Any(x => Distance(x) <= 200 && RelSpeed(x) <= 40, out mostDangerous))
-                return mostDangerous.OrderBy(Distance).First();
+            WriteGeneral(nameof(FightAFucker), $"GPS Location Changed - " +
+                                               $"{_counter:D2} {Rc.GetShipSpeed()} " +
+                                               $"{_oldWaypoint.DistanceTo(Rc.CurrentWaypoint.Coords)} " +
+                                               $"{Rc.CurrentWaypoint.Coords.DistanceTo(Rc.CubeGrid.PositionComp.GetPosition())}");
 
-            List<InGame.MyDetectedEntityInfo> targetsClose = targets.Where(x => Distance(x) <= 1200).ToList();
+            _oldWaypoint = Rc.CurrentWaypoint.Coords;
 
-            if (targetsClose.Count > 0) return targetsClose.OrderBy(x => DangerIndex(x) / x.GetMassT()).First();
-
-            List<InGame.MyDetectedEntityInfo> targetsFar = targets.Where(x => Distance(x) > 1200).ToList();
-
-            return targetsFar.Count > 0 ? targetsFar.OrderBy(x => DangerIndex(x) / x.GetMassT()).First() : new InGame.MyDetectedEntityInfo();
+            //Rc.ClearWaypoints();
+            //Rc.AddWaypoint(fucker.PositionComp.GetPosition(), "Boom!");
         }
 
-        private float DangerIndex(InGame.MyDetectedEntityInfo enemy)
+        private MyEntity GetMostDangerous(Dictionary<int, HashSet<MyEntity>> enemiesSortedByRange)
         {
-            if (enemy.Type == InGame.MyDetectedEntityType.CharacterHuman)
-                return Distance(enemy) < 100 ? 100 : 10;
-            if (!enemy.IsGrid()) return 0;
+            _mostDangerous.DangerIndex = 0;
+            _mostDangerous.MyEntity = null;
+            
+            foreach (var enemyGroup in enemiesSortedByRange)
+            {
+                GetMostDangerous(enemyGroup);
+            }
+            
+            return _mostDangerous.MyEntity;
+        }
+
+        private readonly DangerAssessment _mostDangerous = new DangerAssessment();
+        
+        private void GetMostDangerous(KeyValuePair<int, HashSet<MyEntity>> group)
+        {
+            if (group.Value.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var enemy in group.Value)
+            {
+                double tempDangerIndex = (10 - group.Key) * GetDangerIndex(enemy);
+                if (tempDangerIndex < _mostDangerous.DangerIndex) continue;
+                _mostDangerous.DangerIndex = tempDangerIndex;
+                _mostDangerous.MyEntity = enemy;
+            }
+        }
+
+        private HashSet<IMyTerminalBlock> _dangerIndexTerminalBlocks = new HashSet<IMyTerminalBlock>();
+
+        private double GetDangerIndex(MyEntity target)
+        {
+            if (target is IMyCharacter)
+            {
+                return GridPosition.DistanceTo(target.PositionComp.GetPosition()) < 100 ? 100 : 10;
+            }
 
             float dangerIndex = 0;
-            IMyCubeGrid enemyGrid = enemy.GetGrid();
+            var enemyGrid = target as IMyCubeGrid;
+            if (enemyGrid == null)
+            {
+                return 0;
+            }
 
-            var enemySlimBlocks = new List<IMySlimBlock>();
-            enemyGrid.GetBlocks(enemySlimBlocks, x => x.FatBlock is IMyTerminalBlock);
+            _dangerIndexTerminalBlocks.Clear();
+            _dangerIndexTerminalBlocks = enemyGrid.GetFatBlocks<IMyTerminalBlock>().ToHashSet();
 
-            List<IMyTerminalBlock> enemyBlocks = enemySlimBlocks.Select(x => x.FatBlock as IMyTerminalBlock).ToList();
+            dangerIndex += _dangerIndexTerminalBlocks.Count(x => x is IMyLargeMissileTurret) * 300;
+            dangerIndex += _dangerIndexTerminalBlocks.Count(x => x is IMyLargeGatlingTurret) * 100;
+            dangerIndex += _dangerIndexTerminalBlocks.Count(x => x is IMySmallMissileLauncher) * 400;
+            dangerIndex += _dangerIndexTerminalBlocks.Count(x => x is IMySmallGatlingGun) * 250;
+            dangerIndex += _dangerIndexTerminalBlocks.Count(x => x is IMyLargeInteriorTurret) * 40;
 
-            dangerIndex += enemyBlocks.Count(x => x is IMyLargeMissileTurret) * 300;
-            dangerIndex += enemyBlocks.Count(x => x is IMyLargeGatlingTurret) * 100;
-            dangerIndex += enemyBlocks.Count(x => x is IMySmallMissileLauncher) * 400;
-            dangerIndex += enemyBlocks.Count(x => x is IMySmallGatlingGun) * 250;
-            dangerIndex += enemyBlocks.Count(x => x is IMyLargeInteriorTurret) * 40;
-
-            if (enemy.Type == InGame.MyDetectedEntityType.LargeGrid) dangerIndex *= 2.5f;
+            if (enemyGrid.GridSizeEnum == MyCubeSize.Large) dangerIndex *= 2.5f;
             return dangerIndex;
         }
+
+        //private float DangerIndex(InGame.MyDetectedEntityInfo enemy)
+        //{
+        //    if (enemy.Type == InGame.MyDetectedEntityType.CharacterHuman)
+        //        return Distance(enemy) < 100 ? 100 : 10;
+        //    if (!enemy.IsGrid()) return 0;
+
+        //    float dangerIndex = 0;
+        //    IMyCubeGrid enemyGrid = enemy.GetGrid();
+
+        //    var enemySlimBlocks = new List<IMySlimBlock>();
+        //    enemyGrid.GetBlocks(enemySlimBlocks, x => x.FatBlock is IMyTerminalBlock);
+
+        //    List<IMyTerminalBlock> enemyBlocks = enemySlimBlocks.Select(x => x.FatBlock as IMyTerminalBlock).ToList();
+
+        //    dangerIndex += enemyBlocks.Count(x => x is IMyLargeMissileTurret) * 300;
+        //    dangerIndex += enemyBlocks.Count(x => x is IMyLargeGatlingTurret) * 100;
+        //    dangerIndex += enemyBlocks.Count(x => x is IMySmallMissileLauncher) * 400;
+        //    dangerIndex += enemyBlocks.Count(x => x is IMySmallGatlingGun) * 250;
+        //    dangerIndex += enemyBlocks.Count(x => x is IMyLargeInteriorTurret) * 40;
+
+        //    if (enemy.Type == InGame.MyDetectedEntityType.LargeGrid) dangerIndex *= 2.5f;
+        //    return dangerIndex;
+        //}
 
         protected override void ParseSetup()
         {

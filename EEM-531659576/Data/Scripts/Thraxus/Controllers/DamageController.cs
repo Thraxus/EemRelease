@@ -3,7 +3,6 @@ using System.Linq;
 using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Common.Generics;
-using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
@@ -27,13 +26,13 @@ namespace Eem.Thraxus.Controllers
             damageEvent.BlockId = blockId;
             damageEvent.PlayerId = playerId;
 
-            WriteGeneral(nameof(GetDamageEvent), $"Serving DamageEvent...");
+            //WriteGeneral(nameof(GetDamageEvent), $"Serving DamageEvent...");
             return damageEvent;
         }
 
         private void ReturnDamageEvent(DamageEvent damageEvent)
         {
-            WriteGeneral(nameof(ReturnDamageEvent), $"Returning DamageEvent...[{_damageEventObjectPool}]");
+            //WriteGeneral(nameof(ReturnDamageEvent), $"Returning DamageEvent...[{_damageEventObjectPool}]");
             _damageEventObjectPool.Return(damageEvent);
         }
 
@@ -75,13 +74,14 @@ namespace Eem.Thraxus.Controllers
             Action alertAction;
             AlertReporting.TryGetValue(damageEvent.ShipId, out alertAction);
             alertAction?.Invoke();
-            _coordinationController.FactionController.TriggerWar(damageEvent.ShipId, damageEvent.PlayerId);
 
-            WriteGeneral(nameof(ProcessDamageQueue), $"Damage Report: [{AlertReporting.ContainsKey(damageEvent.ShipId).ToSingleChar()}] {damageEvent}");
-            foreach (var ar in AlertReporting)
-            {
-                WriteGeneral(nameof(ProcessDamageQueue), $"Alert Dictionary: [{ar.Key.ToEntityIdFormat()}]");
-            }
+            _coordinationController.FactionController.TriggerWar(damageEvent);
+
+            //WriteGeneral(nameof(ProcessDamageQueue), $"Damage Report: [{AlertReporting.ContainsKey(damageEvent.ShipId).ToSingleChar()}] {damageEvent}");
+            //foreach (var ar in AlertReporting)
+            //{
+            //    WriteGeneral(nameof(ProcessDamageQueue), $"Alert Dictionary: [{ar.Key.ToEntityIdFormat()}]");
+            //}
 
             //AlertReporting.ContainsKey(damageEvent.ShipId);
             _damageEventList.Remove(damageEvent);
@@ -262,7 +262,7 @@ namespace Eem.Thraxus.Controllers
                 //    return;
                 //}
 
-                IMyIdentity myIdentity = myCubeGrid.BigOwners.FirstOrDefault().GetIdentityById();
+                IMyIdentity myIdentity = myCubeGrid.BigOwners.FirstOrDefault().GetIdentityFromIdentityId();
                 if (myIdentity != null)
                 {
                     AddToDamageQueue(damagedEntity, damagedBlock, myIdentity.IdentityId);

@@ -1,9 +1,13 @@
-﻿using Eem.Thraxus.Common.BaseClasses;
+﻿using System;
+using Eem.Thraxus.Common.BaseClasses;
 using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Controllers;
 using Eem.Thraxus.Enums;
+using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Models;
+using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Entities.Bots
@@ -20,6 +24,8 @@ namespace Eem.Thraxus.Entities.Bots
             _botConfig = botConfig;
             _coordinationController = coordinationController;
         }
+
+        public event Action<long, long> TriggerWar;
 
         private IMyRemoteControl Rc { get; }
 
@@ -44,7 +50,10 @@ namespace Eem.Thraxus.Entities.Bots
             WriteGeneral("Init", $"Bot Id: [{BotId.ToEntityIdFormat()}]");
 
             Ai.OnWriteToLog += WriteGeneral;
+            Ai.TriggerWar += (assaulted, assaulter) => _coordinationController.FactionController.TriggerWar(assaulted, assaulter);
+
             _coordinationController.DamageController.AlertReporting.Add(Rc.GetTopMostParent().EntityId, Ai.TriggerAlert);
+
             Ai.OnClose += close =>
             {
                 _coordinationController.DamageController.AlertReporting.Remove(Rc.GetTopMostParent().EntityId);
@@ -53,6 +62,17 @@ namespace Eem.Thraxus.Entities.Bots
             };
             WriteGeneral("Init", $"Initializing Ai for: [{BotId.ToEntityIdFormat()}]");
             Ai.Init(Rc);
+            
+            _coordinationController.ActionQueues.AfterSimActionQueue.Add(1, EnsureOwnership);
+        }
+
+        private void EnsureOwnership()
+        {
+            IMyFaction properOwner = _botConfig.Faction.FactionTypeToFaction();
+            if (((MyCubeGrid)Grid.GetTopMostParent()).GetOwnerFaction().Tag == properOwner.Tag) return;
+            WriteGeneral("Init", $"Trigger Faction Change: [{((MyCubeGrid)Grid.GetTopMostParent()).GetOwnerFaction().Tag}] [{properOwner.Tag}]");
+            ((MyCubeGrid)Grid.GetTopMostParent()).ChangeGridOwner(properOwner.FounderId, MyOwnershipShareModeEnum.Faction);
+            ((MyCubeGrid)Grid.GetTopMostParent()).ChangeGridOwnership(properOwner.FounderId, MyOwnershipShareModeEnum.Faction);
         }
 
         public void Update10()
@@ -63,6 +83,7 @@ namespace Eem.Thraxus.Entities.Bots
         public override void Close()
         {
             Ai.Close();
+            Ai.TriggerWar -= TriggerWar;
             Ai.OnWriteToLog -= WriteGeneral;
             base.Close();
         }

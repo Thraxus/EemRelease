@@ -6,10 +6,9 @@ using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
-using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using VRage.Game.Entity;
 using VRage.Game.ModAPI;
-using VRage.ModAPI;
 using VRageMath;
 using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
 using InGame = Sandbox.ModAPI.Ingame;
@@ -73,29 +72,12 @@ namespace Eem.Thraxus.Entities.Bots
             {
                 return;
             }
-            //WriteGeneral(nameof(TriggerAlert), $"Alert Triggered! [{assaulted.ToEntityIdFormat()}] [{blockId.ToEntityIdFormat()}] [{assaulter.ToEntityIdFormat()}]");
-            IsFleeing = true;
             Flee();
         }
 
-        //private void DamageHandler(IMySlimBlock block, MyDamageInformation damage)
-        //{
-        //    try
-        //    {
-        //        IMyPlayer damager;
-        //        ReactOnDamage(damage, out damager);
-        //        if (damager == null) return;
-        //        IsFleeing = true;
-        //        Flee();
-        //    }
-        //    catch (Exception scrap)
-        //    {
-        //        WriteGeneral("DamageHandler", scrap.Message);
-        //    }
-        //}
-
         public override void Main()
         {
+            base.Main();
             if (IsFleeing)
             {
                 Flee();
@@ -104,58 +86,68 @@ namespace Eem.Thraxus.Entities.Bots
             
             if (!_freighterSetup.FleeOnlyWhenDamaged)
             {
-                List<InGame.MyDetectedEntityInfo> enemiesAround = LookForEnemies(_freighterSetup.FleeTriggerDistance, true);
-                if (enemiesAround.Count <= 0) return;
-                IsFleeing = true;
-                Flee(enemiesAround);
-                return;
+                var targets = FindTargets(_freighterSetup.FleeTriggerDistance, true);
+                if (targets.Any())
+                {
+                    Flee(targets);
+                    return;
+                }
             }
 
             if (GridPosition.DistanceTo(_endpoint) < 100) Shutdown();
         }
 
-        private void Flee(List<InGame.MyDetectedEntityInfo> radarData = null)
+        private HashSet<IMyTimerBlock> _timers = new HashSet<IMyTimerBlock>();
+
+        private void Flee(HashSet<MyEntity> targets = null)
         {
-            if (!IsFleeing) return;
-
-            if (!FleeTimersTriggered) TriggerFleeTimers();
-
-            if (radarData == null) radarData = LookForEnemies(_freighterSetup.FleeTriggerDistance);
-            if (radarData.Count == 0) return;
-
-            InGame.MyDetectedEntityInfo closestEnemy = radarData.OrderBy(x => GridPosition.DistanceTo(x.Position)).FirstOrDefault();
-
-            if (closestEnemy.IsEmpty())
+            IsFleeing = true;
+            if (targets == null)
             {
-                WriteGeneral("Flee", "Cannot find closest hostile");
+                targets = FindTargets(_freighterSetup.FleeTriggerDistance, true);
+            }
+
+            if (targets == null)
+            {
+                IsFleeing = false;
                 return;
             }
 
-            IMyEntity enemyEntity = MyAPIGateway.Entities.GetEntityById(closestEnemy.EntityId);
-            if (enemyEntity == null)
+            MyEntity closestEntity = GetClosestEntity(targets);
+            if (closestEntity != null)
             {
-                WriteGeneral("Flee", "Cannot find enemy entity from closest hostile ID");
-                return;
+                SetFleePath(closestEntity);
             }
 
-            Vector3D fleePoint = GridPosition.InverseVectorTo(closestEnemy.Position, 100 * 1000);
+            if (!FleeTimersTriggered)
+            {
+                TriggerFleeTimers();
+            }
+        }
+
+        private void SetFleePath(MyEntity closestEntity)
+        {
+            Vector3D fleePoint = GridPosition.InverseVectorTo(closestEntity.PositionComp.GetPosition(), 100 * 1000);
             Rc.AddWaypoint(fleePoint, "Flee Point");
-            (Rc as MyRemoteControl)?.ChangeFlightMode(InGame.FlightMode.OneWay);
-            (Rc as MyRemoteControl)?.SetAutoPilotSpeedLimit(DetermineFleeSpeed());
+            Rc.FlightMode = InGame.FlightMode.OneWay;
+            Rc.SpeedLimit = DetermineFleeSpeed();
             Rc.SetAutoPilotEnabled(true);
         }
 
         private void TriggerFleeTimers()
         {
-            if (FleeTimersTriggered) return;
-
-            var fleeTimers = new List<IMyTimerBlock>();
-
-            Term.GetBlocksOfType(fleeTimers, x => x.IsFunctional && x.Enabled && (x.CustomName.Contains("Flee") || x.CustomData.Contains("Flee")));
-
-            foreach (IMyTimerBlock timer in fleeTimers) timer.Trigger();
-
             FleeTimersTriggered = true;
+
+            _timers.Clear();
+            _timers = Rc.CubeGrid.GetFatBlocks<IMyTimerBlock>().ToHashSet();
+
+            foreach (var timer in _timers)
+            {
+                if (timer.Enabled && timer.IsFunctional && (timer.CustomName.Contains("Flee") || timer.CustomData.Contains("Flee")))
+                {
+                    timer.Trigger();
+                }
+            }
         }
 
         private float DetermineFleeSpeed()
