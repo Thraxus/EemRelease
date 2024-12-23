@@ -43,8 +43,10 @@
 		</PhysicalItem>
 	</PhysicalItems>
 
+
+	
 	<Blueprints>
-		<Blueprint>
+		<!--<Blueprint>
 			<Id>
 				<TypeId>BlueprintDefinition</TypeId>
 				<SubtypeId>Credits</SubtypeId>
@@ -56,8 +58,23 @@
 			</Prerequisites>
 			<Result Amount="1" TypeId="Component" SubtypeId="Credits" />
 			<BaseProductionTimeInSeconds>666</BaseProductionTimeInSeconds>
+		</Blueprint>-->
+		<Blueprint>
+			<Id>
+				<TypeId>BlueprintDefinition</TypeId>
+				<SubtypeId>Credits</SubtypeId>
+			</Id>
+			<DisplayName>Credits</DisplayName>
+			<Icon>Textures\GUI\Icons\Credits.dds</Icon>
+			<Prerequisites>
+				<Item Amount="0.1" TypeId="Ore" SubtypeId="Organic" />
+			</Prerequisites>
+			<Results>
+				<Item Amount="1" TypeId="Component" SubtypeId="Credits" />
+			</Results>
+			<BaseProductionTimeInSeconds>666</BaseProductionTimeInSeconds>
 		</Blueprint>
-
+		
 		<Blueprint>
 			<Id>
 				<TypeId>BlueprintDefinition</TypeId>

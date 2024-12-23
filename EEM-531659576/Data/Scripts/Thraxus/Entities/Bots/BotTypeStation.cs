@@ -48,6 +48,8 @@ namespace Eem.Thraxus.Entities.Bots
 
         private void EvaluateCalmDownTimer()
         {
+            if (!_onAlert) return;
+            WriteGeneral(nameof(EvaluateCalmDownTimer), $"Evaluating Calm Down Timer: {_calmDown:D4}");
             _calmDown -= 10;
             if (_calmDown > 0) return;
             CalmDown();
@@ -110,7 +112,7 @@ namespace Eem.Thraxus.Entities.Bots
         {
             try
             {
-                WriteGeneral("CalmDown", "Calm Down activated");
+                WriteGeneral("CalmDown", $"Calm Down activated {_calmDown:D4}");
                 //_alertTriggerTime = null;
                 Default_SwitchTurretsAndRunTimers(false);
                 _onAlert = false;

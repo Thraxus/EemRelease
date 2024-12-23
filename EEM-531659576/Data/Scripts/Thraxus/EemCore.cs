@@ -12,25 +12,30 @@ namespace Eem.Thraxus
     {
         /* TODO
 
-        1) Create new Faction Types in FactionTypes.sbc for EEM specifically
-            -- Done. Was not necessary, so all code commented out.
         2) Decide how the prefabs should be distributed to this new system
         3) Spawn all prefabs in specific saves per category type (i.e. all traders in one save, cargos in another, encounters in another?)
+        
+        10) Disconnect EEM AI once the RC dies
+        11) Remove target when factions change to neutral again
+        
+        DONE
+        --------------
+        1) Create new Faction Types in FactionTypes.sbc for EEM specifically
+           -- Done. Was not necessary, so all code commented out.
         4) Remove AI init that sets factions from all RCs
-            - Can keep behavior or other items as necessary?
+           - Can keep behavior or other items as necessary?
         5) Update EEM to use the Common framework from my other mods
-            -- Done.  Also updated some bad references in files to obsolete code.
+           -- Done.  Also updated some bad references in files to obsolete code.
         6) Make bots not suck as a simple first pass, and divorce them from "AiSessionCore"
-            - NO FANCY SHIT THIS TIME AROUND ASSHOLE!!!
-            - Pull them off GameLogic of the RC into Session Logic
-            - Simplify the setup routine
-            - Fix the awful threat detection
+           - NO FANCY SHIT THIS TIME AROUND ASSHOLE!!!
+           - Pull them off GameLogic of the RC into Session Logic
+           - Simplify the setup routine
+           - Fix the awful threat detection
         7) Rename "AiSessionCore" to "EemCore"
-            -- Done.  Also moved Bots to their own area, but did not do much for logic yet.
+           -- Done.  Also moved Bots to their own area, but did not do much for logic yet.
         8) Stop Factions from caring about any faction but EEM for protections
         9) See if you can remove all reliance on the Client Code
-            - Code change done, but still should look deeper into Factions and keeping all stuff to EEM only
-
+           - Code change done, but still should look deeper into Factions and keeping all stuff to EEM only       
 
         DEV NOTES Dec 10 2024
 

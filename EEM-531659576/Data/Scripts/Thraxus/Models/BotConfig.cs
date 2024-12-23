@@ -7,7 +7,7 @@ namespace Eem.Thraxus.Models
     public class BotConfig
     {
         public readonly BotType BotType;
-        public readonly FactionType Faction;
+        public readonly FactionType Faction = FactionType.Other;
         public readonly GridPresetType PresetEnum;
 
         public readonly bool AmbushMode;

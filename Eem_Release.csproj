@@ -263,8 +263,9 @@
     <None Include="EEM-531659576\Data\CubeBlocks.sbc" />
     <None Include="EEM-531659576\Data\CubeBlocks_EEM.sbc" />
     <None Include="EEM-531659576\Data\DroneBehaviors_EEM.sbc" />
-    <None Include="EEM-531659576\Data\DronePilots_nukeguard_EEMModified.sbc" />
     <None Include="EEM-531659576\Data\EEM_LCD_Textures.sbc" />
+    <None Include="EEM-531659576\Data\EntityComponents_EEM.sbc" />
+    <None Include="EEM-531659576\Data\EntityContainers_EEM.sbc" />
     <None Include="EEM-531659576\Data\FactionIconTextures.sbc" />
     <None Include="EEM-531659576\Data\FactionNames.sbc" />
     <None Include="EEM-531659576\Data\Factions.sbc" />
@@ -622,8 +623,8 @@
     <None Include="EEM-531659576\Models\EEMCredit.mwm" />
     <None Include="EEM-531659576\Models\HiddenAntennaL.mwm" />
     <None Include="EEM-531659576\Models\HiddenAntennaS.mwm" />
+    <None Include="EEM-531659576\modinfo.sbmi.rel" />
     <None Include="EEM-531659576\modinfo.sbmi" />
-    <None Include="EEM-531659576\modinfo.sbmi.dev" />
     <None Include="EEM-531659576\VoxelMaps\ArtifactStationVoxel.vx2" />
     <None Include="EEM-531659576\VoxelMaps\asteroidfield.vx2" />
     <None Include="EEM-531659576\VoxelMaps\BariteInfectionVoxel_1.vx2" />

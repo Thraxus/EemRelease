@@ -30,6 +30,8 @@ namespace Eem.Thraxus.Common.Reporting
             sb.AppendLine();
             sb.AppendFormat("{0, -4}Drones Enabled:{1}", " ", MyAPIGateway.Session.SessionSettings.EnableDrones);
             sb.AppendLine();
+            sb.AppendFormat("{0, -4}Max Drones:{1}", " ", MyAPIGateway.Session.SessionSettings.MaxDrones);
+            sb.AppendLine();
             sb.AppendFormat("{0, -4}Scripts Enabled:{1}", " ", MyAPIGateway.Session.SessionSettings.EnableIngameScripts);
             sb.AppendLine();
             sb.AppendFormat("{0, -4}Asteroid Density:{1}", " ", MyAPIGateway.Session.SessionSettings.ProceduralDensity);

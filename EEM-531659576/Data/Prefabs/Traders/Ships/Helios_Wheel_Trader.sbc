@@ -13969,9 +13969,11 @@ $LCD Font Color: {R:255 G:112 B:0 A:255}
                         <dictionary>
                           <item>
                             <Key>74de02b3-27f9-4960-b1c4-27351f2b06d1</Key>
-                            <Value>[EEM_AI]  
-Type:Station
-Faction:ISTG</Value>
+	                          <Value>[EEM_AI]
+Type:Freighter
+FleeOnlyWhenDamaged:True
+Faction:ISTG
+	                          </Value>
                           </item>
                         </dictionary>
                       </Storage>

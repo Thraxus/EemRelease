@@ -496,11 +496,11 @@ namespace Eem.Thraxus.Entities.Factions.Models
             foreach (KeyValuePair<long, IMyFaction> leftPair in _lawfulFactionDictionary)
                 foreach (KeyValuePair<long, IMyFaction> rightPair in _lawfulFactionDictionary)
                 {
-                    if (leftPair.Key == rightPair.Key || !MyAPIGateway.Session.Factions.AreFactionsEnemies(leftPair.Key, rightPair.Key)) continue;
-                    AutoPeace(leftPair.Key, rightPair.Key);
+                    if (leftPair.Key == rightPair.Key) continue;
+                    AutoPeace(leftPair.Key, rightPair.Key, 1500);
                 }
         }
-
+         
         private void SetupPirateRelations()
         {
             foreach (KeyValuePair<long, IMyFaction> faction in MyAPIGateway.Session.Factions.Factions)
@@ -590,9 +590,9 @@ namespace Eem.Thraxus.Entities.Factions.Models
             return false;
         }
 
-        private static void AutoPeace(long fromFactionId, long toFactionId)
+        private static void AutoPeace(long fromFactionId, long toFactionId, int value = 0)
         {
-            SetRep(fromFactionId, toFactionId, false);
+            SetRep(fromFactionId, toFactionId, false, value);
             //MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.SendPeaceRequest(fromFactionId, toFactionId));
             //MyAPIGateway.Utilities.InvokeOnGameThread(() => MyAPIGateway.Session.Factions.AcceptPeace(toFactionId, fromFactionId));
             ClearPeace(fromFactionId, toFactionId);
@@ -1123,36 +1123,23 @@ namespace Eem.Thraxus.Entities.Factions.Models
         //	}
         //}
 
-        private static void SetRep(long npcFactionId, long playerFactionId, bool hostile)
+        private static void SetRep(long npcFactionId, long playerFactionId, bool hostile, int value = 0)
         {
             //WriteGeneral("SetRep", $"{npcFactionId} | {playerFactionId} | {hostile}");
-            int value;
-
-            if (hostile)
-                value = -750;
-            else
-                value = 250;
-
-            //if (!ranOnce)
-            //{
-            //	GetAllPlayerInfo();
-            //	ranOnce = true;
-            //}
-
-            //DebugRep("SetRep-Pre", npcFactionId, playerFactionId, hostile);
+            if(value == 0)
+            {
+                if (hostile)
+                    value = -750;
+                else
+                    value = 250;
+            }
 
             try
             {
-                //MyAPIGateway.Utilities.InvokeOnGameThread(() => { 
                 MyAPIGateway.Session.Factions.SetReputation(npcFactionId, playerFactionId, value);
                 MyAPIGateway.Session.Factions.SetReputation(playerFactionId, npcFactionId, value);
 
-                SetRepPlayers(npcFactionId, playerFactionId, hostile);
-                //});
-
-
-                //SetRepWithPlayers(npcFactionId, playerFactionId, hostile);
-                //DebugRep("SetRep-Post", npcFactionId, playerFactionId, hostile);
+                SetRepPlayers(npcFactionId, playerFactionId, hostile, value);
             }
             catch (Exception)
             {
@@ -1160,16 +1147,10 @@ namespace Eem.Thraxus.Entities.Factions.Models
             }
         }
 
-        private static void SetRepPlayers(long npcFactionId, long playerFactionId, bool hostile)
+        private static void SetRepPlayers(long npcFactionId, long playerFactionId, bool hostile, int value)
         {
             IMyFaction npcFaction = npcFactionId.GetFactionById();
             IMyFaction playerFaction = playerFactionId.GetFactionById();
-            int value;
-
-            if (hostile)
-                value = -750;
-            else
-                value = 250;
 
             try
             {

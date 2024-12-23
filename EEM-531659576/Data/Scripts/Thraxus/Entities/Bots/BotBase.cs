@@ -10,6 +10,7 @@ using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Cube;
+using Sandbox.Game.Entities.Interfaces;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game;
@@ -62,6 +63,7 @@ namespace Eem.Thraxus.Entities.Bots
         {
             if (grid == null) return;
             Grid = grid;
+            OverrideLogPrefix(grid.DisplayName);
             //_botDamageHandler = botDamageHandler;
             //Term = grid.GetTerminalSystem();
             Antennae = new List<IMyRadioAntenna>();
@@ -120,10 +122,11 @@ namespace Eem.Thraxus.Entities.Bots
 
         public virtual bool Init(IMyRemoteControl rc)
         {
-            Rc = rc;// ?? Term.GetBlocksOfType<IMyRemoteControl>(x => x.IsFunctional).FirstOrDefault();
+            Rc = rc;
             if (rc == null) return false;
             DroneName = $"Drone_{Grid.EntityId.ToEntityIdFormat()}";
-
+            rc.IsMainCockpit = true;
+            rc.IsWorkingChanged += block => Shutdown();
             WriteGeneral("Init", $"Bot Base Booting... [{DroneName}]");
 
             Antennae = Grid.GetFatBlocks<IMyRadioAntenna>().ToList();  //Term.GetBlocksOfType<IMyRadioAntenna>(x => x.IsFunctional);
@@ -194,6 +197,8 @@ namespace Eem.Thraxus.Entities.Bots
         {
             _filteredTargets.Clear();
 
+            if (!targets.Any()) return targets;
+
             foreach (var target in targets)
             {
                 var targetGrid = target as MyCubeGrid;
@@ -218,8 +223,9 @@ namespace Eem.Thraxus.Entities.Bots
 
                         //WriteGeneral(nameof(FilterTargets), $"Relation between [{Rc.CubeGrid.DisplayName}] [{targetGrid.DisplayName}] is [{myRelationsBetweenFactions}]");
 
-                        if (myRelationsBetweenFactions == MyRelationsBetweenFactions.Enemies)
-                            _filteredTargets.Add(targetGrid);
+                        if (myRelationsBetweenFactions != MyRelationsBetweenFactions.Enemies) continue;
+                        
+                        _filteredTargets.Add(targetGrid);
                     }
                     //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
                     continue;
@@ -319,10 +325,51 @@ namespace Eem.Thraxus.Entities.Bots
 
             foreach (var enemy in enemies)
             {
+                if (!ValidateTarget(enemy)) continue;
                 AddToDistanceSortedEnemies(enemy, reference.DistanceTo(enemy.PositionComp.GetPosition()));
             }
 
             return DistanceSortedEnemies;
+        }
+
+        private bool ValidateTarget(MyEntity entity)
+        {
+            if (entity is IMyCharacter) return true;
+
+            var grid = (IMyCubeGrid)entity;
+            var controllers = grid.GetFatBlocks<IMyShipController>().ToHashSet();
+            if (controllers.Any())
+            {
+                if (!ValidateBlockGroup(controllers)) return false;
+            }
+
+            // We know we have a controller at this point
+            HashSet<IMyPowerProducer> powerProducers = grid.GetFatBlocks<IMyPowerProducer>().ToHashSet();
+            if (powerProducers.Any())
+            {
+                if (!ValidateBlockGroup(powerProducers)) return false;
+            }
+
+            // So at this point we have power and control, but do we have weapons?
+            HashSet<IMyCubeBlock> bangBangs = grid.GetFatBlocks<IMyCubeBlock>().ToHashSet();
+            bangBangs.UnionWith(grid.GetFatBlocks<IMySmallGatlingGun>().ToHashSet());
+            bangBangs.UnionWith(grid.GetFatBlocks<IMySmallMissileLauncher>().ToHashSet());
+            if (bangBangs.Any())
+            {
+                if (!ValidateBlockGroup(bangBangs)) return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateBlockGroup<T>(HashSet<T> group)
+        {
+            foreach (var block in group)
+            {
+                if (((IMyCubeBlock)block).IsFunctional) return true;
+            }
+
+            return false;
         }
 
         protected abstract void ParseSetup();

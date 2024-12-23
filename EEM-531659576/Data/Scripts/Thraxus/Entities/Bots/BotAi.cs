@@ -58,11 +58,12 @@ namespace Eem.Thraxus.Entities.Bots
             {
                 _coordinationController.DamageController.AlertReporting.Remove(Rc.GetTopMostParent().EntityId);
                 WriteGeneral("Signing Off", $"[{BotId.ToEntityIdFormat()}]");
-                Grid.Close();
+                Close();
+                //Grid.Close();
             };
             WriteGeneral("Init", $"Initializing Ai for: [{BotId.ToEntityIdFormat()}]");
             Ai.Init(Rc);
-            
+            Rc.IsMainCockpit = true;
             _coordinationController.ActionQueues.AfterSimActionQueue.Add(1, EnsureOwnership);
         }
 

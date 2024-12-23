@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Character;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game;
 using VRage.Game.Entity;
@@ -143,12 +145,24 @@ namespace Eem.Thraxus.Entities.Bots
             FindAFucker(_fighterSetup.AiActivationDistance);
         }
 
+        private void Lurk()
+        {
+            MyVisualScriptLogicProvider.DroneTargetLoseCurrent(Rc.Name);
+            MyVisualScriptLogicProvider.DroneWaypointClear(Rc.Name);
+            MyVisualScriptLogicProvider.AutopilotClearWaypoints(Rc.Name);
+            Rc.ClearWaypoints();
+        }
+
         private void FindAFucker(float distance)
         {
             _targets.Clear();
             _targets = FindTargets(distance);
 
-            if (_targets.Count == 0) return;
+            if (_targets.Count == 0)
+            {
+                Lurk();
+                return;
+            }
 
             if (_targets.Count > 1)
             {
@@ -159,37 +173,73 @@ namespace Eem.Thraxus.Entities.Bots
             FightAFucker(_targets.First());
         }
 
-        private int _counter;
-
-        private Vector3D _oldWaypoint;
+        private int _counter = 0;
 
         private void FightAFucker(MyEntity fucker)
         {
-            if (_oldWaypoint == default(Vector3D))
-            {
-                _oldWaypoint = Rc.Position;
-            }
+            //var myRemote = (MyRemoteControl)Rc;
+            //myRemote.TargetData = new MyCharacter.MyTargetData
+            //{
+
+            //};
+
 
             MyVisualScriptLogicProvider.DroneTargetLoseCurrent(Rc.Name);
             MyVisualScriptLogicProvider.DroneSetTarget(Rc.Name, fucker);
             MyVisualScriptLogicProvider.DroneSetSpeedLimit(Rc.Name, Rc.GetSpeedCap());
-            Rc.SetCollisionAvoidance(false);
-            Rc.FlightMode = InGame.FlightMode.OneWay;
-            //Rc.SpeedLimit = Rc.GetSpeedCap();
-            Rc.DebugDraw();
-            Rc.SpeedLimit = 1000;
-            //Statics.AddGpsLocation($"{Rc.CubeGrid.DisplayName} -- {++_counter:D2}", Rc.CurrentWaypoint.Coords);
-            if (Rc.CurrentWaypoint.Coords == _oldWaypoint) return;
+            //myRemote.ClearWaypoints();
+            //myRemote.AddWaypoint(fucker.PositionComp.GetPosition(), "Target");
 
-            WriteGeneral(nameof(FightAFucker), $"GPS Location Changed - " +
-                                               $"{_counter:D2} {Rc.GetShipSpeed()} " +
-                                               $"{_oldWaypoint.DistanceTo(Rc.CurrentWaypoint.Coords)} " +
-                                               $"{Rc.CurrentWaypoint.Coords.DistanceTo(Rc.CubeGrid.PositionComp.GetPosition())}");
-
-            _oldWaypoint = Rc.CurrentWaypoint.Coords;
+            if (_counter++ % 5 != 0) return;
+            UpdateGps(fucker);
 
             //Rc.ClearWaypoints();
             //Rc.AddWaypoint(fucker.PositionComp.GetPosition(), "Boom!");
+        }
+
+        //public Vector3D CalculateIntercept(MyEntity fucker)
+        //{
+        //    return CalculateIntercept(Grid.PositionComp.GetPosition(), GridVelocity, fucker.PositionComp.GetPosition(), fucker.Physics.LinearVelocity);
+        //}
+
+        public static double MeasureDistance(Vector3D source, Vector3D target)
+        {
+            Vector3D difference = target - source;
+            return difference.Length();
+        }
+
+        public static Vector3D SetPositionAwayFromTarget(Vector3D source, Vector3D target, float distance = 300f)
+        {
+            Vector3D direction = source - target;
+            direction.Normalize();
+            return target + (direction * distance);
+        }
+        
+        public Vector3D CalculateIntercept(Vector3D position1, Vector3D velocity1, Vector3D position2, Vector3D velocity2)
+        {
+            Vector3D relativePosition = position2 - position1;
+            Vector3D relativeVelocity = velocity2 - velocity1;
+            var t = Vector3D.Dot(relativePosition, relativeVelocity) / relativeVelocity.LengthSquared();
+            return position1 + velocity1 * t;
+        }
+
+        private void UpdateGps(MyEntity fucker)
+        {
+            if (!KeenAiLoaded || fucker == null) return;
+
+            var myRemote = (MyRemoteControl)Rc;
+            myRemote.ClearWaypoints();
+            MyVisualScriptLogicProvider.AutopilotClearWaypoints(Rc.Name);
+
+            if (MeasureDistance(GridPosition, fucker.PositionComp.GetPosition()) < 300)
+            {
+                SetPositionAwayFromTarget(GridPosition, fucker.PositionComp.GetPosition());
+                return;
+            }
+            
+            var targetWaypoint = CalculateIntercept(fucker.PositionComp.GetPosition(), fucker.Physics.LinearVelocity, Grid.PositionComp.GetPosition(), GridVelocity);
+            myRemote.AddWaypoint(targetWaypoint, "Target");
+            Statics.AddGpsLocation("Boom!", targetWaypoint);
         }
 
         private MyEntity GetMostDangerous(Dictionary<int, HashSet<MyEntity>> enemiesSortedByRange)
@@ -217,6 +267,7 @@ namespace Eem.Thraxus.Entities.Bots
             foreach (var enemy in group.Value)
             {
                 double tempDangerIndex = (10 - group.Key) * GetDangerIndex(enemy);
+                WriteGeneral("GetMostDangerous", $"DI:[{tempDangerIndex:##.##}] {enemy.DisplayName ?? "Fred"}");
                 if (tempDangerIndex < _mostDangerous.DangerIndex) continue;
                 _mostDangerous.DangerIndex = tempDangerIndex;
                 _mostDangerous.MyEntity = enemy;
