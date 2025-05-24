@@ -64,7 +64,7 @@ namespace Eem.Thraxus.Controllers
             _damageEventList.Add(damageEvent);
             _damageEventList.ApplyAdditions();
             _actionQueues.AfterSimActionQueue.Add(0, () => ProcessDamageQueue(damageEvent));
-            WriteGeneral("AddToDamageQueue", $"{damageEvent}");
+            //WriteGeneral("AddToDamageQueue", $"{damageEvent}");
         }
 
         private void ProcessDamageQueue(DamageEvent damageEvent)

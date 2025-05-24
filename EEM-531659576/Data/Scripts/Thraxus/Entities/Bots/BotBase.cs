@@ -9,18 +9,14 @@ using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
-using Sandbox.Game.Entities.Cube;
-using Sandbox.Game.Entities.Interfaces;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRageMath;
-using IMyGridTerminalSystem = Sandbox.ModAPI.IMyGridTerminalSystem;
 using IMyRadioAntenna = Sandbox.ModAPI.IMyRadioAntenna;
 using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
-using IMyThrust = Sandbox.ModAPI.IMyThrust;
 
 namespace Eem.Thraxus.Entities.Bots
 {
@@ -199,52 +195,62 @@ namespace Eem.Thraxus.Entities.Bots
 
             if (!targets.Any()) return targets;
 
-            foreach (var target in targets)
+            try
             {
-                var targetGrid = target as MyCubeGrid;
-                if (targetGrid != null)
+                foreach (var target in targets)
                 {
-                    IMyFaction targetGridFaction = targetGrid.GetOwnerFaction();
-                    if (targetGridFaction != null)
+                    var targetGrid = target as MyCubeGrid;
+                    if (targetGrid != null)
                     {
-
-                        if (Rc.GetOwnerFaction().FactionId == targetGridFaction.FactionId)
+                        IMyFaction targetGridFaction = targetGrid.GetOwnerFaction();
+                        if (targetGridFaction != null)
                         {
-                            continue;
-                        }
 
-                        if (includeNeutrals)
-                        {
+                            if (Rc.GetOwnerFaction().FactionId == targetGridFaction.FactionId)
+                            {
+                                continue;
+                            }
+
+                            if (includeNeutrals)
+                            {
+                                _filteredTargets.Add(targetGrid);
+                                continue;
+                            }
+
+                            MyRelationsBetweenFactions myRelationsBetweenFactions = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(Rc.GetOwnerFaction().FactionId, targetGridFaction.FactionId);
+
+                            //WriteGeneral(nameof(FilterTargets), $"Relation between [{Rc.CubeGrid.DisplayName}] [{targetGrid.DisplayName}] is [{myRelationsBetweenFactions}]");
+
+                            if (myRelationsBetweenFactions != MyRelationsBetweenFactions.Enemies) continue;
+
                             _filteredTargets.Add(targetGrid);
-                            continue;
                         }
 
-                        MyRelationsBetweenFactions myRelationsBetweenFactions = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(Rc.GetOwnerFaction().FactionId, targetGridFaction.FactionId);
+                        //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
+                        continue;
+                    }
 
-                        //WriteGeneral(nameof(FilterTargets), $"Relation between [{Rc.CubeGrid.DisplayName}] [{targetGrid.DisplayName}] is [{myRelationsBetweenFactions}]");
+                    var targetCharacter = target as IMyCharacter;
+                    if (targetCharacter == null) continue;
 
-                        if (myRelationsBetweenFactions != MyRelationsBetweenFactions.Enemies) continue;
-                        
-                        _filteredTargets.Add(targetGrid);
+                    if (includeNeutrals)
+                    {
+                        _filteredTargets.Add(target);
+                        continue;
+                    }
+
+                    if (Statics.GetRelationBetweenGridAndCharacterUsingEntity(Rc.CubeGrid, target) == FactionRelationship.Enemies)
+                    {
+                        _filteredTargets.Add(target);
                     }
                     //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
-                    continue;
                 }
-
-                var targetCharacter = target as IMyCharacter;
-                if (targetCharacter == null) continue;
-
-                if (includeNeutrals)
-                {
-                    _filteredTargets.Add(target);
-                    continue;
-                }
-
-                if (Statics.GetRelationBetweenGridAndCharacterUsingEntity(Rc.CubeGrid, target) == FactionRelationship.Enemies)
-                {
-                    _filteredTargets.Add(target);
-                }
-                //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
+            }
+            catch (Exception e)
+            {
+                WriteGeneral(nameof(FilterTargets),$"This error shouldn't hurt anything, but tell Thraxus if you see it: \n {e}");
+                _filteredTargets.Clear();
+                return _filteredTargets;
             }
 
             return _filteredTargets;

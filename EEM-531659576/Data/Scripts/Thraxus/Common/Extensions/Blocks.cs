@@ -1,5 +1,4 @@
-﻿using Eem.Thraxus.Extensions;
-using Sandbox.Game.Entities;
+﻿using Sandbox.Game.Entities;
 using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Common.Extensions

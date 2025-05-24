@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Enums;
 using Eem.Thraxus.Extensions;
 using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
-using Sandbox.Game.Entities.Character;
 using SpaceEngineers.Game.ModAPI;
 using VRage.Game;
 using VRage.Game.Entity;
@@ -18,7 +16,6 @@ using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
 using IMySmallGatlingGun = Sandbox.ModAPI.IMySmallGatlingGun;
 using IMySmallMissileLauncher = Sandbox.ModAPI.IMySmallMissileLauncher;
 using IMyTerminalBlock = Sandbox.ModAPI.IMyTerminalBlock;
-using InGame = Sandbox.ModAPI.Ingame;
 
 
 namespace Eem.Thraxus.Entities.Bots
@@ -236,10 +233,15 @@ namespace Eem.Thraxus.Entities.Bots
                 SetPositionAwayFromTarget(GridPosition, fucker.PositionComp.GetPosition());
                 return;
             }
-            
+
+            if (fucker.Physics?.LinearVelocity == null || Grid.PositionComp?.GetPosition() == null)
+            {
+                return;
+            }
+
             var targetWaypoint = CalculateIntercept(fucker.PositionComp.GetPosition(), fucker.Physics.LinearVelocity, Grid.PositionComp.GetPosition(), GridVelocity);
             myRemote.AddWaypoint(targetWaypoint, "Target");
-            Statics.AddGpsLocation("Boom!", targetWaypoint);
+            //Statics.AddGpsLocation("Boom!", targetWaypoint);
         }
 
         private MyEntity GetMostDangerous(Dictionary<int, HashSet<MyEntity>> enemiesSortedByRange)
@@ -267,7 +269,7 @@ namespace Eem.Thraxus.Entities.Bots
             foreach (var enemy in group.Value)
             {
                 double tempDangerIndex = (10 - group.Key) * GetDangerIndex(enemy);
-                WriteGeneral("GetMostDangerous", $"DI:[{tempDangerIndex:##.##}] {enemy.DisplayName ?? "Fred"}");
+                //WriteGeneral("GetMostDangerous", $"DI:[{tempDangerIndex:##.##}] {enemy.DisplayName ?? "Fred"}");
                 if (tempDangerIndex < _mostDangerous.DangerIndex) continue;
                 _mostDangerous.DangerIndex = tempDangerIndex;
                 _mostDangerous.MyEntity = enemy;

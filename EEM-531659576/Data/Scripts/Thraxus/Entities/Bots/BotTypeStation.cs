@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using Eem.Thraxus.Enums;
-using Eem.Thraxus.Extensions;
-using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
