@@ -1,43 +1,30 @@
 <?xml version="1.0"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <GlobalEvents>
+	<GlobalEvents>
 
-	  <!-- VANILLA -->
-	  <!--
-	  <GlobalEvent>
-		  <Id>
-			  <TypeId>EventDefinition</TypeId>
-			  <SubtypeId>SpawnCargoShip</SubtypeId>
-		  </Id>
-		  <MinActivationTimeMs>600000</MinActivationTimeMs>
-		  <MaxActivationTimeMs>3600000</MaxActivationTimeMs>
-		  <FirstActivationTimeMs>900000</FirstActivationTimeMs>
-	  </GlobalEvent>
-		-->
+		<!-- DEBUG -->
 
-	  <!-- DEBUG -->
-	  
 		<!--<GlobalEvent>
 			<Id>
 				<TypeId>EventDefinition</TypeId>
 				<SubtypeId>SpawnCargoShip</SubtypeId>
 			</Id>
-			<MinActivationTimeMs>100000</MinActivationTimeMs>
-			<MaxActivationTimeMs>100000</MaxActivationTimeMs>
-			<FirstActivationTimeMs>50000</FirstActivationTimeMs>
+			<MinActivationTimeMs>500</MinActivationTimeMs>
+			<MaxActivationTimeMs>500</MaxActivationTimeMs>
+			<FirstActivationTimeMs>500</FirstActivationTimeMs>
 		</GlobalEvent>-->
-	  
 
-	  <!-- PRODUCTION -->
+
+		<!-- PRODUCTION -->
 		<GlobalEvent>
-      <Id>
-        <TypeId>EventDefinition</TypeId>
-        <SubtypeId>SpawnCargoShip</SubtypeId>
-      </Id>
-      <MinActivationTimeMs>300000</MinActivationTimeMs>
-      <MaxActivationTimeMs>450000</MaxActivationTimeMs>
-      <FirstActivationTimeMs>90000</FirstActivationTimeMs>
-    </GlobalEvent>
+			<Id>
+				<TypeId>EventDefinition</TypeId>
+				<SubtypeId>SpawnCargoShip</SubtypeId>
+			</Id>
+			<MinActivationTimeMs>300000</MinActivationTimeMs>
+			<MaxActivationTimeMs>450000</MaxActivationTimeMs>
+			<FirstActivationTimeMs>90000</FirstActivationTimeMs>
+		</GlobalEvent>
 
-  </GlobalEvents>
+	</GlobalEvents>
 </Definitions>

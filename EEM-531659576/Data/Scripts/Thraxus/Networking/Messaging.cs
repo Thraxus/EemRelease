@@ -8,116 +8,124 @@ using VRage.Game.ModAPI;
 
 namespace Eem.Thraxus.Networking
 {
-	public static class Messaging
-	{
-		private static List<IMyPlayer> _playerCache = new List<IMyPlayer>();
+    public static class Messaging
+    {
+        private static List<IMyPlayer> _playerCache = new List<IMyPlayer>();
 
-		public static void Register()
-		{
-			MyAPIGateway.Multiplayer.RegisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
-			MyAPIGateway.Utilities.MessageEntered += ChatMessageHandler;
-		}
+        public static void Register()
+        {
+            //MyAPIGateway.Multiplayer.RegisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Multiplayer.RegisterSecureMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Utilities.MessageEntered += ChatMessageHandler;
+        }
 
-		public static void Unregister()
-		{
-			MyAPIGateway.Multiplayer.UnregisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
-			lock (_playerCache)
-			{
-				_playerCache = null;
-			}
-			MyAPIGateway.Utilities.MessageEntered -= ChatMessageHandler;
-		}
+        public static void Unregister()
+        {
+            //MyAPIGateway.Multiplayer.UnregisterMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            MyAPIGateway.Multiplayer.UnregisterSecureMessageHandler(Constants.EemCoreNetworkId, MessageHandler);
+            lock (_playerCache)
+            {
+                _playerCache = null;
+            }
 
-		private static void MessageHandler(byte[] bytes)
-		{
-			MessageBase m = MyAPIGateway.Utilities.SerializeFromBinary<MessageBase>(bytes);
-			if(Constants.IsServer)
-				m.HandleServer();
-			else
-				m.HandleClient();
-		}
+            MyAPIGateway.Utilities.MessageEntered -= ChatMessageHandler;
+        }
 
-		// ReSharper disable once RedundantAssignment
-		private static void ChatMessageHandler(string message, ref bool sendToOthers)
-		{
-			if (!message.StartsWith(ChatMessages.EemChatCommandPrefix))
-			{
-				sendToOthers = true;
-				return;
-			}
-			sendToOthers = false;
-			ChatMessages.HandleChatMessage(message);
-		}
+        private static void MessageHandler(ushort id, byte[] message, ulong recipient, bool reliable = true)
+        {
+            if (Constants.EemCoreNetworkId != id) return;
+            MessageHandler(message);
+        }
 
-		public static void SendMessageTo(ulong steamId, MessageBase message, bool reliable = true)
-		{
-			byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
-			if(!reliable && d.Length >= 1000)
-				throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
-			MyAPIGateway.Multiplayer.SendMessageTo(Constants.EemCoreNetworkId, d, steamId, reliable);
-		}
+        private static void MessageHandler(byte[] bytes)
+        {
+            var m = MyAPIGateway.Utilities.SerializeFromBinary<MessageBase>(bytes);
+            if (Constants.IsServer)
+                m.HandleServer();
+            else
+                m.HandleClient();
+        }
 
-		public static void SendMessageToServer(MessageBase message, bool reliable = true)
-		{
-			byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
-			if (!reliable && d.Length >= 1000)
-				throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
-			MyAPIGateway.Multiplayer.SendMessageToServer(Constants.EemCoreNetworkId, d, reliable);
-		}
+        private static void ChatMessageHandler(string message, ref bool sendToOthers)
+        {
+            if (!message.StartsWith(ChatMessages.EemChatCommandPrefix)) return;
 
-		public static void SendMessageToClients(MessageBase message, bool reliable = true, params ulong[] ignore)
-		{
-			byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
-			if (!reliable && d.Length >= 1000)
-				throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
+            ChatMessages.HandleChatMessage(message);
+        }
 
-			lock (_playerCache)
-			{
-				MyAPIGateway.Players.GetPlayers(_playerCache);
-				foreach (IMyPlayer player in _playerCache)
-				{
-					ulong steamId = player.SteamUserId;
-					if (ignore?.Contains(steamId) == true)
-						continue;
-					MyAPIGateway.Multiplayer.SendMessageTo(Constants.EemCoreNetworkId, d, steamId, reliable);
-				}
-				_playerCache.Clear();
-			}
-		}
+        public static void SendMessageTo(ulong steamId, MessageBase message, bool reliable = true)
+        {
+            byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
+            if (!reliable && d.Length >= 1000)
+                throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
+            MyAPIGateway.Multiplayer.SendMessageTo(Constants.EemCoreNetworkId, d, steamId, reliable);
+        }
 
-		/// <summary>
-		/// Sends a message to a specific player
-		/// </summary>
-		/// <param name="message">The message to send</param>
-		/// <param name="duration">Optional. How long to display the message for</param>
-		/// <param name="color">Optional.  Color of the sender's name in chat - remember to check it against MyFontEnum else, errors</param>
-		public static void ShowLocalNotification(string message, int duration = Constants.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
-		{
-			MyVisualScriptLogicProvider.ShowNotification(message, duration, color);
-		}
+        public static void SendMessageToServer(MessageBase message, bool reliable = true)
+        {
+            byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
+            if (!reliable && d.Length >= 1000)
+                throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
+            MyAPIGateway.Multiplayer.SendMessageToServer(Constants.EemCoreNetworkId, d, reliable);
+        }
 
-		/// <summary>
-		/// Sends a message to the entire server
-		/// </summary>
-		/// <param name="message">Message to send</param>
-		/// <param name="duration">Optional. How long to display the message for</param>
-		/// <param name="color">Optional. Color to send the message in</param>
-		public static void SendMessageToServer(string message, int duration = Constants.DefaultServerMessageDisplayTime, string color = MyFontEnum.Red)
-		{
-			MyVisualScriptLogicProvider.ShowNotificationToAll(message, duration, color);
-		}
+        public static void SendMessageToClients(MessageBase message, bool reliable = true, params ulong[] ignore)
+        {
+            byte[] d = MyAPIGateway.Utilities.SerializeToBinary(message);
+            if (!reliable && d.Length >= 1000)
+                throw new Exception($"Attempting to send unreliable message beyond message size limits! Message type: {message.GetType()} Content: {string.Join(" ", d)}");
 
-		/// <summary>
-		/// Sends a message to a specific player
-		/// </summary>
-		/// <param name="message">The message to send</param>
-		/// <param name="sender">Who is sending the message</param>
-		/// <param name="recipient">Player to receive the message</param>
-		/// <param name="color">Optional.  Color of the sender's name in chat</param>
-		public static void SendMessageToPlayer(string message, string sender, long recipient, string color = MyFontEnum.Blue)
-		{
-			//if(MyAPIGateway.Multiplayer.Players.GetPlayerById(recipient).Character.IsPlayer)
-			MyVisualScriptLogicProvider.SendChatMessage(message, sender, recipient, color);
-		}
-	}
+            lock (_playerCache)
+            {
+                MyAPIGateway.Players.GetPlayers(_playerCache);
+                foreach (IMyPlayer player in _playerCache)
+                {
+                    ulong steamId = player.SteamUserId;
+                    if (ignore?.Contains(steamId) == true)
+                        continue;
+                    MyAPIGateway.Multiplayer.SendMessageTo(Constants.EemCoreNetworkId, d, steamId, reliable);
+                }
+
+                _playerCache.Clear();
+            }
+        }
+
+        /// <summary>
+        ///     Sends a message to a specific player
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="duration">Optional. How long to display the message for</param>
+        /// <param name="color">
+        ///     Optional.  Color of the sender's name in chat - remember to check it against MyFontEnum else,
+        ///     errors
+        /// </param>
+        public static void ShowLocalNotification(string message, int duration = Constants.DefaultLocalMessageDisplayTime, string color = MyFontEnum.Green)
+        {
+            MyVisualScriptLogicProvider.ShowNotification(message, duration, color);
+        }
+
+        /// <summary>
+        ///     Sends a message to the entire server
+        /// </summary>
+        /// <param name="message">Message to send</param>
+        /// <param name="duration">Optional. How long to display the message for</param>
+        /// <param name="color">Optional. Color to send the message in</param>
+        public static void SendMessageToServer(string message, int duration = Constants.DefaultServerMessageDisplayTime, string color = MyFontEnum.Red)
+        {
+            MyVisualScriptLogicProvider.ShowNotificationToAll(message, duration, color);
+        }
+
+        /// <summary>
+        ///     Sends a message to a specific player
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <param name="sender">Who is sending the message</param>
+        /// <param name="recipient">Player to receive the message</param>
+        /// <param name="color">Optional.  Color of the sender's name in chat</param>
+        public static void SendMessageToPlayer(string message, string sender, long recipient, string color = MyFontEnum.Blue)
+        {
+            //if(MyAPIGateway.Multiplayer.Players.GetPlayerById(recipient).Character.IsPlayer)
+            MyVisualScriptLogicProvider.SendChatMessage(message, sender, recipient, color);
+        }
+    }
 }

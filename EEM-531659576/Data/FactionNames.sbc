@@ -1,0 +1,171 @@
+﻿<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <FactionNames>
+		
+		<!--<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_AMPH_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_AMPH</Type>
+			<Names>
+				<string>Amphion Mining and Militia Corporation</string>
+			</Names>
+			<Tags>
+				<string>AMPH</string>
+			</Tags>
+		</FactionName>
+
+		<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_CIVL_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_CIVL</Type>
+			<Names>
+				<string>Civilians</string>
+			</Names>
+			<Tags>
+				<string>CIVL</string>
+			</Tags>
+		</FactionName>
+
+		<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_EXMC_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_EXMC</Type>
+			<Names>
+				<string>Xtraerrestrial Mining Corporation</string>
+			</Names>
+			<Tags>
+				<string>EXMC</string>
+			</Tags>
+		</FactionName>
+
+	    <FactionName>
+		    <Id>
+			    <TypeId>FactionNameDefinition</TypeId>
+			    <SubtypeId>EEM_Faction_HS_NameDef</SubtypeId>
+		    </Id>
+		    <LanguageId>English</LanguageId>
+		    <Type>EEM_Faction_HS</Type>
+		    <Names>
+			    <string>Hyperion Systems</string>
+		    </Names>
+		    <Tags>
+			    <string>HS</string>
+		    </Tags>
+	    </FactionName>
+
+	    <FactionName>
+		    <Id>
+			    <TypeId>FactionNameDefinition</TypeId>
+			    <SubtypeId>EEM_Faction_IMDC_NameDef</SubtypeId>
+		    </Id>
+		    <LanguageId>English</LanguageId>
+		    <Type>EEM_Faction_IMDC</Type>
+		    <Names>
+			    <string>Interstellar Mining and Defense Corporation</string>
+		    </Names>
+		    <Tags>
+			    <string>IMDC</string>
+		    </Tags>
+	    </FactionName>
+
+	    <FactionName>
+		    <Id>
+			    <TypeId>FactionNameDefinition</TypeId>
+			    <SubtypeId>EEM_Faction_ISTG_NameDef</SubtypeId>
+		    </Id>
+		    <LanguageId>English</LanguageId>
+		    <Type>EEM_Faction_ISTG</Type>
+		    <Names>
+			    <string>Interstellar Trade Guild</string>
+		    </Names>
+		    <Tags>
+			    <string>ISTG</string>
+		    </Tags>
+	    </FactionName>
+
+		<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_KUSS_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_KUSS</Type>
+			<Names>
+				<string>KUS Shipyards</string>
+			</Names>
+			<Tags>
+				<string>KUSS</string>
+			</Tags>
+		</FactionName>
+
+		<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_MA-I_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_MA-I</Type>
+			<Names>
+				<string>Mahriane Industries</string>
+			</Names>
+			<Tags>
+				<string>MA-I</string>
+			</Tags>
+		</FactionName>
+
+	    <FactionName>
+		    <Id>
+			    <TypeId>FactionNameDefinition</TypeId>
+			    <SubtypeId>EEM_Faction_MMEC_NameDef</SubtypeId>
+		    </Id>
+		    <LanguageId>English</LanguageId>
+		    <Type>EEM_Faction_MMEC</Type>
+		    <Names>
+			    <string>Medved's Mineral Exchange Consortium</string>
+		    </Names>
+		    <Tags>
+			    <string>MMEC</string>
+		    </Tags>
+	    </FactionName>
+
+	    <FactionName>
+		    <Id>
+			    <TypeId>FactionNameDefinition</TypeId>
+			    <SubtypeId>EEM_Faction_SEPD_NameDef</SubtypeId>
+		    </Id>
+		    <LanguageId>English</LanguageId>
+		    <Type>EEM_Faction_SEPD</Type>
+		    <Names>
+			    <string>Stellar Exploration Police Force</string>
+		    </Names>
+		    <Tags>
+			    <string>SEPD</string>
+		    </Tags>
+	    </FactionName>
+
+		<FactionName>
+			<Id>
+				<TypeId>FactionNameDefinition</TypeId>
+				<SubtypeId>EEM_Faction_UCMF_NameDef</SubtypeId>
+			</Id>
+			<LanguageId>English</LanguageId>
+			<Type>EEM_Faction_UCMF</Type>
+			<Names>
+				<string>United Colonies Military Force</string>
+			</Names>
+			<Tags>
+				<string>UCMF</string>
+			</Tags>
+		</FactionName>-->		
+		
+    </FactionNames>
+</Definitions>

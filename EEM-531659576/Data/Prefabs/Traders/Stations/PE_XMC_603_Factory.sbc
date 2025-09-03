@@ -28301,10 +28301,10 @@ void DisplayOnScreen()
 		info += Tab + _menuText[15] + Empty + credit + Empty + CurrencyUnit + errorPrefix + error + errorSuffix + Blank;
 
 		// Display _info on Screen
-		_tradeDisplay.WritePublicText(info);
+		_tradeDisplay.WriteText(info);
 
 		// Ensure that screen is updating (SE Bug avoidance)
-		_tradeDisplay.ShowPublicTextOnScreen();
+		
 	}
 	else
 	{
@@ -28313,8 +28313,8 @@ void DisplayOnScreen()
 	if (_debugger != null)
 	{
 		// Ensure that screen is updating (SE Bug avoidance)
-		_debugger.WritePublicText(GetDebugInfo);
-		_debugger.ShowPublicTextOnScreen();
+		_debugger.WriteText(GetDebugInfo);
+		
 	}
 	if (_tutorialDisplay != null)
 	{
@@ -28327,8 +28327,8 @@ void DisplayOnScreen()
 		}
 		info += Blank;
 
-		_tutorialDisplay.WritePublicText(info + DoManualScreen(true));
-		_tutorialDisplay.ShowPublicTextOnScreen();
+		_tutorialDisplay.WriteText(info + DoManualScreen(true));
+		
 	}
 }
 
@@ -29559,7 +29559,7 @@ void LoadExternalConfigData()
 	Echo("Loading External Config Data");
 	if (_config != null)
 	{
-		string[] data = _config.GetPublicText().Split(ConfigSeperator);
+		string[] data = _config.GetText().Split(ConfigSeperator);
 		for (int i = 0; i &lt; data.Length; i++)
 		{
 			if (data[i].Contains(ConfigKeyPlatformId))
@@ -29725,8 +29725,8 @@ void Debug(string msg, bool updateInstant)
 	{
 		if (_debugger != null)
 		{
-			_debugger.WritePublicText(GetDebugInfo);
-			_debugger.ShowPublicTextOnScreen();
+			_debugger.WriteText(GetDebugInfo);
+			
 		}
 	}
 }
@@ -33290,10 +33290,10 @@ void DisplayOnScreen()
 		info += Tab + _menuText[15] + Empty + credit + Empty + CurrencyUnit + errorPrefix + error + errorSuffix + Blank;
 
 		// Display _info on Screen
-		_tradeDisplay.WritePublicText(info);
+		_tradeDisplay.WriteText(info);
 
 		// Ensure that screen is updating (SE Bug avoidance)
-		_tradeDisplay.ShowPublicTextOnScreen();
+		
 	}
 	else
 	{
@@ -33302,8 +33302,8 @@ void DisplayOnScreen()
 	if (_debugger != null)
 	{
 		// Ensure that screen is updating (SE Bug avoidance)
-		_debugger.WritePublicText(GetDebugInfo);
-		_debugger.ShowPublicTextOnScreen();
+		_debugger.WriteText(GetDebugInfo);
+		
 	}
 	if (_tutorialDisplay != null)
 	{
@@ -33316,8 +33316,8 @@ void DisplayOnScreen()
 		}
 		info += Blank;
 
-		_tutorialDisplay.WritePublicText(info + DoManualScreen(true));
-		_tutorialDisplay.ShowPublicTextOnScreen();
+		_tutorialDisplay.WriteText(info + DoManualScreen(true));
+		
 	}
 }
 
@@ -34548,7 +34548,7 @@ void LoadExternalConfigData()
 	Echo("Loading External Config Data");
 	if (_config != null)
 	{
-		string[] data = _config.GetPublicText().Split(ConfigSeperator);
+		string[] data = _config.GetText().Split(ConfigSeperator);
 		for (int i = 0; i &lt; data.Length; i++)
 		{
 			if (data[i].Contains(ConfigKeyPlatformId))
@@ -34714,8 +34714,8 @@ void Debug(string msg, bool updateInstant)
 	{
 		if (_debugger != null)
 		{
-			_debugger.WritePublicText(GetDebugInfo);
-			_debugger.ShowPublicTextOnScreen();
+			_debugger.WriteText(GetDebugInfo);
+			
 		}
 	}
 }
@@ -42102,10 +42102,10 @@ void DisplayOnScreen()
 		info += Tab + _menuText[15] + Empty + credit + Empty + CurrencyUnit + errorPrefix + error + errorSuffix + Blank;
 
 		// Display _info on Screen
-		_tradeDisplay.WritePublicText(info);
+		_tradeDisplay.WriteText(info);
 
 		// Ensure that screen is updating (SE Bug avoidance)
-		_tradeDisplay.ShowPublicTextOnScreen();
+		
 	}
 	else
 	{
@@ -42114,8 +42114,8 @@ void DisplayOnScreen()
 	if (_debugger != null)
 	{
 		// Ensure that screen is updating (SE Bug avoidance)
-		_debugger.WritePublicText(GetDebugInfo);
-		_debugger.ShowPublicTextOnScreen();
+		_debugger.WriteText(GetDebugInfo);
+		
 	}
 	if (_tutorialDisplay != null)
 	{
@@ -42128,8 +42128,8 @@ void DisplayOnScreen()
 		}
 		info += Blank;
 
-		_tutorialDisplay.WritePublicText(info + DoManualScreen(true));
-		_tutorialDisplay.ShowPublicTextOnScreen();
+		_tutorialDisplay.WriteText(info + DoManualScreen(true));
+		
 	}
 }
 
@@ -43360,7 +43360,7 @@ void LoadExternalConfigData()
 	Echo("Loading External Config Data");
 	if (_config != null)
 	{
-		string[] data = _config.GetPublicText().Split(ConfigSeperator);
+		string[] data = _config.GetText().Split(ConfigSeperator);
 		for (int i = 0; i &lt; data.Length; i++)
 		{
 			if (data[i].Contains(ConfigKeyPlatformId))
@@ -43526,8 +43526,8 @@ void Debug(string msg, bool updateInstant)
 	{
 		if (_debugger != null)
 		{
-			_debugger.WritePublicText(GetDebugInfo);
-			_debugger.ShowPublicTextOnScreen();
+			_debugger.WriteText(GetDebugInfo);
+			
 		}
 	}
 }

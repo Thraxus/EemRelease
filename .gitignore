@@ -262,3 +262,5 @@ __pycache__/
 
 # Space Engineers serialized prefabs
 *.sbcb*
+/EEM-531659576.rar
+/bfg-1.14.0.jar
