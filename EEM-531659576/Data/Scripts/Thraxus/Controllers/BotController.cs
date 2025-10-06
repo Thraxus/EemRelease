@@ -38,7 +38,17 @@ namespace Eem.Thraxus.Controllers
 
         public void Update10()
         {
-            foreach (BotAi botAi in _botAis) botAi.Update10();
+            for (int i = _botAis.Count - 1; i >= 0; i--)
+            {
+                var botAi = _botAis[i];
+                if (botAi.IsPendingRemoval)
+                {
+                    _botAis.RemoveAt(i);
+                    botAi.OnWriteToLog -= WriteGeneral;
+                    continue;
+                }
+                botAi.Update10();
+            }
         }
 
         private void OnEntityAdd(IMyEntity myEntity)
@@ -66,8 +76,7 @@ namespace Eem.Thraxus.Controllers
             newBot.OnClose += close =>
             {
                 WriteGeneral("BotClose", "Closing Bot");
-                OnWriteToLog -= WriteGeneral;
-                _botAis.Remove(newBot);
+                newBot.IsPendingRemoval = true;
             };
             
             newBot.Init();

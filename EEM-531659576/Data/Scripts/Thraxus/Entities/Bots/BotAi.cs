@@ -33,8 +33,10 @@ namespace Eem.Thraxus.Entities.Bots
 
         private BotBase Ai { get; set; }
 
-        private long BotId;
+        private long _botId;
 
+        public bool IsPendingRemoval = false;
+        
         public void Init()
         {
             WriteGeneral("Init", "Fabricating New Bot...");
@@ -46,8 +48,8 @@ namespace Eem.Thraxus.Entities.Bots
                 return;
             }
 
-            BotId = Rc.EntityId;
-            WriteGeneral("Init", $"Bot Id: [{BotId.ToEntityIdFormat()}]");
+            _botId = Rc.EntityId;
+            WriteGeneral("Init", $"Bot Id: [{_botId.ToEntityIdFormat()}]");
 
             Ai.OnWriteToLog += WriteGeneral;
             Ai.TriggerWar += (assaulted, assaulter) => _coordinationController.FactionController.TriggerWar(assaulted, assaulter);
@@ -57,11 +59,10 @@ namespace Eem.Thraxus.Entities.Bots
             Ai.OnClose += close =>
             {
                 _coordinationController.DamageController.AlertReporting.Remove(Rc.GetTopMostParent().EntityId);
-                WriteGeneral("Signing Off", $"[{BotId.ToEntityIdFormat()}]");
+                WriteGeneral("Signing Off", $"[{_botId.ToEntityIdFormat()}]");
                 Close();
-                //Grid.Close();
             };
-            WriteGeneral("Init", $"Initializing Ai for: [{BotId.ToEntityIdFormat()}]");
+            WriteGeneral("Init", $"Initializing Ai for: [{_botId.ToEntityIdFormat()}]");
             Ai.Init(Rc);
             Rc.IsMainCockpit = true;
             _coordinationController.ActionQueues.AfterSimActionQueue.Add(1, EnsureOwnership);
@@ -96,7 +97,6 @@ namespace Eem.Thraxus.Entities.Bots
             {
                 case BotType.Fighter:
                     WriteGeneral("FabricateBot", "New Bot: Fighter");
-                    //bot = new BotTypeFighter(grid, _botConfig, _botDamageHandler);
                     bot = new BotTypeFighter(grid, _botConfig);
                     break;
                 case BotType.Freighter:

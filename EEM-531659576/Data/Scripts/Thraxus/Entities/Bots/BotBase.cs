@@ -22,36 +22,20 @@ namespace Eem.Thraxus.Entities.Bots
 {
     public abstract class BotBase : BaseLoggingClass
     {
-        //public delegate void HOnBlockPlaced(IMySlimBlock block);
-
-        //public delegate void OnDamageTaken(IMySlimBlock damagedBlock, MyDamageInformation damage);
-
         public abstract void TriggerAlert();
-
-        //private readonly BotDamageHandler _botDamageHandler;
-
-        //protected readonly IMyGridTerminalSystem Term;
 
         private IMyFaction _ownerFaction;
 
         protected bool BotOperable;
 
         protected bool Closed;
-
-        //protected List<IMyThrust> SpeedModdedThrusters = new List<IMyThrust>();
-
+        
         protected readonly BotConfig BotConfig;
         
         public List<IMyRadioAntenna> Antennae { get; protected set; }
         public List<IMyTimerBlock> Timers { get; protected set; }
 
         public event Action<long, long> TriggerWar;
-
-        //protected event OnDamageTaken OnDamaged;
-
-        //protected event HOnBlockPlaced OnBlockPlaced;
-
-        //protected event Action Alert;
 
         private readonly ActionQueue _actionQueue = new ActionQueue();
 
@@ -60,8 +44,6 @@ namespace Eem.Thraxus.Entities.Bots
             if (grid == null) return;
             Grid = grid;
             OverrideLogPrefix(grid.DisplayName);
-            //_botDamageHandler = botDamageHandler;
-            //Term = grid.GetTerminalSystem();
             Antennae = new List<IMyRadioAntenna>();
             BotConfig = botConfig;
         }
@@ -85,20 +67,7 @@ namespace Eem.Thraxus.Entities.Bots
 
         protected string DroneNameProvider => $"Drone_{Rc.EntityId}";
 
-        //protected bool HasModdedThrusters => SpeedModdedThrusters.Count > 0;
-
         protected string DroneName;
-
-        //public string DroneName
-        //{
-        //    get { return Rc.Name; }
-        //    protected set
-        //    {
-        //        IMyEntity entity = Rc;
-        //        entity.Name = value;
-        //        MyAPIGateway.Entities.SetEntityName(entity);
-        //    }
-        //}
 
         protected bool GridOperable
         {
@@ -125,16 +94,11 @@ namespace Eem.Thraxus.Entities.Bots
             rc.IsWorkingChanged += block => Shutdown();
             WriteGeneral("Init", $"Bot Base Booting... [{DroneName}]");
 
-            Antennae = Grid.GetFatBlocks<IMyRadioAntenna>().ToList();  //Term.GetBlocksOfType<IMyRadioAntenna>(x => x.IsFunctional);
+            Antennae = Grid.GetFatBlocks<IMyRadioAntenna>().ToList();
             Timers = Grid.GetFatBlocks<IMyTimerBlock>().ToList();
 
             ParseSetup();
-
-            //bool hasSetup = ParseSetup();
-            //if (!hasSetup) return false;
-
-            //_botDamageHandler.AddDamageHandler(Grid, (block, damage) => { OnDamaged?.Invoke(block, damage); });
-
+            
             Grid.OnBlockAdded += BlockPlacedHandler;
 
             _ownerFaction = Grid.GetOwnerFaction();
@@ -176,13 +140,6 @@ namespace Eem.Thraxus.Entities.Bots
             HashSet<MyEntity> detectTopMostEntitiesInSphere = Statics.DetectTopMostEntitiesInSphere(Rc.GetPosition(), distance).ToHashSet();
 
             HashSet<MyEntity> filteredTargets = FilterTargets(detectTopMostEntitiesInSphere, includeNeutrals);
-            //foreach (var target in filteredTargets)
-            //{
-            //    WriteGeneral(nameof(FindTargets), $"[{target.EntityId.ToEntityIdFormat()}] {target.GetType()}");
-            //    WriteGeneral(nameof(FindTargets), $"[{Rc?.CubeGrid?.Speed}] [{Rc?.SpeedLimit}]");
-            //    WriteGeneral(nameof(FindTargets), $"[{MyVisualScriptLogicProvider.DroneGetSpeedLimit(Rc?.Name)}] [{MyVisualScriptLogicProvider.DroneGetCurrentAIBehavior(Rc?.Name)}]");
-            //    WriteGeneral(nameof(FindTargets), $"[{MyVisualScriptLogicProvider.DroneGetCurrentAIBehavior(Rc?.CubeGrid?.GetTopMostParent()?.Name)}] [{MyVisualScriptLogicProvider.DroneHasAI(Rc?.Name)}]");
-            //}
 
             return filteredTargets;
         }
@@ -205,7 +162,6 @@ namespace Eem.Thraxus.Entities.Bots
                         IMyFaction targetGridFaction = targetGrid.GetOwnerFaction();
                         if (targetGridFaction != null)
                         {
-
                             if (Rc.GetOwnerFaction().FactionId == targetGridFaction.FactionId)
                             {
                                 continue;
@@ -219,14 +175,10 @@ namespace Eem.Thraxus.Entities.Bots
 
                             MyRelationsBetweenFactions myRelationsBetweenFactions = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(Rc.GetOwnerFaction().FactionId, targetGridFaction.FactionId);
 
-                            //WriteGeneral(nameof(FilterTargets), $"Relation between [{Rc.CubeGrid.DisplayName}] [{targetGrid.DisplayName}] is [{myRelationsBetweenFactions}]");
-
                             if (myRelationsBetweenFactions != MyRelationsBetweenFactions.Enemies) continue;
 
                             _filteredTargets.Add(targetGrid);
                         }
-
-                        //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
                         continue;
                     }
 
@@ -243,12 +195,11 @@ namespace Eem.Thraxus.Entities.Bots
                     {
                         _filteredTargets.Add(target);
                     }
-                    //WriteGeneral(nameof(FilterTargetsToHostileOnly), $"{target.GetType()}");
                 }
             }
             catch (Exception e)
             {
-                WriteGeneral(nameof(FilterTargets),$"This error shouldn't hurt anything, but tell Thraxus if you see it: \n {e}");
+                //WriteGeneral(nameof(FilterTargets),$"This error shouldn't hurt anything, but tell Thraxus if you see it: \n {e}");
                 _filteredTargets.Clear();
                 return _filteredTargets;
             }
@@ -384,8 +335,6 @@ namespace Eem.Thraxus.Entities.Bots
         {
             Closed = true;
             Grid.OnBlockAdded -= BlockPlacedHandler;
-            //if (HasModdedThrusters) DeMultiplyThrusters();
-            //_botDamageHandler.RemoveDamageHandler(Grid);
             Close();
         }
     }
