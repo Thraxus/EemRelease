@@ -2,6 +2,7 @@
 using Eem.Thraxus.Common.Enums;
 using Eem.Thraxus.Common.Reporting;
 using Eem.Thraxus.Common.Utilities.Tools.Logging;
+using Eem.Thraxus.Helpers;
 using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
@@ -10,25 +11,19 @@ namespace Eem.Thraxus.Common.BaseClasses
 {
     public abstract class BaseSessionComp : MySessionComponentBase
     {
-        private bool _earlySetupComplete;
-
-        private Log _generalLog;
-        private static Log _staticLog;
-
-        private bool _lateSetupComplete;
-
-        private bool _superEarlySetupComplete;
-
-        internal long TickCounter;
         protected abstract string CompName { get; }
 
         protected abstract CompType Type { get; }
 
         protected abstract MyUpdateOrder Schedule { get; }
 
-        protected abstract bool IncludeStaticLog { get; }
+        private Log _generalLog;
 
-        protected abstract bool SkipReporting { get; }
+        private bool _superEarlySetupComplete;
+        private bool _earlySetupComplete;
+        private bool _lateSetupComplete;
+
+        internal long TickCounter;
 
         private bool BlockUpdates()
         {
@@ -84,7 +79,7 @@ namespace Eem.Thraxus.Common.BaseClasses
         {
             _superEarlySetupComplete = true;
             _generalLog = new Log(CompName);
-            if (IncludeStaticLog) _staticLog = new Log($"[Static]{CompName}");
+            if (ModContext.ModItem.PublishedFileId == 0) Constants.DebugMode = true;
             WriteGeneral("SuperEarlySetup", $"Waking up.  Is Server: {References.IsServer}");
         }
 
@@ -100,8 +95,6 @@ namespace Eem.Thraxus.Common.BaseClasses
 
         protected void BasicInformationDump(StringBuilder append = null)
         {
-            if (SkipReporting) return;
-
             var sb = new StringBuilder();
             new GameSettings().Report(sb);
             new InstalledMods().Report(sb);
@@ -231,7 +224,6 @@ namespace Eem.Thraxus.Common.BaseClasses
             if (BlockUpdates()) return;
             WriteGeneral("Unload", "Retired.");
             _generalLog?.Close();
-            _staticLog?.Close();
         }
 
         /// <summary>
@@ -271,11 +263,6 @@ namespace Eem.Thraxus.Common.BaseClasses
         public void WriteGeneral(string caller = "", string message = "")
         {
             _generalLog?.WriteGeneral($"{CompName}: {caller}", message);
-        }
-
-        public static void WriteStatic(string caller = "", string message = "")
-        {
-            _staticLog?.WriteGeneral($"{caller}", message);
         }
     }
 }

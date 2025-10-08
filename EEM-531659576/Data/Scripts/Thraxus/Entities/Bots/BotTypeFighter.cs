@@ -244,37 +244,70 @@ namespace Eem.Thraxus.Entities.Bots
             //Statics.AddGpsLocation("Boom!", targetWaypoint);
         }
 
-        private MyEntity GetMostDangerous(Dictionary<int, HashSet<MyEntity>> enemiesSortedByRange)
+        private readonly DangerAssessment _mostDangerous = new DangerAssessment();
+
+        private MyEntity GetMostDangerous(HashSet<MyEntity>[] enemiesSortedByRange)
         {
             _mostDangerous.DangerIndex = 0;
             _mostDangerous.MyEntity = null;
+            int rangeGroup = 0;
             
             foreach (var enemyGroup in enemiesSortedByRange)
             {
-                GetMostDangerous(enemyGroup);
+                GetMostDangerous(enemyGroup, rangeGroup++);
             }
-            
+
             return _mostDangerous.MyEntity;
         }
 
-        private readonly DangerAssessment _mostDangerous = new DangerAssessment();
-        
-        private void GetMostDangerous(KeyValuePair<int, HashSet<MyEntity>> group)
+        private void GetMostDangerous(HashSet<MyEntity> enemiesSortedByRange, int rangeGroup)
         {
-            if (group.Value.Count == 0)
+            if (enemiesSortedByRange.Count == 0)
             {
                 return;
             }
 
-            foreach (var enemy in group.Value)
+            foreach (var enemy in enemiesSortedByRange)
             {
-                double tempDangerIndex = (10 - group.Key) * GetDangerIndex(enemy);
+                double tempDangerIndex = (10 - rangeGroup) * GetDangerIndex(enemy);
                 //WriteGeneral("GetMostDangerous", $"DI:[{tempDangerIndex:##.##}] {enemy.DisplayName ?? "Fred"}");
                 if (tempDangerIndex < _mostDangerous.DangerIndex) continue;
                 _mostDangerous.DangerIndex = tempDangerIndex;
                 _mostDangerous.MyEntity = enemy;
             }
         }
+
+        //private MyEntity GetMostDangerous(Dictionary<int, HashSet<MyEntity>> enemiesSortedByRange)
+        //{
+        //    _mostDangerous.DangerIndex = 0;
+        //    _mostDangerous.MyEntity = null;
+            
+        //    foreach (var enemyGroup in enemiesSortedByRange)
+        //    {
+        //        GetMostDangerous(enemyGroup);
+        //    }
+            
+        //    return _mostDangerous.MyEntity;
+        //}
+
+        //private readonly DangerAssessment _mostDangerous = new DangerAssessment();
+        
+        //private void GetMostDangerous(KeyValuePair<int, HashSet<MyEntity>> group)
+        //{
+        //    if (group.Value.Count == 0)
+        //    {
+        //        return;
+        //    }
+
+        //    foreach (var enemy in group.Value)
+        //    {
+        //        double tempDangerIndex = (10 - group.Key) * GetDangerIndex(enemy);
+        //        //WriteGeneral("GetMostDangerous", $"DI:[{tempDangerIndex:##.##}] {enemy.DisplayName ?? "Fred"}");
+        //        if (tempDangerIndex < _mostDangerous.DangerIndex) continue;
+        //        _mostDangerous.DangerIndex = tempDangerIndex;
+        //        _mostDangerous.MyEntity = enemy;
+        //    }
+        //}
 
         private HashSet<IMyTerminalBlock> _dangerIndexTerminalBlocks = new HashSet<IMyTerminalBlock>();
 

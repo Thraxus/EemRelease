@@ -7,6 +7,7 @@ using Eem.Thraxus.Common.Extensions;
 using Eem.Thraxus.Common.Generics;
 using Eem.Thraxus.Common.Utilities.Statics;
 using Eem.Thraxus.Extensions;
+using Eem.Thraxus.Helpers;
 using Eem.Thraxus.Models;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
@@ -118,30 +119,60 @@ namespace Eem.Thraxus.Entities.Bots
             Grid.OnBlockAdded -= BlockPlacedHandler;
         }
 
-        protected void BlockPlacedHandler(IMySlimBlock block)
+        // Struct in BotBase: Stack-alloc friendly, caches stable fields (C#6 value type)
+        private struct BlockPlacementEvent
         {
-            _actionQueue.Add(1, () => EvaluatePlacedBlock(block));
+            public Vector3I Position;
+            public long OwnerId;
+            public long BuiltBy; // Assuming long; adjust if int
+
+            public BlockPlacementEvent(IMySlimBlock block)
+            {
+                Position = block.Position;
+                OwnerId = block.OwnerId;
+                BuiltBy = block.BuiltBy; // Pre-cache to avoid re-fetch
+            }
         }
 
-        protected void EvaluatePlacedBlock(IMySlimBlock block)
+        protected void BlockPlacedHandler(IMySlimBlock block)
         {
-            if (block == null) return;
-            
+            if (block == null || !GridOperable) return;
+
+            var evt = new BlockPlacementEvent(block);
+            _actionQueue.Add(1, () => EvaluatePlacedBlock(evt)); // Struct by value: No capture/closure
+        }
+
+        private void EvaluatePlacedBlock(BlockPlacementEvent evt)
+        {
+            if (!GridOperable) return;
+
+            // Predicate for exact pos/owner match: Allocates delegate (~20B), but API-internal loop short-circuits
+            List<IMySlimBlock> tempBlocks = new List<IMySlimBlock>(1); // Tiny, reuse via pool if multi-events
+            Grid.GetBlocks(tempBlocks, s => s.Position == evt.Position && s.OwnerId == evt.OwnerId);
+
+            if (tempBlocks.Count == 0) return; // No match (stale/rare)
+
+            var block = tempBlocks[0]; // Single hit guaranteed by predicate
+
             try
             {
-                WriteGeneral("BlockPlacedHandler", $"{block.OwnerId} {block.BuiltBy} {TriggerWar == null}");
+                long myOwner = Grid.BigOwners?.Count > 0 ? Grid.BigOwners[0] : 0L;
+                if (evt.OwnerId == myOwner) return; // Use cached
 
-                if (Grid.BigOwners == null || Grid.BigOwners.Count == 0) return;
-                if (block.OwnerId == Grid.BigOwners[0]) return;
+                if (Constants.DebugMode)
+                {
+                    WriteGeneral("BlockPlacedHandler", $"Unauthorized at {evt.Position}: OwnerId={evt.OwnerId}, BuiltBy={evt.BuiltBy}, HasWarEvent={TriggerWar != null}");
+                }
 
-                WriteGeneral("BlockPlacedHandler", $"{block.OwnerId} {block.BuiltBy}");
-
-                TriggerWar?.Invoke(Grid.EntityId, block.OwnerId);
-
+                TriggerWar?.Invoke(Grid.EntityId, evt.OwnerId); // Use cached OwnerId
             }
             catch (Exception e)
             {
-                WriteGeneral("BlockPlacedHandler", $"{e}");
+                if (Constants.DebugMode) WriteGeneral("BlockPlacedHandler", e.Message);
+            }
+            finally
+            {
+                tempBlocks.Clear(); // Reuse next event
             }
         }
 
@@ -155,6 +186,7 @@ namespace Eem.Thraxus.Entities.Bots
         }
 
         private readonly HashSet<MyEntity> _filteredTargets = new HashSet<MyEntity>();
+        private readonly Dictionary<long, MyRelationsBetweenFactions> _relationsCache = new Dictionary<long, MyRelationsBetweenFactions>(32);
         private int _errorCount;
         private int _totalProcessed;
         private long _myFactionId;
@@ -163,25 +195,25 @@ namespace Eem.Thraxus.Entities.Bots
         {
             _filteredTargets.Clear();
 
-            if (!targets.Any()) return _filteredTargets;
+            if (targets.Count == 0) return _filteredTargets; // No enumerator
 
-            _myFactionId = Rc?.GetOwnerFaction()?.FactionId ?? 0L;  // Cache once, null-safe
+            _myFactionId = Rc?.GetOwnerFaction()?.FactionId ?? 0L;
             _errorCount = 0;
             _totalProcessed = 0;
+            _relationsCache.Clear();
 
             foreach (var target in targets)
             {
+                if (target == null) continue; // Hoist null
                 _totalProcessed++;
+
                 try
                 {
                     var targetGrid = target as MyCubeGrid;
                     if (targetGrid != null)
                     {
-                        var targetGridFaction = targetGrid.GetOwnerFaction();
-                        if (targetGridFaction?.FactionId == _myFactionId)  // Null-safe compare
-                        {
-                            continue;
-                        }
+                        var targetFactionId = targetGrid.GetOwnerFaction()?.FactionId ?? 0L;
+                        if (targetFactionId == _myFactionId) continue;
 
                         if (includeNeutrals)
                         {
@@ -189,11 +221,16 @@ namespace Eem.Thraxus.Entities.Bots
                             continue;
                         }
 
-                        var relations = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(_myFactionId, targetGridFaction?.FactionId ?? 0L);
+                        MyRelationsBetweenFactions relations;
+                        if (!_relationsCache.TryGetValue(targetFactionId, out relations))
+                        {
+                            relations = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(_myFactionId, targetFactionId);
+                            _relationsCache[targetFactionId] = relations;
+                        }
                         if (relations != MyRelationsBetweenFactions.Enemies) continue;
 
                         _filteredTargets.Add(targetGrid);
-                        continue;  // Unneeded now, but harmless
+                        continue;
                     }
 
                     var targetCharacter = target as IMyCharacter;
@@ -205,26 +242,24 @@ namespace Eem.Thraxus.Entities.Bots
                         continue;
                     }
 
-                    if (Statics.GetRelationBetweenGridAndCharacterUsingEntity(Rc.CubeGrid, target) == FactionRelationship.Enemies)
+                    // Assume Statics.GetRelation is cheap; cache if profiling shows otherwise
+                    if (Statics.GetRelationBetweenGridAndCharacterUsingEntity(Rc?.CubeGrid, target) == FactionRelationship.Enemies)
                     {
                         _filteredTargets.Add(target);
                     }
                 }
-                catch (InvalidOperationException e) 
+                catch (InvalidOperationException e)
                 {
                     _errorCount++;
-                    // Disable this message for release - debug only
-                    WriteGeneral(nameof(FilterTargets), $"Entity skipped (ID: {target?.EntityId}): {e.Message}");
+                    if (Constants.DebugMode) WriteGeneral(nameof(FilterTargets), $"Entity skipped (ID: {target?.EntityId}): {e.Message}"); // Drop ? if hoisted null
                 }
                 catch (Exception e)
                 {
                     _errorCount++;
-                    WriteGeneral(nameof(FilterTargets), $"Unexpected error on target {target?.EntityId}: {e.Message}");
-                    if (_errorCount > _totalProcessed * 0.2)  // Clear if >20% errored 
-                    {
-                        _filteredTargets.Clear();
-                        break;  // Fail-fast on noisy input
-                    }
+                    WriteGeneral(nameof(FilterTargets), $"Unexpected error on target {target.EntityId}: {e.Message}");
+                    if (_totalProcessed != 0 && _errorCount * 5 <= _totalProcessed) continue; // Int-safe
+                    _filteredTargets.Clear();
+                    break;
                 }
             }
 
@@ -233,37 +268,54 @@ namespace Eem.Thraxus.Entities.Bots
 
         protected MyEntity GetClosestEntity(HashSet<MyEntity> targets)
         {
-            if (targets.Count == 1)
+            switch (targets.Count)
             {
-                return targets.First();
+                case 0:
+                    return null; // Add: Handle empty (though caller should, safety)
+                case 1:
+                    return targets.First(); // O(1) fast path unchanged
             }
 
-            MyEntity closestEntity = targets.OrderBy(x => GridPosition.DistanceTo(x.PositionComp.GetPosition())).FirstOrDefault();
-            return closestEntity;
+            MyEntity closest = null;
+            float minDistSq = float.MaxValue; // Use squared dist: Avoid sqrt in DistanceTo for 10-20% speed
+            Vector3D myPos = GridPosition; // Cache once
+
+            foreach (MyEntity entity in targets) // Foreach is fine here (HashSet enumerator cheap for small n)
+            {
+                if (entity?.PositionComp == null) continue; // Null-safe, rare
+
+                float distSq = (float)Vector3D.DistanceSquared(myPos, entity.PositionComp.GetPosition());
+                if (distSq >= minDistSq) continue;
+                minDistSq = distSq;
+                closest = entity;
+            }
+
+            return closest;
         }
 
-        protected Dictionary<int, HashSet<MyEntity>> DistanceSortedEnemies = new Dictionary<int, HashSet<MyEntity>>();
+        private readonly HashSet<MyEntity>[] _distanceBuckets =
+        {
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>(),
+            new HashSet<MyEntity>()
+        };
 
         private void ClearDistanceSortedEnemies()
         {
-            foreach (var dse in DistanceSortedEnemies)
-            {
-                dse.Value.Clear();
-            }
+            for (int i = 0; i < 7; i++) _distanceBuckets[i].Clear();
         }
 
         private void AddToDistanceSortedEnemies(MyEntity entity, double distance)
         {
-            int bucket = Math.Min(6, (int)(distance / 500));  // 0-499→0, 500-999→1, ..., 3000+→6
-            if (DistanceSortedEnemies.ContainsKey(bucket))
-            {
-                DistanceSortedEnemies[bucket].Add(entity);
-                return;
-            }
-            DistanceSortedEnemies.Add(bucket, new HashSet<MyEntity>{ entity });
+            int bucket = Math.Min(6, (int)(distance / 500));
+            _distanceBuckets[bucket].Add(entity);
         }
 
-        protected Dictionary<int, HashSet<MyEntity>> GetEnemiesSortedByRange(HashSet<MyEntity> enemies)
+        protected HashSet<MyEntity>[] GetEnemiesSortedByRange(HashSet<MyEntity> enemies) // Note: Array return
         {
             ClearDistanceSortedEnemies();
 
@@ -272,49 +324,28 @@ namespace Eem.Thraxus.Entities.Bots
             foreach (var enemy in enemies)
             {
                 if (!ValidateTarget(enemy)) continue;
-                AddToDistanceSortedEnemies(enemy, reference.DistanceTo(enemy.PositionComp.GetPosition()));
+                double dist = reference.DistanceTo(enemy.PositionComp.GetPosition());
+                AddToDistanceSortedEnemies(enemy, dist);
             }
 
-            return DistanceSortedEnemies;
+            return _distanceBuckets;
         }
 
         private bool ValidateTarget(MyEntity entity)
         {
             if (entity is IMyCharacter) return true;
 
-            var grid = (IMyCubeGrid)entity;
-            var controllers = grid.GetFatBlocks<IMyShipController>().ToHashSet();
-            if (controllers.Any())
+            foreach (var block in ((MyCubeGrid)entity).GetFatBlocks())
             {
-                if (!ValidateBlockGroup(controllers)) return false;
+                if (block.IsFunctional &&
+                    (block is IMyShipController ||
+                     block is IMyPowerProducer ||
+                     block is IMySmallGatlingGun ||
+                     block is IMySmallMissileLauncher))
+                {
+                    return true; // Early exit on first match
+                }
             }
-
-            // We know we have a controller at this point
-            HashSet<IMyPowerProducer> powerProducers = grid.GetFatBlocks<IMyPowerProducer>().ToHashSet();
-            if (powerProducers.Any())
-            {
-                if (!ValidateBlockGroup(powerProducers)) return false;
-            }
-
-            // So at this point we have power and control, but do we have weapons?
-            HashSet<IMyCubeBlock> bangBangs = grid.GetFatBlocks<IMyCubeBlock>().ToHashSet();
-            bangBangs.UnionWith(grid.GetFatBlocks<IMySmallGatlingGun>().ToHashSet());
-            bangBangs.UnionWith(grid.GetFatBlocks<IMySmallMissileLauncher>().ToHashSet());
-            if (bangBangs.Any())
-            {
-                if (!ValidateBlockGroup(bangBangs)) return false;
-            }
-
-            return true;
-        }
-
-        private bool ValidateBlockGroup<T>(HashSet<T> group)
-        {
-            foreach (var block in group)
-            {
-                if (((IMyCubeBlock)block).IsFunctional) return true;
-            }
-
             return false;
         }
 

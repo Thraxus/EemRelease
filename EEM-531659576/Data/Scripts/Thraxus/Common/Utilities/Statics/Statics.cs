@@ -238,6 +238,28 @@ namespace Eem.Thraxus.Common.Utilities.Statics
         {
             var player = character.GetPlayerFromEntity();
             if (player == null) return FactionRelationship.Friends; // this should never happen
+
+            if (npcGrid.BigOwners.Count == 0) return FactionRelationship.Friends; // Early: No owners = neutral/friendly
+            long npcGridOwner = npcGrid.BigOwners[0]; // Manual index: Faster than LINQ for small n
+
+            IMyFaction npcFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(npcGridOwner);
+            if (npcFaction == null) return FactionRelationship.Friends; // Null-safe fallback
+
+            // Optional cache for hot paths: static Dictionary<long, int> _repCache = new Dictionary<long, int>(64);
+            // long key = player.IdentityId * 1000000L + npcFaction.FactionId; // Composite key
+            // if (_repCache.TryGetValue(key, out int cachedRep)) return cachedRep >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
+            // int rep = MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(player.IdentityId, npcFaction.FactionId);
+            // _repCache[key] = rep;
+            // return rep >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
+
+            int rep = MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(player.IdentityId, npcFaction.FactionId);
+            return rep >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
+        }
+
+        public static FactionRelationship GetRelationBetweenGridAndCharacterUsingEntity2(IMyCubeGrid npcGrid, IMyEntity character)
+        {
+            var player = character.GetPlayerFromEntity();
+            if (player == null) return FactionRelationship.Friends; // this should never happen
             long npcGridOwner = npcGrid.BigOwners.FirstOrDefault();
             IMyFaction npcFaction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(npcGridOwner);
             return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(player.IdentityId, npcFaction.FactionId) >= -500 ? FactionRelationship.Friends : FactionRelationship.Enemies;
