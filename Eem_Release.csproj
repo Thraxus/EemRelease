@@ -642,8 +642,10 @@
     <None Include="EEM-531659576\VoxelMaps\wi_reno.vx2" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\BaseClasses\BaseEntity.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Extensions\Blocks.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Extensions\Players.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Interfaces\IHaveSubscriptions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Controllers\CoordinationController.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Enums\FactionType.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Enums\GridPresetType.cs" />
@@ -705,6 +707,7 @@
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Common\Utilities\Tools\Profiler.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Debug\InformationExporter.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Models\DangerAssessment.cs" />
+    <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Models\PotentialTarget.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Utilities\EntityByDistanceSorter.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\GridExtensions.cs" />
     <Compile Include="EEM-531659576\Data\Scripts\Thraxus\Extensions\VectorExtensions.cs" />

@@ -20,7 +20,7 @@ using IMyRemoteControl = Sandbox.ModAPI.IMyRemoteControl;
 
 namespace Eem.Thraxus.Entities.Bots
 {
-    public abstract class BotBase : BaseLoggingClass
+    public abstract class BotBase : BaseEntity
     {
         public abstract void TriggerAlert();
 
@@ -43,7 +43,7 @@ namespace Eem.Thraxus.Entities.Bots
         {
             if (grid == null) return;
             Grid = grid;
-            OverrideLogPrefix(grid.DisplayName);
+            SetLogPrefix(grid.DisplayName);
             Antennae = new List<IMyRadioAntenna>();
             BotConfig = botConfig;
         }
@@ -98,14 +98,24 @@ namespace Eem.Thraxus.Entities.Bots
             Timers = Grid.GetFatBlocks<IMyTimerBlock>().ToList();
 
             ParseSetup();
-            
-            Grid.OnBlockAdded += BlockPlacedHandler;
+
+            SubscriptionHandler();
 
             _ownerFaction = Grid.GetOwnerFaction();
 
             BotOperable = true;
 
             return true;
+        }
+
+        public override void Subscribe()
+        {
+            Grid.OnBlockAdded += BlockPlacedHandler;
+        }
+
+        public override void UnSubscribe()
+        {
+            Grid.OnBlockAdded -= BlockPlacedHandler;
         }
 
         protected void BlockPlacedHandler(IMySlimBlock block)
@@ -145,41 +155,45 @@ namespace Eem.Thraxus.Entities.Bots
         }
 
         private readonly HashSet<MyEntity> _filteredTargets = new HashSet<MyEntity>();
+        private int _errorCount;
+        private int _totalProcessed;
+        private long _myFactionId;
 
         protected HashSet<MyEntity> FilterTargets(HashSet<MyEntity> targets, bool includeNeutrals)
         {
             _filteredTargets.Clear();
 
-            if (!targets.Any()) return targets;
+            if (!targets.Any()) return _filteredTargets;
 
-            try
+            _myFactionId = Rc?.GetOwnerFaction()?.FactionId ?? 0L;  // Cache once, null-safe
+            _errorCount = 0;
+            _totalProcessed = 0;
+
+            foreach (var target in targets)
             {
-                foreach (var target in targets)
+                _totalProcessed++;
+                try
                 {
                     var targetGrid = target as MyCubeGrid;
                     if (targetGrid != null)
                     {
-                        IMyFaction targetGridFaction = targetGrid.GetOwnerFaction();
-                        if (targetGridFaction != null)
+                        var targetGridFaction = targetGrid.GetOwnerFaction();
+                        if (targetGridFaction?.FactionId == _myFactionId)  // Null-safe compare
                         {
-                            if (Rc.GetOwnerFaction().FactionId == targetGridFaction.FactionId)
-                            {
-                                continue;
-                            }
-
-                            if (includeNeutrals)
-                            {
-                                _filteredTargets.Add(targetGrid);
-                                continue;
-                            }
-
-                            MyRelationsBetweenFactions myRelationsBetweenFactions = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(Rc.GetOwnerFaction().FactionId, targetGridFaction.FactionId);
-
-                            if (myRelationsBetweenFactions != MyRelationsBetweenFactions.Enemies) continue;
-
-                            _filteredTargets.Add(targetGrid);
+                            continue;
                         }
-                        continue;
+
+                        if (includeNeutrals)
+                        {
+                            _filteredTargets.Add(targetGrid);
+                            continue;
+                        }
+
+                        var relations = MyAPIGateway.Session.Factions.GetRelationBetweenFactions(_myFactionId, targetGridFaction?.FactionId ?? 0L);
+                        if (relations != MyRelationsBetweenFactions.Enemies) continue;
+
+                        _filteredTargets.Add(targetGrid);
+                        continue;  // Unneeded now, but harmless
                     }
 
                     var targetCharacter = target as IMyCharacter;
@@ -196,12 +210,22 @@ namespace Eem.Thraxus.Entities.Bots
                         _filteredTargets.Add(target);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                //WriteGeneral(nameof(FilterTargets),$"This error shouldn't hurt anything, but tell Thraxus if you see it: \n {e}");
-                _filteredTargets.Clear();
-                return _filteredTargets;
+                catch (InvalidOperationException e) 
+                {
+                    _errorCount++;
+                    // Disable this message for release - debug only
+                    WriteGeneral(nameof(FilterTargets), $"Entity skipped (ID: {target?.EntityId}): {e.Message}");
+                }
+                catch (Exception e)
+                {
+                    _errorCount++;
+                    WriteGeneral(nameof(FilterTargets), $"Unexpected error on target {target?.EntityId}: {e.Message}");
+                    if (_errorCount > _totalProcessed * 0.2)  // Clear if >20% errored 
+                    {
+                        _filteredTargets.Clear();
+                        break;  // Fail-fast on noisy input
+                    }
+                }
             }
 
             return _filteredTargets;
@@ -218,16 +242,7 @@ namespace Eem.Thraxus.Entities.Bots
             return closestEntity;
         }
 
-        protected Dictionary<int, HashSet<MyEntity>> DistanceSortedEnemies = new Dictionary<int, HashSet<MyEntity>>()
-        {
-            { 0, new HashSet<MyEntity>() },
-            { 1, new HashSet<MyEntity>() },
-            { 2, new HashSet<MyEntity>() },
-            { 3, new HashSet<MyEntity>() },
-            { 4, new HashSet<MyEntity>() },
-            { 5, new HashSet<MyEntity>() },
-            { 6, new HashSet<MyEntity>() }
-        };
+        protected Dictionary<int, HashSet<MyEntity>> DistanceSortedEnemies = new Dictionary<int, HashSet<MyEntity>>();
 
         private void ClearDistanceSortedEnemies()
         {
@@ -239,39 +254,13 @@ namespace Eem.Thraxus.Entities.Bots
 
         private void AddToDistanceSortedEnemies(MyEntity entity, double distance)
         {
-            if (distance <= 499)
+            int bucket = Math.Min(6, (int)(distance / 500));  // 0-499→0, 500-999→1, ..., 3000+→6
+            if (DistanceSortedEnemies.ContainsKey(bucket))
             {
-                DistanceSortedEnemies[0].Add(entity);
+                DistanceSortedEnemies[bucket].Add(entity);
                 return;
             }
-            if (distance <= 999)
-            {
-                DistanceSortedEnemies[1].Add(entity);
-                return;
-            }
-            if (distance <= 1499)
-            {
-                DistanceSortedEnemies[2].Add(entity);
-                return;
-            }
-            if (distance <= 1999)
-            {
-                DistanceSortedEnemies[3].Add(entity);
-                return;
-            }
-            if (distance <= 2499)
-            {
-                DistanceSortedEnemies[4].Add(entity);
-                return;
-            }
-
-            if (distance <= 2999)
-            {
-                DistanceSortedEnemies[5].Add(entity);
-                return;
-            }
-
-            DistanceSortedEnemies[6].Add(entity);
+            DistanceSortedEnemies.Add(bucket, new HashSet<MyEntity>{ entity });
         }
 
         protected Dictionary<int, HashSet<MyEntity>> GetEnemiesSortedByRange(HashSet<MyEntity> enemies)
@@ -334,7 +323,7 @@ namespace Eem.Thraxus.Entities.Bots
         public virtual void Shutdown()
         {
             Closed = true;
-            Grid.OnBlockAdded -= BlockPlacedHandler;
+            SubscriptionHandler(true);
             Close();
         }
     }
